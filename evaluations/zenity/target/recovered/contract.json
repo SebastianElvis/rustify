@@ -17,21 +17,23 @@
     ],
     "semantic": [
       "visible dialog text",
-      "default entry text"
+      "default entry text",
+      "native dialog family",
+      "title presentation",
+      "default icon",
+      "controls and focus"
     ],
     "excluded": [
-      "pixel layout",
-      "application icon",
-      "title placement",
       "other dialog modes",
       "other platforms",
       "timeouts",
       "arbitrary option syntax"
     ]
   },
-  "evaluation": "The parent agent performs a small GUI smoke evaluation. This track has no independent reconstruction worker.",
+  "evaluation": "The parent must perform fresh host-native CUA replay for the source-assisted JXA candidate. Historical AppKit captures do not establish current parity.",
   "environment": {
     "host": "macOS GUI session",
     "data": "Temporary test dialogs contain no user data."
-  }
+  },
+  "evaluation_label": "Partial five-workflow native-dialog smoke. Full-product parity remains unestablished."
 }

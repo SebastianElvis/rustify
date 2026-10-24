@@ -63,8 +63,19 @@ def frozen_source():
                 raise ValueError(f"The frozen file hash differs: {name}")
         AGENT.mkdir(parents=True, exist_ok=True)
         for name in ("rust-design.md", "plan.json"):
-            if not (AGENT / name).exists():
-                (AGENT / name).write_bytes(bundle.read(name))
+            (AGENT / name).write_bytes((ROOT / "agent-fixtures" / name).read_bytes())
+    repair = json.loads((VERIFICATION / "blocking-faithfulness.json").read_text())
+    for name, expected in repair["current_source_files"].items():
+        if sha(TARGET / name) != expected:
+            raise ValueError(f"The recorded blocking-repair source changed: {name}")
+    if sha(RECOVERED / "freeze.json") != repair["historical_freeze_sha256"] or sha(RECOVERED / "evidence/binary-only-evidence.zip") != repair["binary_only_archive_sha256"]:
+        raise ValueError("The original binary-only freeze or archive changed.")
+    if sha(RECOVERED / "evidence/source-assisted-before-blocking.zip") != repair["prior_source_assisted_archive_sha256"] or sha(VERIFICATION / "source-assisted.patch") != repair["prior_source_assisted_patch_sha256"]:
+        raise ValueError("The prior source-assisted candidate or patch changed.")
+    with zipfile.ZipFile(RECOVERED / "evidence/source-assisted-before-blocking.zip") as bundle:
+        previous = json.loads(bundle.read("manifest.json"))
+        if any(hashlib.sha256(bundle.read(name)).hexdigest() != expected for name, expected in previous["files"].items()):
+            raise ValueError("The prior source-assisted archive contains a changed file.")
 
 
 def command(name, arguments, directory, records):
@@ -105,7 +116,7 @@ def checkpoints():
 def main():
     WORK.mkdir(parents=True, exist_ok=True)
     (VERIFICATION / "logs").mkdir(parents=True, exist_ok=True)
-    summary = {"status": "failed", "reference_sha256": BINARY_SHA256, "commands": []}
+    summary = {"status": "failed", "reference_sha256": BINARY_SHA256, "scope": "Partial body-only loopback HTTP evaluation", "strict_full_product_parity": "unestablished", "source_assisted_repairs": ["CLI parity repair", "blocking execution-model repair"], "commands": []}
     try:
         reference()
         frozen_source()
@@ -133,6 +144,7 @@ def main():
         save(VERIFICATION / "checks.json", {"status": "passed", "commands": summary["commands"], "candidate_sha256": sha(candidate)})
         summary["rust_test_suites"] = [int(value) for value in re.findall(r"test result: ok\. (\d+) passed", (VERIFICATION / "logs/rust-tests.log").read_text())]
         summary["candidate_sha256"] = sha(candidate)
+        summary["runtime_rust_line_budget"] = json.loads((VERIFICATION / "blocking-faithfulness.json").read_text())["runtime_rust_line_budget"]
         summary["checkpoint"] = checkpoints()
         if summary["checkpoint"]["next"] is not None:
             raise ValueError("The project still has an incomplete checkpoint.")

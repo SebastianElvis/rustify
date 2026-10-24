@@ -24,16 +24,16 @@
     "protocol": "Exact methods, paths, body bytes, selected header values, and redirect request sequence",
     "permitted_differences": [
       "Header order",
-      "Connection and Accept-Encoding defaults",
-      "Transport-internal implementation"
-    ]
+      "Connection and Accept-Encoding defaults"
+    ],
+    "architecture": "The implementation preserves the revealed blocking HTTP execution model. The component mapping records remaining architecture gaps."
   },
   "environment": {
     "network": "HTTP on 127.0.0.1 only",
     "fixture": "Python ThreadingHTTPServer",
     "locale": "C",
     "clock": "Response dates do not enter the compared body",
-    "source_access": "The reconstruction does not receive upstream source or tests."
+    "source_access": "The binary-only reconstruction received no source. The recorded CLI and blocking execution repairs follow source reveal."
   },
   "exclusions": [
     "HTTPS and TLS",
@@ -53,6 +53,7 @@
   ],
   "budget": {
     "scope": "One independent network reconstruction",
-    "stop": "All scoped process and protocol checks pass before source reveal"
-  }
+    "stop": "The finite local test sets pass. Full-product parity gaps remain open."
+  },
+  "evaluation_label": "Partial body-only loopback HTTP evaluation. Strict full-product parity is unestablished."
 }

@@ -36,7 +36,7 @@
       ],
       "returncode": 0,
       "log": "evaluations/xh/target/verification/logs/rust-tests.log",
-      "log_sha256": "af7596c1565cf32f0918e47cc8bda40f974893fd7dffe322889519ddd8713021"
+      "log_sha256": "d54f26d4ed754bb6fe2801f0a42c1b6b67445c7f66fe908f4bbb9eaf9411ea1f"
     },
     {
       "name": "build",
@@ -59,7 +59,7 @@
       ],
       "returncode": 0,
       "log": "evaluations/xh/target/verification/logs/comparison.log",
-      "log_sha256": "6780d8793a6f34d93ef98959317b31b2970c479caaaf6f693e83203fa4ae1114"
+      "log_sha256": "4065ab9992ec372ad0cd3496ae15689bd0b1ea297174684e8a93acb5e318a9fc"
     },
     {
       "name": "upstream",
@@ -72,5 +72,5 @@
       "log_sha256": "d43b2f761c8c5febb7a63a597284f0ffa6d4798187255f8f456ce00ef9f3edcd"
     }
   ],
-  "candidate_sha256": "806d0ce2962e9fdc6dad13dfbbe8da868cb7e1e30b4b0e47d5c6622e332c6186"
+  "candidate_sha256": "67f6c000180e005b4e8fc99030983b8f536ed7a1d44ddc000b2dae1fe62a34b3"
 }

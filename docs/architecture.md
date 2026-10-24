@@ -1,6 +1,6 @@
 # Rustify architecture
 
-Rustify contains seven skills and two Python helpers.
+Rustify contains seven skills and three runtime Python helpers.
 Host-native agents execute the installed instructions.
 The installed skill bundle, temporary agent workspace, and generated target project have separate boundaries.
 
@@ -19,8 +19,9 @@ The installed skill bundle, temporary agent workspace, and generated target proj
 | `rustify-validate` | The skill compares behavior and reports measured compatibility. | `skills/rustify-validate/SKILL.md` |
 | `project.py` | The helper checks phase order, target identity, artifact hashes, and freshness. | `skills/rustify/scripts/project.py` |
 | `compare.py` | The helper captures and compares deterministic CLI runs. | `skills/rustify-validate/scripts/compare.py` |
+| `parity.py` | The helper checks declared mappings, exact expectations, evidence hashes, and known gaps. | `skills/rustify-validate/scripts/parity.py` |
 | REA | The external backend supplies investigation evidence for discovery. | `skills/rustify-architecture/SKILL.md` |
-| Target project | The directory contains recovered/, implementation/, and verification/. | `skills/rustify/docs/project.md` |
+| Target project | The directory contains recovered/, implementation/, and verification/. | `skills/rustify/references/project.md` |
 
 ## Flow and boundaries
 
@@ -46,6 +47,12 @@ The target project has three folders.
 | `implementation/` | `Cargo.toml`, `Cargo.lock`, `src/`, and optional separate Rust tests in `tests/`. |
 | `verification/` | `checks.json`, `comparison.json`, `compatibility.md`, and `logs/`. |
 
+The architecture skill also produces editable diagrams and data models when original evidence requires them.
+The validation skill records the original-to-Rust mapping in `verification/parity-matrix.json`.
+The strict evidence gate writes `verification/parity.json`.
+The full faithful contract cannot complete while that gate has errors or gaps.
+The gate checks declared evidence consistency. The evaluator remains responsible for actual coverage.
+
 The `recovered/tests.json` file stores declarative test specifications.
 Each specification records an observed, inferred, or proposed origin.
 The implementation contains executable code and tests.
@@ -55,6 +62,9 @@ The agent workspace stores temporary `rust-design.md` and `plan.json` files outs
 The plan skill writes these files.
 The implementation skill reads the plan from that workspace.
 The installed bundle contains reusable instructions and helpers.
+Each skill keeps its router short.
+References contain domain methods and output contracts.
+Assets contain copyable specifications, plans, diagrams, and report templates.
 The project helper checks structure and freshness.
 The agent verifies evidence quality and semantic completeness.
 

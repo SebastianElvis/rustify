@@ -40,7 +40,7 @@ def work_root(root, value):
     return path
 
 
-def artifact(root, name):
+def artifact(root, name, check_content=True):
     relative = Path(name)
     if relative.is_absolute() or ".." in relative.parts:
         raise ValueError("An artifact must stay inside its directory.")
@@ -50,9 +50,9 @@ def artifact(root, name):
             break
         if parent.is_symlink():
             raise ValueError("An artifact cannot use a symlink.")
-    if not path.is_file() or not path.read_bytes().strip():
+    if not path.is_file() or (check_content and not path.read_bytes().strip()):
         raise ValueError(f"The artifact is missing or empty: {name}")
-    if path.suffix == ".json":
+    if check_content and path.suffix == ".json":
         value = json.loads(path.read_text())
         if not isinstance(value, (list, dict)) or not value:
             raise ValueError(f"The JSON artifact must have content: {name}")
@@ -132,6 +132,16 @@ def files_for(root, phase, state):
         if checks.get("status") != "passed" or any(latest.get(name) != 0 for name in ("fmt", "clippy", "test")):
             raise ValueError("The latest format, clippy, and test checks must pass.")
     if phase == "validate":
+        contract = json.loads((root / "recovered/contract.json").read_text())
+        if all(isinstance(contract.get(key), dict) for key in ("compatibility", "scope")) and contract["compatibility"].get("mode") == "faithful" and contract["scope"].get("mode") == "full_product":
+            path = artifact(root, "verification/parity.json")
+            parity = json.loads(path.read_text())
+            if parity.get("status") != "passed" or parity.get("full_parity_gate_pass") is not True or parity.get("errors") != [] or parity.get("gaps") != [] or parity.get("target_sha256") != state["target"]["sha256"]:
+                raise ValueError("The full-product parity evidence gate must pass.")
+            inputs = parity.get("inputs", {})
+            if not inputs or any(digest(artifact(root, name, False)) != value for name, value in inputs.items()):
+                raise ValueError("The parity evidence changed after the gate.")
+            hashes["verification/parity.json"] = digest(path)
         report = json.loads((root / "verification/comparison.json").read_text())
         cases = report.get("cases", [])
         if report.get("status") != "passed" or report.get("failed") != 0 or not cases or report.get("passed") != len(cases):

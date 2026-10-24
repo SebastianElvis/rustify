@@ -1,19 +1,20 @@
-use objc2::MainThreadMarker;
-use objc2_app_kit::{NSAlert, NSAlertStyle, NSApplication, NSTextField};
-use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
-use std::io::{self, Write};
-use std::process::ExitCode;
+use serde_json::{Value, json};
+use std::{
+    error::Error,
+    io::{self, Write},
+    process::{Command, ExitCode, Stdio},
+};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 enum Mode {
+    #[default]
+    Unselected,
     Entry,
     Question,
     Info,
-    Warning,
-    Error,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 struct Options {
     mode: Mode,
     title: String,
@@ -24,128 +25,93 @@ struct Options {
 }
 
 fn parse(args: &[String]) -> Result<Options, String> {
-    let mut options = Options {
-        mode: Mode::Info,
-        title: String::new(),
-        text: String::new(),
-        value: String::new(),
-        ok: String::new(),
-        cancel: String::new(),
-    };
-    let mut selected = false;
-    let mut index = 0;
-    while index < args.len() {
-        let arg = args[index].trim_start_matches('-');
-        match arg {
-            "entry" | "question" | "info" | "warning" | "error" => {
-                options.mode = match arg {
+    let mut options = Options::default();
+    let mut args = args.iter();
+    while let Some(arg) = args.next() {
+        match arg.trim_start_matches('-') {
+            mode @ ("entry" | "question" | "info") => {
+                options.mode = match mode {
                     "entry" => Mode::Entry,
                     "question" => Mode::Question,
-                    "warning" => Mode::Warning,
-                    "error" => Mode::Error,
                     _ => Mode::Info,
                 };
-                selected = true;
             }
-            "title" | "text" | "entry-text" | "ok-label" | "cancel-label" => {
-                index += 1;
-                let value = args
-                    .get(index)
-                    .ok_or_else(|| format!("The {arg} option requires a value."))?
+            key @ ("title" | "text" | "entry-text" | "ok-label" | "cancel-label") => {
+                let field = match key {
+                    "title" => &mut options.title,
+                    "text" => &mut options.text,
+                    "entry-text" => &mut options.value,
+                    "ok-label" => &mut options.ok,
+                    _ => &mut options.cancel,
+                };
+                *field = args
+                    .next()
+                    .ok_or_else(|| format!("The {key} option requires a value."))?
                     .clone();
-                match arg {
-                    "title" => options.title = value,
-                    "text" => options.text = value,
-                    "entry-text" => options.value = value,
-                    "ok-label" => options.ok = value,
-                    _ => options.cancel = value,
-                }
             }
-            _ => {
+            arg => {
                 return Err(format!(
                     "The option is outside the evaluation contract: {arg}"
                 ));
             }
         }
-        index += 1;
     }
-    if !selected {
+    if options.mode == Mode::Unselected {
         return Err("The command requires a dialog mode.".into());
     }
+    let (ok, cancel) = if options.mode == Mode::Question {
+        ("Yes", "No")
+    } else {
+        ("OK", "Cancel")
+    };
     if options.ok.is_empty() {
-        options.ok = if options.mode == Mode::Question {
-            "Yes"
-        } else {
-            "OK"
-        }
-        .into();
+        options.ok = ok.into();
     }
     if options.cancel.is_empty() {
-        options.cancel = if options.mode == Mode::Question {
-            "No"
-        } else {
-            "Cancel"
-        }
-        .into();
+        options.cancel = cancel.into();
     }
     Ok(options)
 }
 
-fn outcome(mode: &Mode, response: isize, value: &str) -> (u8, String) {
-    if response != 1000 {
+fn parameters(options: &Options) -> Value {
+    json!({"entry": options.mode == Mode::Entry, "question": options.mode == Mode::Question, "title": options.title, "text": options.text, "value": options.value, "ok": options.ok, "cancel": options.cancel})
+}
+
+fn outcome(mode: &Mode, bytes: &[u8]) -> Result<(u8, String), Box<dyn Error>> {
+    let (accepted, value): (bool, String) = serde_json::from_slice(bytes)?;
+    Ok(if !accepted {
         (1, String::new())
     } else if *mode == Mode::Entry {
         (0, format!("{value}\n"))
     } else {
         (0, String::new())
-    }
+    })
 }
 
-fn show(options: Options) -> (u8, String) {
-    let main = MainThreadMarker::new().expect("The dialog requires the main thread.");
-    let app = NSApplication::sharedApplication(main);
-    app.finishLaunching();
-    let alert = NSAlert::new(main);
-    alert.setMessageText(&NSString::from_str(&options.text));
-    alert.window().setTitle(&NSString::from_str(&options.title));
-    alert.setAlertStyle(match options.mode {
-        Mode::Error => NSAlertStyle::Critical,
-        Mode::Warning => NSAlertStyle::Warning,
-        _ => NSAlertStyle::Informational,
-    });
-    alert.addButtonWithTitle(&NSString::from_str(&options.ok));
-    if matches!(options.mode, Mode::Entry | Mode::Question) {
-        alert.addButtonWithTitle(&NSString::from_str(&options.cancel));
+fn show(options: Options) -> Result<(u8, String), Box<dyn Error>> {
+    let mut child = Command::new("/usr/bin/osascript")
+        .args(["-l", "JavaScript", "-", &parameters(&options).to_string()])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+    child
+        .stdin
+        .take()
+        .ok_or("The script input pipe is missing.")?
+        .write_all(include_bytes!("../assets/dialog.js"))?;
+    let result = child.wait_with_output()?;
+    if !result.status.success() {
+        return Err(String::from_utf8_lossy(&result.stderr).into_owned().into());
     }
-    let entry = NSTextField::textFieldWithString(&NSString::from_str(&options.value), main);
-    entry.setFrame(NSRect::new(
-        NSPoint::new(0.0, 0.0),
-        NSSize::new(280.0, 24.0),
-    ));
-    if options.mode == Mode::Entry {
-        alert.setAccessoryView(Some(&entry));
-        alert.window().setInitialFirstResponder(Some(&entry));
-    }
-    #[allow(deprecated)]
-    app.activateIgnoringOtherApps(true);
-    let response = alert.runModal();
-    outcome(&options.mode, response, &entry.stringValue().to_string())
+    outcome(&options.mode, &result.stdout)
 }
 
-fn main() -> ExitCode {
-    let args: Vec<_> = std::env::args().skip(1).collect();
-    let options = match parse(&args) {
-        Ok(options) => options,
-        Err(error) => {
-            eprintln!("{error}");
-            return ExitCode::FAILURE;
-        }
-    };
-    let (status, output) = show(options);
-    if io::stdout().lock().write_all(output.as_bytes()).is_err() {
-        return ExitCode::FAILURE;
-    }
-    ExitCode::from(status)
+fn main() -> Result<ExitCode, Box<dyn Error>> {
+    let options = parse(&std::env::args().skip(1).collect::<Vec<_>>())?;
+    let (status, output) = show(options)?;
+    io::stdout().lock().write_all(output.as_bytes())?;
+    Ok(ExitCode::from(status))
 }
 
 #[cfg(test)]
@@ -157,10 +123,9 @@ mod tests {
         let args = vec!["--question".into(), "--text".into(), "A & B?".into()];
         let options = parse(&args).unwrap();
         assert_eq!(
-            (options.ok.as_str(), options.cancel.as_str()),
-            ("Yes", "No")
+            [options.ok, options.cancel, options.text],
+            ["Yes", "No", "A & B?"]
         );
-        assert_eq!(options.text, "A & B?");
     }
 
     #[test]
@@ -170,17 +135,30 @@ mod tests {
     }
 
     #[test]
-    fn entry_results_keep_unicode_and_newlines() {
-        assert_eq!(
-            outcome(&Mode::Entry, 1000, "caf\u{e9}"),
-            (0, "caf\u{e9}\n".into())
-        );
-        assert_eq!(outcome(&Mode::Entry, 1001, "ignored"), (1, String::new()));
+    fn script_results_keep_text_status_and_cancel_semantics() {
+        for (mode, reply, expected) in [
+            (Mode::Entry, r#"[true,"caf\u00e9\n"]"#, (0, "caf\u{e9}\n\n")),
+            (Mode::Entry, r#"[false,"ignored"]"#, (1, "")),
+            (Mode::Question, r#"[true,""]"#, (0, "")),
+            (Mode::Question, r#"[false,""]"#, (1, "")),
+        ] {
+            let (status, text) = outcome(&mode, reply.as_bytes()).unwrap();
+            assert_eq!((status, text.as_str()), expected);
+        }
     }
 
     #[test]
-    fn question_results_have_no_output() {
-        assert_eq!(outcome(&Mode::Question, 1000, ""), (0, String::new()));
-        assert_eq!(outcome(&Mode::Question, 1001, ""), (1, String::new()));
+    fn parameters_preserve_quotes_unicode_and_script_text() {
+        let value = "\"\\\n\u{2028}caf\u{e9}'); throw Error('injected');";
+        let options = parse(&["--entry".into(), "--entry-text".into(), value.into()]).unwrap();
+        let decoded: Value = serde_json::from_str(&parameters(&options).to_string()).unwrap();
+        assert_eq!(decoded["value"], value);
+    }
+
+    #[test]
+    fn malformed_script_results_fail() {
+        for data in [b"not json".as_slice(), br#"["yes",""]"#, br#"[true]"#] {
+            assert!(outcome(&Mode::Info, data).is_err());
+        }
     }
 }

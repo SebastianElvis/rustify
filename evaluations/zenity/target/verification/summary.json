@@ -1,10 +1,12 @@
 {
-  "status": "passed",
-  "mode": "Recorded GUI evidence with fresh Rust unit checks",
-  "fresh_unit_tests": 4,
-  "recorded_gui_cases": 5,
+  "status": "pending_fresh_gui_replay",
+  "mode": "SOURCE-ASSISTED JXA fidelity repair",
+  "fresh_unit_tests": 5,
+  "historical_gui_cases": 5,
+  "fresh_gui_cases": 0,
   "live_gui_replay": false,
-  "upstream_test_suite_executed": false,
+  "source_assisted_changes": true,
+  "full_product_parity": "unestablished",
   "commands": [
     {
       "name": "fmt",
@@ -30,7 +32,7 @@
       ],
       "returncode": 0,
       "log": "verification/logs/clippy.log",
-      "log_sha256": "ee1d3fffa2022e962e63e0dbe4d35c9c198450a20c29fc09030f635dbb38bfcd"
+      "log_sha256": "02db5a66fa0c60ca8618bd08aac556eac4f3ec863e8630a0d353dba6a0f6e126"
     },
     {
       "name": "unit",
@@ -41,21 +43,44 @@
       ],
       "returncode": 0,
       "log": "verification/logs/unit.log",
-      "log_sha256": "16a3d9e667d1c61621fafa26b62aa5e67209f7b8bd5bb0b2acb3286006f051fc"
+      "log_sha256": "0d025c0a04ee0f48059aec89e6943e868ef5e36c1bc83e580ce37a06b428ce73"
+    },
+    {
+      "name": "build-release",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "returncode": 0,
+      "log": "verification/logs/build-release.log",
+      "log_sha256": "376a48f02bf305a0c383aa68e8f2d8c5df3ec64cbee6a09491a649aa453baba9"
     }
   ],
-  "recorded_candidate_sha256": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306",
+  "historical_candidate_sha256": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306",
   "frozen_files_verified": 37,
   "freeze_state_snapshot_available": false,
+  "candidate_sha256": "d864795b3f08baed16158aa5808143b37b0647931fa066114839ede3905b205b",
+  "runtime_line_budget": {
+    "old_all_rust_lines": 186,
+    "new_all_rust_lines": 164,
+    "new_js_lines": 22,
+    "added_rust_lines": 89,
+    "removed_rust_lines": 111,
+    "added_rust_and_js_lines": 111,
+    "includes_unit_tests": true
+  },
   "checkpoint": {
-    "completed": [
-      "prepare",
-      "discover",
-      "plan",
-      "implement",
-      "validate"
-    ],
-    "next": null,
-    "stale": null
-  }
+    "completed": [],
+    "next": "prepare",
+    "stale": "prepare"
+  },
+  "required_fresh_workflows": [
+    "entry-accept",
+    "entry-cancel",
+    "question-accept",
+    "question-cancel",
+    "info-accept"
+  ]
 }

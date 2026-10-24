@@ -1,7 +1,7 @@
 # Rustify
 
 Rustify reconstructs local software from binary evidence in idiomatic Rust.
-The output includes a product model, design specification, architecture, decisions, roadmap, tests, and compatibility results.
+The output includes a product model, design specification, architecture, parity backlog, tests, and compatibility results.
 
 ![Rustify architecture](docs/architecture.svg)
 
@@ -31,7 +31,9 @@ The host uses its native skill invocation and task tools.
 
 The three discovery skills run in parallel when the host supports parallel tasks.
 The host runs them sequentially otherwise.
-REA supplies the binary investigation backend.
+[REA](https://github.com/morluto/rea) supplies the binary investigation backend.
+The three discovery skills declare that dependency in their metadata.
+The [REA setup guide](https://github.com/morluto/rea/blob/main/docs/installation.md) connects its tools to the selected agent.
 The installed skill folders contain their runtime resources.
 The target project stores generated files outside the installed bundle.
 The target project contains `recovered/`, `implementation/`, and `verification/`.
@@ -42,8 +44,31 @@ The agent keeps temporary design and task plans in a separate workspace.
 - [Product and vision](docs/product.md)
 - [Architecture and LaTeX source](docs/architecture.md)
 - [Evaluation method and dataset](docs/evaluation.md)
-- [Target-project contract](skills/rustify/docs/project.md)
-- [Rust stack guide](skills/rustify-plan/docs/rust-stack.md)
+- [Target-project contract](skills/rustify/references/project.md)
+- [Rust stack guide](skills/rustify-plan/references/rust-stack.md)
+
+## Fidelity
+
+The default contract requires faithful reconstruction.
+Rustify maps original features, interactions, data, and components to the implementation.
+Known differences remain parity gaps.
+The evaluation dataset measures finite subsets and records unresolved differences.
+Its passing checks do not establish full-product parity.
+
+## Repository workflow
+
+The default branch is `main`.
+Every change uses a feature branch and a pull request.
+GitHub allows squash merge only.
+The author installs the local push guard with this command:
+
+```sh
+python3 scripts/install_hooks.py
+```
+
+The guard blocks direct pushes to `main` in this checkout.
+The installer preserves existing hooks.
+GitHub refused server-side branch protection for this private repository under the current plan.
 
 ## Checks
 

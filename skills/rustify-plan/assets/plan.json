@@ -1,0 +1,146 @@
+{
+  "parity_policy": "strict",
+  "component_mapping": [
+    {
+      "original": "{{original_component_id}}",
+      "rust": "{{rust_component_id}}",
+      "kind": "technical",
+      "evidence": [
+        "{{evidence_id}}"
+      ],
+      "preserved": [
+        "{{original_boundary_and_execution_model}}"
+      ],
+      "exception": null,
+      "parity_status": "unknown"
+    },
+    {
+      "original": "{{ui_component_id}}",
+      "rust": "{{rust_ui_component_id}}",
+      "kind": "ui",
+      "evidence": [
+        "{{ui_evidence_id}}"
+      ],
+      "preserved": [
+        "{{original_visual_and_interaction_contract}}"
+      ],
+      "exception": null,
+      "parity_status": "unknown"
+    }
+  ],
+  "features": [
+    {
+      "id": "{{feature_id}}",
+      "interfaces": [
+        "{{interface_id}}"
+      ],
+      "ui_components": [
+        "{{ui_component_id}}"
+      ],
+      "technical_components": [
+        "{{original_component_id}}"
+      ],
+      "rust_components": [
+        "{{rust_component_id}}",
+        "{{rust_ui_component_id}}"
+      ],
+      "evidence": [
+        "{{evidence_id}}",
+        "{{ui_evidence_id}}"
+      ],
+      "scenarios": [
+        "{{scenario_id}}"
+      ],
+      "acceptance_tests": [
+        "{{contract_test_id}}",
+        "{{workflow_test_id}}"
+      ],
+      "tasks": [
+        "{{contract_task_id}}",
+        "{{workflow_task_id}}"
+      ],
+      "parity_status": "unknown"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "{{contract_task_id}}",
+      "depends_on": [],
+      "feature_ids": [
+        "{{feature_id}}"
+      ],
+      "original_components": [
+        "{{original_component_id}}"
+      ],
+      "rust_components": [
+        "{{rust_component_id}}"
+      ],
+      "evidence": [
+        "{{evidence_id}}"
+      ],
+      "acceptance_tests": [
+        "{{contract_test_id}}"
+      ],
+      "outputs": [
+        "implementation/{{module_path}}"
+      ]
+    },
+    {
+      "id": "{{workflow_task_id}}",
+      "depends_on": [
+        "{{contract_task_id}}"
+      ],
+      "feature_ids": [
+        "{{feature_id}}"
+      ],
+      "original_components": [
+        "{{original_component_id}}",
+        "{{ui_component_id}}"
+      ],
+      "rust_components": [
+        "{{rust_component_id}}",
+        "{{rust_ui_component_id}}"
+      ],
+      "evidence": [
+        "{{evidence_id}}",
+        "{{ui_evidence_id}}"
+      ],
+      "acceptance_tests": [
+        "{{workflow_test_id}}"
+      ],
+      "outputs": [
+        "implementation/tests/{{workflow_test_file}}"
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "{{contract_milestone_id}}",
+      "requires": [],
+      "tasks": [
+        "{{contract_task_id}}"
+      ],
+      "acceptance_tests": [
+        "{{contract_test_id}}"
+      ],
+      "completion": "The contract test passes against the original and the Rust component.",
+      "kind": "dependency_checkpoint"
+    },
+    {
+      "id": "{{workflow_milestone_id}}",
+      "requires": [
+        "{{contract_milestone_id}}"
+      ],
+      "tasks": [
+        "{{workflow_task_id}}"
+      ],
+      "acceptance_tests": [
+        "{{workflow_test_id}}"
+      ],
+      "completion": "The original workflow and all named parity checks pass.",
+      "kind": "workflow_delivery"
+    }
+  ],
+  "exceptions": [],
+  "blocked": []
+}

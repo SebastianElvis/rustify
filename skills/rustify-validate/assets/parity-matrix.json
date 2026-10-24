@@ -1,0 +1,25 @@
+{
+  "target_sha256": "{{TARGET_SHA256}}",
+  "surface_complete": false,
+  "scope": "full_product",
+  "selected_features": ["{{FEATURE_ID}}"],
+  "user_scope_evidence": [],
+  "original_features": [
+    {"id": "{{FEATURE_ID}}", "classification": "unknown", "evidence": ["{{EVIDENCE_ID}}"]}
+  ],
+  "mappings": [
+    {
+      "feature": "{{FEATURE_ID}}",
+      "evidence": ["{{EVIDENCE_ID}}"],
+      "rust": ["implementation/src/{{RUST_FILE}}"],
+      "tests": ["{{TEST_ID}}"],
+      "dimensions": {"product": "unknown", "ux": "unknown", "components": "unknown", "data": "unknown", "behavior": "unknown"}
+    }
+  ],
+  "evidence_files": [
+    {"id": "{{EVIDENCE_ID}}", "path": "recovered/evidence/{{CAPTURE_FILE}}", "sha256": "{{CAPTURE_SHA256}}"}
+  ],
+  "comparison": {"path": "verification/comparison.json", "sha256": "{{COMPARISON_SHA256}}"},
+  "user_authorized_exceptions": [],
+  "source_assisted_changes": []
+}

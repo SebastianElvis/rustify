@@ -1,5 +1,30 @@
 # Project contract and state
 
+## Fidelity contract
+
+The agent copies `../assets/contract.json` into `recovered/contract.json`.
+The agent replaces every `{{name}}` value with observed target data or an explicit user limit.
+The agent records unavailable values as unknowns with a discovery task.
+The default scope covers the full product.
+The default compatibility mode requires faithful reconstruction.
+The agent narrows scope only when the user requests a bounded reconstruction or evaluation.
+
+Each original feature, UI state, interface, data structure, and recoverable component receives an identifier.
+The agent maps each identifier to its Rust implementation location, evidence, and acceptance tests.
+The mapping distinguishes verified, different, and unknown results.
+A known difference remains an open parity gap.
+Passing a subset of tests does not close an unmapped feature.
+The agent records an explicit user exception before it accepts a deliberate behavior or design change.
+Proposed tests explore the original program before they define new compatibility expectations.
+The roadmap prioritizes parity gaps and missing evidence.
+
+The three discovery skills use their domain references and specification assets.
+The agent fills those templates with target facts and evidence.
+The agent omits unsupported models rather than inventing them.
+The faithful full-product validation checkpoint also requires `verification/parity.json`.
+That report must pass the strict parity evidence gate with no errors or gaps.
+The helper binds its target hash and input hashes to the current project.
+
 The target project has three directories.
 
 ```text

@@ -1,24 +1,20 @@
 ---
 name: rustify-implement
-description: Implement complete Rust workflows from a binary reconstruction plan. Use after Rustify planning and when comparison failures require implementation repairs.
+description: This skill implements strict product and architecture parity in Rust from recovered software contracts. This skill applies after Rustify planning or during parity repairs.
 ---
 
-# Build the Rust implementation
+# Implement original-to-Rust parity
 
-The agent reads `recovered/` and the external workspace's `rust-design.md` and `plan.json`.
-The [state contract](../rustify/docs/project.md) identifies those paths and the checkpoint helper.
+The agent implements recovered contracts under `implementation/`.
+The contract covers the full original product by default.
+The agent preserves behavior and documented structure wherever Rust permits it.
+The agent does not select a different architecture for convenience.
 
-- The agent implements complete workflows in dependency order under `implementation/`.
-- The agent uses Rust ownership, typed errors, enums, and small modules where they help the design.
-- The agent excludes decompiler register names and compiler artifacts from the Rust design.
-- The agent uses safe Rust and explains and tests any necessary `unsafe` block.
-- The agent keeps compatibility diagnostics at the interface boundary.
-- The agent defines cancellation and shutdown behavior when the workflow needs concurrency.
-- The agent adds no abstraction without a concrete need.
-- The agent keeps fixes and refactors no larger than the code they replace.
-- The agent adds unit tests and process or application tests under `implementation/`.
+- The agent reads [the implementation workflow](references/workflow.md) before coding or repairs.
+- The agent reads [the output contract](references/outputs.md) before producing mappings and check records.
+- The agent uses the linked copyable assets for those records.
+- The agent follows [the shared project contract](../rustify/references/project.md) for paths and checkpoints.
 
-The agent runs `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings`, and `cargo test` from `implementation/`.
-The agent records results in `verification/checks.json` and logs in `verification/logs/`.
-The agent completes the `implement` checkpoint after required checks pass.
-The agent returns missing specifications to discovery and planning.
+The agent returns unknown or unmapped requirements to discovery and planning.
+The implementation gate requires unit tests, E2E tests, and failure-path checks.
+The agent reports an explicit subset as a subset. A small smoke never establishes full parity.

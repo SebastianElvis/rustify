@@ -1,0 +1,59 @@
+{
+  "features": [
+    {
+      "id": "entry",
+      "evidence": [
+        "E-ENTRY"
+      ],
+      "scenarios": [
+        "entry-accept",
+        "entry-cancel"
+      ]
+    },
+    {
+      "id": "alerts",
+      "evidence": [
+        "E-ALERT"
+      ],
+      "scenarios": [
+        "question-accept",
+        "question-cancel",
+        "info-accept"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "options",
+      "depends_on": []
+    },
+    {
+      "id": "dialogs",
+      "depends_on": [
+        "options"
+      ]
+    },
+    {
+      "id": "native-replay",
+      "depends_on": [
+        "dialogs"
+      ]
+    }
+  ],
+  "limitations": [
+    "This parent-run smoke track does not claim full zenity reconstruction."
+  ],
+  "source_assisted_fidelity_repair": {
+    "original_boundary": "Go dialog data -> JXA -> osascript -> native standard-additions dialogs",
+    "rust_boundary": "Rust JSON data -> embedded JXA asset -> osascript -> native standard-additions dialogs",
+    "required_replay": [
+      "entry-accept",
+      "entry-cancel",
+      "question-accept",
+      "question-cancel",
+      "info-accept"
+    ],
+    "status": "pending fresh host-native replay",
+    "full_product_parity": "unestablished"
+  }
+}

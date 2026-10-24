@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify recorded native GUI evidence and run fresh Rust unit checks."""
+"""Check the source-assisted JXA build without opening a GUI."""
 
 import base64
 import hashlib
@@ -50,37 +50,24 @@ def frozen_evidence():
     archive = RECOVERED / provenance["freeze"]["archive"]
     if sha(archive.read_bytes()) != provenance["freeze"]["archive_sha256"]:
         raise ValueError("The frozen recording archive changed.")
-    expected_source = set()
     with zipfile.ZipFile(archive) as bundle:
         for name, expected in freeze["files"].items():
-            if name == "state.json":
-                continue
-            if sha(bundle.read(name)) != expected:
-                raise ValueError(f"The frozen archive entry changed: {name}")
-            path = None
-            if name.startswith("replacement/"):
-                path = TARGET / "implementation" / name.removeprefix("replacement/")
-                expected_source.add(path.relative_to(TARGET / "implementation").as_posix())
-            elif name.startswith("evidence/"):
-                path = RECOVERED / name
-            elif name in {"contract.json", "scenarios.json"}:
-                path = RECOVERED / name
-            if path is not None and (path.is_symlink() or sha(path.read_bytes()) != expected):
-                raise ValueError(f"The recorded code or evidence changed: {name}")
-        AGENT.mkdir(parents=True, exist_ok=True)
-        for name in ("rust-design.md", "plan.json"):
-            if not (AGENT / name).exists():
-                (AGENT / name).write_bytes(bundle.read(name))
-        candidate = bundle.read("recorded-candidate.bin")
-    source = {path.relative_to(TARGET / "implementation").as_posix() for path in (TARGET / "implementation").rglob("*") if path.is_file() and "target" not in path.relative_to(TARGET / "implementation").parts and (path.suffix == ".rs" or path.name in {"Cargo.toml", "Cargo.lock"})}
-    if source != expected_source:
-        raise ValueError("The recorded Rust source file set changed.")
-    if sha(candidate) != freeze["candidate_sha256"]:
-        raise ValueError("The recorded candidate bytes changed.")
-    path = TARGET / "implementation/target/recorded/zenity"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(candidate)
-    return freeze, provenance, path
+            if name != "state.json" and sha(bundle.read(name)) != expected:
+                raise ValueError(f"The historical archive entry changed: {name}")
+        if sha(bundle.read("recorded-candidate.bin")) != freeze["candidate_sha256"]:
+            raise ValueError("The historical candidate bytes changed.")
+    AGENT.mkdir(parents=True, exist_ok=True)
+    for name in ("rust-design.md", "plan.json"):
+        (AGENT / name).write_bytes((ROOT / "agent-fixtures" / name).read_bytes())
+    pin = json.loads((RECOVERED / "evidence/jxa-source-pin.json").read_text())
+    if pin["historical_freeze_sha256"] != sha(manifest.read_bytes()) or pin["historical_archive_sha256"] != sha(archive.read_bytes()):
+        raise ValueError("The source-assisted pin identifies a different historical stage.")
+    if pin["previous_stage_archive_sha256"] != sha((RECOVERED / "evidence/pre-jxa-repair.zip").read_bytes()):
+        raise ValueError("The previous AppKit stage archive changed.")
+    for name, expected in pin["source_files"].items():
+        if sha((TARGET / "implementation" / name).read_bytes()) != expected:
+            raise ValueError(f"The source-assisted input changed: {name}")
+    return freeze, provenance, pin
 
 
 def captured_results():
@@ -141,56 +128,45 @@ def reference(provenance):
         raise ValueError("The reference differs from the recorded artifact.")
 
 
-def checkpoints():
+def checkpoint_status():
     spec = importlib.util.spec_from_file_location("project", REPOSITORY / "skills/rustify/scripts/project.py")
     project = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(project)
-    state = RECOVERED / "state.json"
-    if state.exists():
-        value = json.loads(state.read_text())
-        if value["target"]["sha256"] != json.loads((RECOVERED / "freeze.json").read_text())["reference_sha256"]:
-            raise ValueError("The saved project uses a different reference.")
-        value["target"]["path"] = str(REFERENCE)
-        value["work_dir"] = str(AGENT)
-        project.save(TARGET, value)
-    else:
-        project.init(TARGET, REFERENCE, "desktop", work_dir=AGENT)
-    for _ in project.PHASES:
-        progress = project.status(TARGET)
-        if progress["next"] is None:
-            return progress
-        project.checkpoint(TARGET, progress["next"])
     return project.status(TARGET)
 
 
 def main():
     (VERIFICATION / "logs").mkdir(parents=True, exist_ok=True)
-    summary = {"status": "failed", "mode": "Recorded GUI evidence with fresh Rust unit checks", "fresh_unit_tests": 0, "recorded_gui_cases": 0, "live_gui_replay": False, "upstream_test_suite_executed": False, "commands": []}
+    summary = {"status": "failed", "mode": "SOURCE-ASSISTED JXA fidelity repair", "fresh_unit_tests": 0, "historical_gui_cases": 0, "fresh_gui_cases": 0, "live_gui_replay": False, "source_assisted_changes": True, "full_product_parity": "unestablished", "commands": []}
     try:
-        freeze, provenance, candidate = frozen_evidence()
-        cases = captured_results()
-        summary["recorded_gui_cases"] = len(cases)
-        summary["recorded_candidate_sha256"] = freeze["candidate_sha256"]
+        freeze, provenance, pin = frozen_evidence()
+        historical_cases = captured_results()
+        summary["historical_gui_cases"] = len(historical_cases)
+        summary["historical_candidate_sha256"] = freeze["candidate_sha256"]
         summary["frozen_files_verified"] = 37
         summary["freeze_state_snapshot_available"] = False
-        for name, args in (("fmt", ["cargo", "fmt", "--check"]), ("clippy", ["cargo", "clippy", "--locked", "--all-targets", "--", "-D", "warnings"]), ("unit", ["cargo", "test", "--locked"])):
+        for name, args in (("fmt", ["cargo", "fmt", "--check"]), ("clippy", ["cargo", "clippy", "--locked", "--all-targets", "--", "-D", "warnings"]), ("unit", ["cargo", "test", "--locked"]), ("build-release", ["cargo", "build", "--release", "--locked"])):
             summary["commands"].append(command(name, args))
         summary["fresh_unit_tests"] = sum(int(value) for value in re.findall(r"test result: ok\. (\d+) passed", (VERIFICATION / "logs/unit.log").read_text()))
-        if summary["fresh_unit_tests"] != 4:
-            raise ValueError("The fresh unit test count differs from the recorded source.")
+        if summary["fresh_unit_tests"] != 5:
+            raise ValueError("The JSON protocol unit checks must report five tests.")
         reference(provenance)
-        report = {"status": "passed", "passed": len(cases), "failed": 0, "method": "Independent checks of recorded native GUI process captures", "live_gui_replay": False, "cases": cases, "executables": {"reference": {"path": str(REFERENCE), "sha256": freeze["reference_sha256"]}, "candidate": {"path": str(candidate), "sha256": freeze["candidate_sha256"]}}}
+        candidate = TARGET / "implementation/target/release/zenity"
+        if sha(candidate.read_bytes()) != pin["candidate"]["sha256"]:
+            raise ValueError("The current executable differs from the replay source pin.")
+        summary["candidate_sha256"] = sha(candidate.read_bytes())
+        summary["runtime_line_budget"] = pin["runtime_line_budget"]
+        summary["checkpoint"] = checkpoint_status()
+        summary["required_fresh_workflows"] = list(EXPECTED)
+        report = {"status": "pending_fresh_gui_replay", "passed": 0, "failed": 0, "cases": [], "historical_gui_cases": len(historical_cases), "required_fresh_workflows": list(EXPECTED), "reason": "The historical AppKit captures do not validate the source-assisted JXA candidate."}
         save(VERIFICATION / "comparison.json", report)
-        save(VERIFICATION / "checks.json", {"status": "passed", "commands": summary["commands"], "live_gui_replay": False})
-        summary["checkpoint"] = checkpoints()
-        if summary["checkpoint"]["next"] is not None:
-            raise ValueError("The recorded project has an incomplete checkpoint.")
-        summary["status"] = "passed"
+        save(VERIFICATION / "checks.json", {"status": "passed", "commands": summary["commands"], "fresh_unit_tests": 5, "gui_replay_status": "pending_fresh_gui_replay"})
+        summary["status"] = "pending_fresh_gui_replay"
     except Exception as error:
         summary["error"] = str(error)
     save(VERIFICATION / "summary.json", summary)
     print(json.dumps({key: value for key, value in summary.items() if key != "commands"}, indent=2))
-    return 0 if summary["status"] == "passed" else 1
+    return 2 if summary["status"] == "pending_fresh_gui_replay" else 1
 
 
 if __name__ == "__main__":

@@ -1,0 +1,29 @@
+{
+  "stage": "SOURCE-ASSISTED fidelity repair. Fresh GUI replay is pending.",
+  "created_utc": "2026-10-24T15:30:07.029839+00:00",
+  "scope": "Five Entry, Question, and Info GUI workflows. Full-product parity remains unestablished.",
+  "historical_freeze_sha256": "fc3b26569c97ba82afacc1538730973dbc334086df1c18e74a354d1f7ccabcc6",
+  "historical_archive_sha256": "6456cc11342c2615345344a302fec6f644f59247da947d36eb27f01d8f5dbb87",
+  "previous_stage_archive_sha256": "931b49ff5ed48779f46cdc540d308deb4be599b6496fe8da9ec38e31f33afa02",
+  "source_files": {
+    "Cargo.toml": "529f5e476c607d3efcbb5c7101cf7fb857184ef10961cb280ea8917acf3f0083",
+    "Cargo.lock": "7c824292b435af98291f811fb1342052dc42bb4789402c33103cc62cb8e23bc7",
+    "src/main.rs": "d13a84fcdbc2f69706d10b5c9bfef86a9a054192f96b190ac3f18f8d903bf181",
+    "assets/dialog.js": "a2d37c0887e00b2a48da1b7c4bb8c22785d28fda44b7c3db589eab553681d385"
+  },
+  "candidate": {
+    "path": "/Users/runchao/Projects/Personal/rustify/evaluations/zenity/target/implementation/target/release/zenity",
+    "sha256": "d864795b3f08baed16158aa5808143b37b0647931fa066114839ede3905b205b"
+  },
+  "runtime_line_budget": {
+    "old_all_rust_lines": 186,
+    "new_all_rust_lines": 164,
+    "new_js_lines": 22,
+    "added_rust_lines": 89,
+    "removed_rust_lines": 111,
+    "added_rust_and_js_lines": 111,
+    "includes_unit_tests": true
+  },
+  "gui_replay_status": "pending_fresh_replay",
+  "fresh_unit_tests": 5
+}

@@ -33,5 +33,32 @@
     "classification": "inferred",
     "source": "evidence/question-accept-reference-ax.txt",
     "falsifier": "The source audit can identify a different platform boundary."
+  },
+  {
+    "id": "SOURCE-JXA-BOUNDARY",
+    "claim": "The revealed tag uses osascript and standard additions for the scoped Entry, Question, and Info dialogs.",
+    "classification": "observed",
+    "source": [
+      "evidence/original-zenity-v0.10.15.tar.gz#entry_darwin.go",
+      "evidence/original-zenity-v0.10.15.tar.gz#msg_darwin.go",
+      "evidence/original-zenity-v0.10.15.tar.gz#internal/zenutil/osascripts/dialog.gojs",
+      "evidence/original-zenity-v0.10.15.tar.gz#util_darwin.go"
+    ],
+    "limitations": [
+      "The tag cannot authenticate the dirty reference binary exact source. Fresh current-candidate GUI replay remains missing."
+    ]
+  },
+  {
+    "id": "CURRENT-JXA-PENDING",
+    "claim": "The source-assisted JXA candidate builds and passes non-GUI protocol tests. Its GUI parity remains unverified.",
+    "classification": "observed",
+    "source": [
+      "evidence/jxa-source-pin.json",
+      "../verification/checks.json",
+      "../verification/summary.json"
+    ],
+    "limitations": [
+      "Historical AppKit captures are not current-source proof. The Mac is locked."
+    ]
   }
 ]

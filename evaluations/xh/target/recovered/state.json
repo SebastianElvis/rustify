@@ -8,34 +8,36 @@
   "work_dir": "/Users/runchao/Projects/Personal/rustify/work/evaluation/xh/agent",
   "checkpoints": {
     "prepare": {
-      "recovered/contract.json": "c908b72191270b550d7c6642cf5d9b9445202553f704b3efc643423b22770832"
+      "recovered/contract.json": "562bd5b24ac5256093b9464b97ed7a3c13c05ba9d82e89819054fc8d08e9b38d"
     },
     "discover": {
-      "recovered/architecture.md": "678a519ca26a038014dccbc1bffd8c06dfc9195ddb99d2e24c314b7dcff666f3",
-      "recovered/evidence.json": "34ff29bd92ce35a614838acedbdd1453823a39f7cae925f0d807ba0dda3d39cf",
+      "recovered/architecture.md": "77f9c8162275fc7b52c135785e5751625ed4440d358dc4fc61649d9ee3c62a50",
+      "recovered/evidence.json": "25e84bfc6d26a6ee92fff9fb514c7a18d45e109aede47125059b02d8bd233830",
       "recovered/product.md": "0df74660c5519e2f6ed8712975225935f664a5dceb902c71f59b7715baa8fa56",
-      "recovered/roadmap.md": "23b0da4305f3715cddc11438afc6591b655f4323cfdb228e4d922baa3cf0f577",
+      "recovered/roadmap.md": "b5676f20e0311cbe6251b256ddf1235a52599f97fb6d051aedf919297b4bd0f2",
       "recovered/scenarios.json": "43d5fefa04d78e7226e2a899373c06b7f1cfa80b48684582baf16451a61f5ceb",
       "recovered/tests.json": "3c639f4672c2f1939984c6314eb106451f2f3d38e7382d3774fcc31f8c663969",
       "recovered/ux.md": "4f61cb66f3b403233bb794e4ed26453fbf1a2b05f6e94073163d6a88a0478acb",
       "recovered/evidence/binary-only-evidence.zip": "f1ecacd70e19d4e30115f4eccd8eee83e71e7c2f2a6b5b832e50c20c4853f9ec",
-      "recovered/evidence/state-v1.json": "9205d6f438120461c242a39d9553b48f553e307b86cc08f60a05d5390002455a"
+      "recovered/evidence/original-xh-v0.26.3.tar.gz": "8c54c7e8e878600d1a322151e0158c4fa6e6793283a45e355d0c1f87ca6d5640",
+      "recovered/evidence/state-v1.json": "9205d6f438120461c242a39d9553b48f553e307b86cc08f60a05d5390002455a",
+      "recovered/evidence/source-assisted-before-blocking.zip": "71f21ab57fbef0234984d9eaeb07331ace081ec610f3d326978d38be55307f94"
     },
     "plan": {
-      "plan.json": "3940b3e7566d20281cfffa8b499220b292074e63fbffcc0664be033c886e877f",
-      "rust-design.md": "cac2f4c6e556e714da669cc95377d3dda212e075726b8a378a2404e51472f3dc"
+      "plan.json": "790b8bfe93cb64fb57444ad231180e0dcee927d8e572e2d916297c467e4ffa5a",
+      "rust-design.md": "a6ab03e0f13d0f664de722a452dddbf2dc7c5c954b0eaf8302760dd9e878636b"
     },
     "implement": {
-      "implementation/Cargo.lock": "b36a6b08fb63c617480ca67f95d3224d66122053798bbfb9538b63b36e914353",
-      "implementation/Cargo.toml": "12e52756cb5599f400496e3c5bdee6a989314732320031bc8476b70d9fb841e1",
-      "verification/checks.json": "336ee4f47bffd704016e5cc9250e794a2f9b032006b40f806f151166ceae36b8",
+      "implementation/Cargo.lock": "8f52c873da99a06611077182fed13d04e1216487b83ffd02f7f99fb2c16ea320",
+      "implementation/Cargo.toml": "681a4bffe89f5015d3188a9ba29d74fe50338622cb5da3251f40ddd2b1d501f3",
+      "verification/checks.json": "6627b450a12a1d51d86aa44c8308713fb4d0d87b970e0b39f1b32da201c9add5",
       "implementation/tests/e2e.rs": "c7be1cd12e25ab70098016edae77ea3d5cd9748a98bd39425becd75bca29554b",
-      "implementation/src/main.rs": "d35e842299dc1b59d64aab81ca0fbd04688bfde298b0447f8aba9cadaf064771"
+      "implementation/src/main.rs": "25e7d235fc6c3f895510acad08b33b72b08ef40bb318dbb60761b8a431c13966"
     },
     "validate": {
-      "verification/comparison.json": "ae73fa5c3e93ef42229ba6b3b44f093b8a336e3673eb3b874b5fb3861c0fff14",
-      "verification/compatibility.md": "5ce343174525eb524b3b5a6efa1ad320f875aa9c605c3223c6155498612c4b41",
-      "implementation/target/debug/xh": "806d0ce2962e9fdc6dad13dfbbe8da868cb7e1e30b4b0e47d5c6622e332c6186"
+      "verification/comparison.json": "6beb00753d2bf5783343276aa9b2e19f276789c39f7f1d1f489dd2ae6f5830ce",
+      "verification/compatibility.md": "315452d36187c92b191a00dac4304f15d551a3e62c84d73ae9400c7fbec16d6f",
+      "implementation/target/debug/xh": "67f6c000180e005b4e8fc99030983b8f536ed7a1d44ddc000b2dae1fe62a34b3"
     }
   }
 }

@@ -1,21 +1,31 @@
 ---
 name: rustify-design
-description: Recover interface behavior and design language from a binary application. Use during Rustify discovery for CLI, desktop, service, or game interaction contracts.
+description: Recover an original interaction and design specification with captures and Rust parity mapping. Use during Rustify discovery for visual interfaces, CLI behavior, and other interaction contracts.
+metadata:
+  dependencies: "rea"
+  rea-source: "https://github.com/morluto/rea"
+  rea-setup: "https://github.com/morluto/rea/blob/main/docs/installation.md"
 ---
 
-# Recover user experience
+# Recover the interaction specification
 
-The agent reads `recovered/contract.json` and [the evidence contract](../rustify/docs/project.md).
-The orchestrator supplies bounded questions and separate capture paths.
+The agent reads `recovered/contract.json` and [the evidence contract](../rustify/references/project.md).
+The default scope covers the full original interface on the contracted platform.
+A partial evaluation requires an explicit scope label and unexamined-state inventory.
+The agent preserves original appearance and behavior without aesthetic improvements.
+Every known visual or interaction mismatch remains an open parity gap.
 
-- The agent maps interaction states and transitions for complete workflows.
-- The agent records CLI syntax, help, formatting, prompts, errors, and exit behavior.
-- The agent maps screens, dialogs, navigation, focus, selection, resizing, and unsaved changes when applicable.
-- The agent recovers visual tokens, assets, and reusable components when applicable.
-- The agent records service interactions or game controls, saves, and feedback when applicable.
-- The agent links each rule and declarative expectation to a scenario and evidence.
-- The agent labels design rationale as an inference.
+1. The agent reads [investigation methods](references/investigation.md) before capturing interactions.
+2. The agent uses existing [REA tools](https://github.com/morluto/rea) and the current provider.
+   The orchestrator owns dependency setup and shared session coordination.
+3. The agent reads [output rules](references/output-format.md) before writing `recovered/ux.md`.
+4. The agent uses the [interaction specification template](assets/interaction-specification.md) for visual or stateful interfaces.
+   The agent uses the [CLI specification template](assets/cli-specification.md) for command-line interfaces.
+   A mixed product uses both structures in one specification.
+5. The agent returns its assigned evidence, scenario, and declarative-test shards to the orchestrator.
+   The agent preserves original capture paths and REA Evidence IDs.
+   The orchestrator merges the canonical JSON files.
 
-The agent writes the interaction specification and design language in `recovered/ux.md`.
-The agent marks a visual design system as inapplicable when the target has none.
-The agent returns evidence, scenarios, test expectations, contradictions, and unknowns to the orchestrator.
+Every interface state traces to original captures, Rust components, and replay checks.
+An unknown token, transition, or expected result remains an investigation gap.
+The agent declares completeness only for the explicit contracted scope.

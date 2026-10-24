@@ -25,7 +25,7 @@
       ],
       "returncode": 0,
       "log": "verification/logs/clippy.log",
-      "log_sha256": "ee1d3fffa2022e962e63e0dbe4d35c9c198450a20c29fc09030f635dbb38bfcd"
+      "log_sha256": "02db5a66fa0c60ca8618bd08aac556eac4f3ec863e8630a0d353dba6a0f6e126"
     },
     {
       "name": "unit",
@@ -36,8 +36,21 @@
       ],
       "returncode": 0,
       "log": "verification/logs/unit.log",
-      "log_sha256": "16a3d9e667d1c61621fafa26b62aa5e67209f7b8bd5bb0b2acb3286006f051fc"
+      "log_sha256": "0d025c0a04ee0f48059aec89e6943e868ef5e36c1bc83e580ce37a06b428ce73"
+    },
+    {
+      "name": "build-release",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "returncode": 0,
+      "log": "verification/logs/build-release.log",
+      "log_sha256": "376a48f02bf305a0c383aa68e8f2d8c5df3ec64cbee6a09491a649aa453baba9"
     }
   ],
-  "live_gui_replay": false
+  "fresh_unit_tests": 5,
+  "gui_replay_status": "pending_fresh_gui_replay"
 }

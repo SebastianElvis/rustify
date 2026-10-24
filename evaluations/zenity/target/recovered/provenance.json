@@ -12,7 +12,8 @@
   "candidate": {
     "recorded_binary_sha256": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306",
     "source_assisted_changes": false,
-    "pre_freeze_correction": "The parent adds finishLaunching before modal display. The correction uses runtime feedback."
+    "pre_freeze_correction": "The parent adds finishLaunching before modal display. The correction uses runtime feedback.",
+    "stage": "Historical direct-AppKit candidate before the source-assisted JXA repair."
   },
   "source": {
     "tag": "v0.10.15",
@@ -51,6 +52,13 @@
       "icon",
       "title placement",
       "pixel layout"
-    ]
+    ],
+    "stage": "Historical AppKit replay only."
+  },
+  "current_source_assisted_repair": {
+    "kind": "SOURCE-ASSISTED native JXA fidelity repair",
+    "source_pin": "evidence/jxa-source-pin.json",
+    "status": "pending_fresh_gui_replay",
+    "full_product_parity": "unestablished"
   }
 }

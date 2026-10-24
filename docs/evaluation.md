@@ -2,6 +2,9 @@
 
 Rustify evaluates a reconstruction against an identified original binary.
 The report separates measured behavior from unexplored behavior.
+The default reconstruction requires one-to-one product, UX, component, data, and behavior mappings.
+The compact dataset measures explicit subsets.
+A passing subset does not establish full-product parity.
 
 ## Complete flow
 
@@ -72,12 +75,13 @@ The target directory follows the three-folder product layout.
 The wrapper can keep historical agent fixtures outside that directory.
 The original source remains hidden until a recorded source and model freeze.
 Archives preserve the original files when later audits require source-assisted repairs.
-The BLAKE3 and HTTP tracks disclose these repairs.
+The cryptography, client, and desktop tracks disclose these repairs.
 The base64 implementation needs no source-assisted repair.
 
 The default replay runs CLI, cryptography, and client checks.
 The desktop option checks recorded GUI evidence and fresh Rust unit tests.
 The desktop report states that it does not perform a fresh native replay.
+The desktop runner rejects captures from an earlier implementation.
 The initial desktop investigation uses actual native controls and process captures.
 The desktop source audit maps its scenarios to upstream interactive tests.
 The audit does not claim that the upstream interactive suite ran.
@@ -113,6 +117,21 @@ The skill bundle remains host-neutral.
 | Rust quality | Formatting, lint, unit, and E2E checks pass. |
 | Evidence quality | Each conclusion has an origin and a stated limitation. |
 
-Architecture similarity does not require identical modules or algorithms.
-The report evaluates recovery accuracy and implementation design separately.
+The architecture assessment maps original components to Rust components.
+Each mapping preserves responsibilities, interfaces, state ownership, and execution boundaries where evidence permits them.
+The report keeps unknown and different mappings open.
 Each track stores its report in `evaluations/<track>/target/verification/compatibility.md`.
+
+## Strict parity gate
+
+The full-product workflow records its inventory and mappings in `verification/parity-matrix.json`.
+The validation skill provides the matrix asset and its field definitions.
+The checker rejects known gaps, incomplete inventories, differing dimensions, and stale inputs.
+The checker verifies recorded assertions against both original and Rust captures.
+The checker records its result in `verification/parity.json`.
+A passing machine gate does not prove that the declared inventory covers every original feature.
+The agent must justify that inventory with evidence.
+
+```sh
+python3 skills/rustify-validate/scripts/parity.py --project PROJECT --report PROJECT/verification/parity.json
+```
