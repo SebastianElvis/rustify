@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "profile": "cli",
+  "target": {
+    "path": "/Users/runchao/Projects/Personal/rustify/work/downloads/xh",
+    "sha256": "ea62f476d76bdfd401e56bdee8fb2630d447aeb843b7c5fdde8bcd3de86b391d"
+  },
+  "checkpoints": {
+    "prepare": {
+      "contract.json": "f4af97995543da5fddd8b7dfb6287fdf6ecdfbdb1c0638594b8b75c8618ecb5c"
+    },
+    "discover": {
+      "evidence.json": "95ee180ea267e02f17d63122a5dad121860280a8d2e41f6fb98907979fea7cb7",
+      "experience.md": "4f61cb66f3b403233bb794e4ed26453fbf1a2b05f6e94073163d6a88a0478acb",
+      "product.md": "0df74660c5519e2f6ed8712975225935f664a5dceb902c71f59b7715baa8fa56",
+      "recovered-architecture.md": "678a519ca26a038014dccbc1bffd8c06dfc9195ddb99d2e24c314b7dcff666f3",
+      "scenarios.json": "43d5fefa04d78e7226e2a899373c06b7f1cfa80b48684582baf16451a61f5ceb"
+    },
+    "plan": {
+      "plan.json": "3940b3e7566d20281cfffa8b499220b292074e63fbffcc0664be033c886e877f",
+      "rust-design.md": "cac2f4c6e556e714da669cc95377d3dda212e075726b8a378a2404e51472f3dc"
+    },
+    "implement": {
+      "checks.json": "f357b9095179f7499bb2bffa3a358896fe9491c56bdc70a1788cfa1ed17306de",
+      "replacement/Cargo.lock": "b36a6b08fb63c617480ca67f95d3224d66122053798bbfb9538b63b36e914353",
+      "replacement/Cargo.toml": "12e52756cb5599f400496e3c5bdee6a989314732320031bc8476b70d9fb841e1",
+      "replacement/src/main.rs": "d35e842299dc1b59d64aab81ca0fbd04688bfde298b0447f8aba9cadaf064771",
+      "replacement/tests/e2e.rs": "7956a9b1bd698c5351872af71e8b9f678ab395741c14d0857f058e726520cc8a"
+    },
+    "validate": {
+      "comparison.json": "c715ab4b2b85880f193c8ddc793f04f4f481a97c6835cf1cb97a1baa559a8311",
+      "compatibility.md": "33e5f82db713be0da9e568bab8ac925a665179ac0c3d1151f2aa2fc3746e5e96",
+      "replacement/target/debug/xh": "2eab0d4fb789e7efb3cde30f26fea7e34642d62ebb2b7740f89be43e71c4e12e"
+    }
+  }
+}

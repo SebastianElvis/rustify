@@ -1,0 +1,12 @@
+/work/
+**/implementation/target/
+**/verification/raw/
+**/verification/logs/
+.DS_Store
+__pycache__/
+*.pyc
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.out

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "E-GO",
+    "claim": "The binary contains Go module and compiler metadata.",
+    "classification": "observed",
+    "source": "evidence/rea-go.json",
+    "limitations": "Metadata does not prove runtime behavior or source authenticity."
+  },
+  {
+    "id": "E-ENTRY",
+    "claim": "The entry workflows return matching data and statuses.",
+    "classification": "observed",
+    "source": [
+      "evidence/entry-accept-reference.json",
+      "evidence/entry-accept-candidate.json",
+      "evidence/entry-cancel-reference.json",
+      "evidence/entry-cancel-candidate.json"
+    ]
+  },
+  {
+    "id": "E-ALERT",
+    "claim": "The question and information workflows have matching outcomes.",
+    "classification": "observed",
+    "source": [
+      "evidence/question-accept-reference.json",
+      "evidence/question-cancel-reference.json",
+      "evidence/info-accept-reference.json"
+    ]
+  },
+  {
+    "id": "E-OS",
+    "claim": "The original delegates alerts through osascript.",
+    "classification": "inferred",
+    "source": "evidence/question-accept-reference-ax.txt",
+    "falsifier": "The source audit can identify a different platform boundary."
+  }
+]

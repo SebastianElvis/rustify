@@ -1,0 +1,112 @@
+{
+  "status": "passed",
+  "reference_sha256": "ea62f476d76bdfd401e56bdee8fb2630d447aeb843b7c5fdde8bcd3de86b391d",
+  "commands": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--check"
+      ],
+      "returncode": 0,
+      "log": "evaluations/xh/target/verification/logs/fmt.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0,
+      "log": "evaluations/xh/target/verification/logs/clippy.log",
+      "log_sha256": "8c233a54790c4800d3dd585436af679aa838da259bfdb129412e2d51cdb75cdc"
+    },
+    {
+      "name": "rust-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked"
+      ],
+      "returncode": 0,
+      "log": "evaluations/xh/target/verification/logs/rust-tests.log",
+      "log_sha256": "af7596c1565cf32f0918e47cc8bda40f974893fd7dffe322889519ddd8713021"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked"
+      ],
+      "returncode": 0,
+      "log": "evaluations/xh/target/verification/logs/build.log",
+      "log_sha256": "02db5a66fa0c60ca8618bd08aac556eac4f3ec863e8630a0d353dba6a0f6e126"
+    },
+    {
+      "name": "comparison",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/xh/evaluate.py",
+        "--port",
+        "0"
+      ],
+      "returncode": 0,
+      "log": "evaluations/xh/target/verification/logs/comparison.log",
+      "log_sha256": "6780d8793a6f34d93ef98959317b31b2970c479caaaf6f693e83203fa4ae1114"
+    },
+    {
+      "name": "upstream",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/xh/upstream.py"
+      ],
+      "returncode": 0,
+      "log": "evaluations/xh/target/verification/logs/upstream.log",
+      "log_sha256": "d43b2f761c8c5febb7a63a597284f0ffa6d4798187255f8f456ce00ef9f3edcd"
+    }
+  ],
+  "process": {
+    "status": "passed",
+    "passed": 26,
+    "failed": 0
+  },
+  "protocol": {
+    "status": "passed",
+    "passed": 26,
+    "failed": 0
+  },
+  "repeatability": {
+    "status": "passed",
+    "passed": 26,
+    "failed": 0
+  },
+  "upstream": {
+    "status": "passed",
+    "passed": 13,
+    "failed": 0
+  },
+  "rust_test_suites": [
+    6,
+    1
+  ],
+  "candidate_sha256": "806d0ce2962e9fdc6dad13dfbbe8da868cb7e1e30b4b0e47d5c6622e332c6186",
+  "checkpoint": {
+    "completed": [
+      "prepare",
+      "discover",
+      "plan",
+      "implement",
+      "validate"
+    ],
+    "next": null,
+    "stale": null
+  }
+}

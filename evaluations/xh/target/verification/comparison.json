@@ -1,0 +1,148 @@
+{
+  "status": "passed",
+  "passed": 26,
+  "failed": 0,
+  "executables": {
+    "reference": {
+      "path": "/Users/runchao/Projects/Personal/rustify/work/downloads/xh",
+      "sha256": "ea62f476d76bdfd401e56bdee8fb2630d447aeb843b7c5fdde8bcd3de86b391d"
+    },
+    "candidate": {
+      "path": "/Users/runchao/Projects/Personal/rustify/evaluations/xh/target/implementation/target/debug/xh",
+      "sha256": "806d0ce2962e9fdc6dad13dfbbe8da868cb7e1e30b4b0e47d5c6622e332c6186"
+    }
+  },
+  "full_report": "raw/comparison.json",
+  "cases": [
+    {
+      "id": "get-text",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "get-json",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "get-query",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "head",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "empty-post",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "json-fields",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "json-types",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "json-order",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "json-replace",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "inferred-post",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "raw-post",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "raw-empty",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "json-get",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "custom-header",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "header-equals",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "string-operator",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "custom-accept",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "custom-content-type",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "redirect-stop",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "redirect-follow",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "post-302",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "post-303",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "post-307",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "status-404",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "status-500",
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "status-ignore",
+      "passed": true,
+      "differences": []
+    }
+  ]
+}

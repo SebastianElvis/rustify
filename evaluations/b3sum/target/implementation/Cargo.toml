@@ -1,0 +1,7 @@
+[package]
+name = "rustify-b3sum"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+blake3 = "=1.8.3"

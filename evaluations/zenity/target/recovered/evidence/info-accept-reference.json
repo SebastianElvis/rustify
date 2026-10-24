@@ -1,0 +1,15 @@
+{
+  "case": {
+    "id": "info-accept",
+    "args": [
+      "--info",
+      "--title",
+      "Rustify brief test",
+      "--text",
+      "Rustify will close this test dialog."
+    ]
+  },
+  "returncode": 0,
+  "stdout_b64": "",
+  "stderr_b64": ""
+}

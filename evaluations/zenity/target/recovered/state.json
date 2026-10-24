@@ -1,0 +1,66 @@
+{
+  "version": 2,
+  "profile": "desktop",
+  "target": {
+    "path": "/Users/runchao/Projects/Personal/rustify/work/downloads/zenity",
+    "sha256": "5f917a17b59bc5c516fb8173a21d13f4ac0d47850ab09cd7097e19bcdb5495c5"
+  },
+  "work_dir": "/Users/runchao/Projects/Personal/rustify/work/evaluation/zenity/agent",
+  "checkpoints": {
+    "prepare": {
+      "recovered/contract.json": "b6342971b90ca344ed64873abb3c882b9c6542787496a4c41e1fcd5292b63e13"
+    },
+    "discover": {
+      "recovered/architecture.md": "d7f45f5b4bafd438e7255fd4dc09439928aa763c8edd0b368efef15a0317f453",
+      "recovered/evidence.json": "2ca58bd5072b0aa0c1462033a8c2a4c5bddd70f49c548278e0f59baaee0f69e8",
+      "recovered/product.md": "21689cca616efb7a1869fbabcc720e1cbe52dac87eddc68c0886900e50ef2343",
+      "recovered/roadmap.md": "c1665be04ae1227ef7a60ab41e443ded6125331ae86bee71e3fe3b0a6dbb8128",
+      "recovered/scenarios.json": "cdd5dbdb90d8f8cbefdb147931fd92e8fe093a3e2911a006f39d3c0458043bc9",
+      "recovered/tests.json": "f60f1fa1cee63dc9243d3297a5df92c6cc5005382cd96e73ecdc0a0d5883dec3",
+      "recovered/ux.md": "06362f4eeb1eb6236076ad2e1a0a1917cb1514070f065d19659a7dcff23c5f4f",
+      "recovered/evidence/question-cancel-candidate.json": "cc7a57488d20c9a36683d2941cad0cb27d9c366249fefe2062ae09a9a996ead8",
+      "recovered/evidence/question-accept-candidate.json": "b44238823dfc67862b327ee0cc9b25930220cfbe3ca1b1743d104d638b8e4357",
+      "recovered/evidence/recorded-compatibility.md": "425702db488abdb9ab7c04dae21c809a2032179c0296f4776cb4c72c249370ce",
+      "recovered/evidence/question-accept-candidate-ax.txt": "9f531ffdcfdbb2ade6ecdaf0401c8e3a1c8a845e740f237d085351fefaf2a0be",
+      "recovered/evidence/post-freeze-state-v1.json": "c6b3f74389d7fe619a004a8ac13a0cf28545777c8a2e07c2d18c924325d082a6",
+      "recovered/evidence/reference-entry.png": "0d0b1c3da42d0b660e4167e0cdecbed9ac28b75b09382af59adb505d25eb5464",
+      "recovered/evidence/candidate-entry.png": "e28a3a13c9d0a4f16a34604e1a8b77b4cc8cadf24547bbdfe427a894e99923c9",
+      "recovered/evidence/fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "recovered/evidence/active-case.json": "b00b407f799fc4eddc97ca1773810d5434134a4a8a71d73e1e451781f9c38a72",
+      "recovered/evidence/entry-cancel-reference.json": "a361ff3df21d8e54bf86cfaae1a39e6be8ed85accccfbb01ec21e7c498bd5b63",
+      "recovered/evidence/entry-accept-reference.json": "d6b66eae515a01db8c4a8724b0b4cdb4be2dd9f26b7d24dc589687c57a965dc3",
+      "recovered/evidence/recorded-checks.json": "ac11f97dcac50ef8d2c4eafbd458a5adb40575a8c0a88ea7b268c30158395a37",
+      "recovered/evidence/frozen-recording.zip": "6456cc11342c2615345344a302fec6f644f59247da947d36eb27f01d8f5dbb87",
+      "recovered/evidence/info-accept-reference.json": "348d2458d19bdea3ba77948aae36faff9ff95072731e1d35c80c66711d68fe9d",
+      "recovered/evidence/clippy.log": "de8e3d86c0e912a30a3be515f07d65c4dc13727ec9906f44ccfcb4a29b05e96a",
+      "recovered/evidence/question-accept-reference-ax.txt": "c4990e78e02d1672a2f699e90c35c6c9a901ae2ad9d59692b7b048a62344fda7",
+      "recovered/evidence/info-accept-candidate.json": "348d2458d19bdea3ba77948aae36faff9ff95072731e1d35c80c66711d68fe9d",
+      "recovered/evidence/rea-go.json": "439b3e3d290d0ea95e50b6aec07dddb91cee15354658ef938dcb119e37a1913f",
+      "recovered/evidence/unit.log": "1c4606ac2dd4a85a7fbbfdf8ee077f9444a0d962c7a580323435978b1672e72e",
+      "recovered/evidence/info-accept-reference-ax.txt": "4aeb2e4e986656538b77df87e46d5d51c63dc5d3d4740b722b88c58d9b8abcbd",
+      "recovered/evidence/question-cancel-reference-ax.txt": "c4990e78e02d1672a2f699e90c35c6c9a901ae2ad9d59692b7b048a62344fda7",
+      "recovered/evidence/recorded-comparison.json": "1e22b50c39d95917ea09e0f16aad6fc7834f9959c69550139834ff3be311b7e8",
+      "recovered/evidence/question-cancel-reference.json": "cc7a57488d20c9a36683d2941cad0cb27d9c366249fefe2062ae09a9a996ead8",
+      "recovered/evidence/question-accept-reference.json": "b44238823dfc67862b327ee0cc9b25930220cfbe3ca1b1743d104d638b8e4357",
+      "recovered/evidence/info-accept-candidate-ax.txt": "e256be95664d7386eefa6c0edabd7bbe431776f4490c4be370a4fd8dd936a122",
+      "recovered/evidence/question-cancel-candidate-ax.txt": "9f531ffdcfdbb2ade6ecdaf0401c8e3a1c8a845e740f237d085351fefaf2a0be",
+      "recovered/evidence/entry-cancel-candidate.json": "a361ff3df21d8e54bf86cfaae1a39e6be8ed85accccfbb01ec21e7c498bd5b63",
+      "recovered/evidence/entry-accept-candidate.json": "d6b66eae515a01db8c4a8724b0b4cdb4be2dd9f26b7d24dc589687c57a965dc3"
+    },
+    "plan": {
+      "plan.json": "44b3d7398b58eee80779aaf9740cf359676fe53d5e1f8c9723e33bc426564a14",
+      "rust-design.md": "c88d45fba267dbf0b90c8c9babe53b05542697f4e74dd7ca9338dbf1df351ad0"
+    },
+    "implement": {
+      "implementation/Cargo.lock": "dcc67d200044e1cfe927b550af80a2ccf9431056fef43355ea981baa79c1ecd6",
+      "implementation/Cargo.toml": "068002a24833a4ad49b9d95d52ac582074ee35b66fce932f04b2ea104cc29e40",
+      "verification/checks.json": "5b1e8d14a399b90d655827eaad2a7da1a3019ec103b08abd5e36a266e2b8d78f",
+      "implementation/src/main.rs": "caa8a160334c18df8893da58d2998b3334564981afb28381ca13f02e53ce7fcd"
+    },
+    "validate": {
+      "verification/comparison.json": "e531e536cd016f246a95b87eafc7ff98d321da09808d469dc412865685cd8f6e",
+      "verification/compatibility.md": "84eab93ecc663e41cde3122a103c9b2b92e13d21cd4c2794b85e03fa4200557c",
+      "implementation/target/recorded/zenity": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306"
+    }
+  }
+}

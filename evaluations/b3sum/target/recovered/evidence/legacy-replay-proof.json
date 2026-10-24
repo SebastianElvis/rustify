@@ -1,0 +1,40 @@
+{
+  "missing_reference_download": {
+    "status": "passed",
+    "sha256": "97017f4477d872b24752a9bdbe48a6e0296fe1a66fc4787906c20c040b15c299",
+    "summary": {
+      "status": "passed",
+      "reference_sha256": "97017f4477d872b24752a9bdbe48a6e0296fe1a66fc4787906c20c040b15c299",
+      "candidate_sha256": "96bee3259eb90239fde0e59b4d7465f4a4d02ef163fd48fee7b2e9daf589e848",
+      "runtime_cases": 226,
+      "runtime_failures": 0,
+      "repeatability_cases": 226,
+      "vector_cases": 315,
+      "official_expected_checks": 630,
+      "official_expected_outputs_passed": true,
+      "rust_tests": 8,
+      "negative_control_detected": true,
+      "source_assisted_repairs": true,
+      "raw_reports": "work/evaluation/b3sum"
+    }
+  },
+  "outside_cwd_replay": {
+    "status": "passed",
+    "cwd": "/Users/runchao/Projects/Personal/rustify/work/blind-b3sum/replay-copy/outside-cwd",
+    "summary": {
+      "status": "passed",
+      "reference_sha256": "97017f4477d872b24752a9bdbe48a6e0296fe1a66fc4787906c20c040b15c299",
+      "candidate_sha256": "e3865904b6518af7e7b6979a719cf1bb66c323be3bc3c0b9762a320b55fad9a9",
+      "runtime_cases": 226,
+      "runtime_failures": 0,
+      "repeatability_cases": 226,
+      "vector_cases": 315,
+      "official_expected_checks": 630,
+      "official_expected_outputs_passed": true,
+      "rust_tests": 8,
+      "negative_control_detected": true,
+      "source_assisted_repairs": true,
+      "raw_reports": "work/evaluation/b3sum"
+    }
+  }
+}

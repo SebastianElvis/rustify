@@ -1,0 +1,56 @@
+{
+  "evaluation": "The parent agent performs a native GUI smoke. This track is not an independent full reconstruction.",
+  "reference": {
+    "release_url": "https://github.com/ncruces/zenity/releases/download/v0.10.15/zenity_macos.zip",
+    "archive_sha256": "4997ad32c70384e90e8e8bba42e8eddb35e7d8b9a752a7c4cd3e42c4be36ddb3",
+    "binary_sha256": "5f917a17b59bc5c516fb8173a21d13f4ac0d47850ab09cd7097e19bcdb5495c5",
+    "kind": "The original release executable is universal. The replay uses macOS arm64.",
+    "analysis_slice_sha256": "aa22174dff97c6415bb64ccf9edbc103d91ef67cc4b43c0901fdd29bfaa773b1",
+    "build_metadata_version": "v0.10.15+dirty",
+    "exact_source_identity": "unknown"
+  },
+  "candidate": {
+    "recorded_binary_sha256": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306",
+    "source_assisted_changes": false,
+    "pre_freeze_correction": "The parent adds finishLaunching before modal display. The correction uses runtime feedback."
+  },
+  "source": {
+    "tag": "v0.10.15",
+    "archive_url": "https://github.com/ncruces/zenity/archive/refs/tags/v0.10.15.tar.gz",
+    "archive_sha256": "ed900c7f0a16976fa57c06000f4a9e06e65dce669a475f54d52ddc2b77027e24",
+    "review_order": "The parent freezes source and evidence before the source reveal.",
+    "export_review_started_at": "2026-10-24T14:29:04Z",
+    "files": {
+      "entry_darwin.go": "11cbede04601d9d4fbcfb954adba7e816ae1fca5e4d557338825e6ef51455540",
+      "msg_darwin.go": "a541e1b85e904b68017dafca119d46fb4d2ab68e8a946cbadc22c6643e7e4c68",
+      "internal/zenutil/run_darwin.go": "e7e5c554e860d7ec73d26d4f9416798930c959b581a43814800ff6a5a9648739",
+      "cmd/zenity/main.go": "9b65fa0ebeaf4873020e3ce84c53d9514db867315e86f6bb38b44a6f8e183332",
+      "entry_test.go": "1e1689e791cdc2445e4833a4d94f45e38d358b1df7c02126dbf1807d3df6fcde",
+      "msg_test.go": "f89cc8951607763ea77161a06975136afe82c51dffcaf97f999ff8628d372513"
+    }
+  },
+  "freeze": {
+    "manifest_sha256": "fc3b26569c97ba82afacc1538730973dbc334086df1c18e74a354d1f7ccabcc6",
+    "archive": "evidence/frozen-recording.zip",
+    "archive_sha256": "6456cc11342c2615345344a302fec6f644f59247da947d36eb27f01d8f5dbb87",
+    "matching_original_files": 37,
+    "operational_state_exception": {
+      "path": "state.json",
+      "frozen_sha256": "06661469e8088f56ac64d3ad67b94d42f33cd2740e7182f0daae383c3db17fc8",
+      "later_sha256": "c6b3f74389d7fe619a004a8ac13a0cf28545777c8a2e07c2d18c924325d082a6",
+      "reason": "The parent checkpoints operational state after freeze. The original state snapshot is unavailable.",
+      "copy": "evidence/post-freeze-state-v1.json"
+    }
+  },
+  "replay": {
+    "live_gui_replay": false,
+    "recorded_gui_cases": 5,
+    "upstream_test_suite_executed": false,
+    "semantics": "The parent checks text, buttons, entered value, and process results.",
+    "unconstrained_visuals": [
+      "icon",
+      "title placement",
+      "pixel layout"
+    ]
+  }
+}

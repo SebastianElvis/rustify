@@ -1,0 +1,22 @@
+{
+  "utc": "2026-10-24T14:04:12.070450+00:00",
+  "source_access": false,
+  "upstream_vectors_access": false,
+  "dependency_note": "Cargo downloads the approved blake3 dependency. The evaluator does not inspect its source.",
+  "files": {
+    "contract.json": "8b0167900a325e016b746037e4fb7a18ce3ba86cc6826329228a60f62af593bd",
+    "product.md": "6ca66d5af65db5cba13a2d9483b2c486b08d66625c4ae0e507b47982b16f74ac",
+    "experience.md": "76a1fd06c8e7e96531b1e07dedd77ba8752c0a4f2300a23b347cc40af32cafa3",
+    "recovered-architecture.md": "22b60f63dfd75346d8ec1d09fb93b01b111ac993fe5a86789045efbefd7ce1db",
+    "rust-design.md": "920a13e70a88b848280b4b4b3eee5fb9dc3be122e83dfa1ca92d81e61550d1c9",
+    "plan.json": "048702d1e3f0c5f703cf481c0857aadbedfc8ffd3d3b6a749a38e87efacc6350",
+    "evidence.json": "ff4133b1347ca6d05ec00896805333bd2a992e6d607a12f0cf0ddd8a815b3d16",
+    "scenarios.json": "fc112119e7aae7d8cd2ae66bbb5d48e03398e09547096b31d561d95cf70fea4b",
+    "replacement/Cargo.toml": "835383e6ae2891c68a6a3b438b9327cfb17d089e3f8fb5de4828e8d49ce81b55",
+    "replacement/Cargo.lock": "20889a5c1948f1bde1ec0b7190368a5aa8f5c8c8667e9193d6595700fc54fa3a",
+    "replacement/help.txt": "70ad273beae9c58eaf42b4ebb4c84e592dc6f7e66ee13dbdbee10b0203977858",
+    "replacement/src/main.rs": "5ebcdec380ef38f9f2ad05f1695c2c7089579e6a109d5132dcddce536e851b7a",
+    "replacement/tests/cli.rs": "a7167f7c08fefd7265d906c9c1241e46087dd1d5f2d3004a86742bb58a9c4b52"
+  },
+  "tree_sha256": "a91042e98ee27e0edf22479bee53afb36fe35870c31bb837b87853302d570271"
+}

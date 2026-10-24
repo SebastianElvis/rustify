@@ -1,0 +1,17 @@
+{
+  "case": {
+    "id": "entry-accept",
+    "args": [
+      "--entry",
+      "--title",
+      "Rustify desktop test",
+      "--text",
+      "Rustify input test",
+      "--entry-text",
+      "seed"
+    ]
+  },
+  "returncode": 0,
+  "stdout_b64": "UnVzdGlmeSBHVUkgdGVzdAo=",
+  "stderr_b64": ""
+}

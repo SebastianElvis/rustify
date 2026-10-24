@@ -1,0 +1,2574 @@
+{
+  "status": "passed",
+  "passed": 226,
+  "failed": 0,
+  "executables": {
+    "reference": {
+      "path": "/Users/runchao/Projects/Personal/rustify/work/downloads/b3sum",
+      "sha256": "97017f4477d872b24752a9bdbe48a6e0296fe1a66fc4787906c20c040b15c299"
+    },
+    "candidate": {
+      "path": "/Users/runchao/Projects/Personal/rustify/work/downloads/b3sum",
+      "sha256": "97017f4477d872b24752a9bdbe48a6e0296fe1a66fc4787906c20c040b15c299"
+    }
+  },
+  "cases": [
+    {
+      "input": {
+        "id": "help",
+        "args": [
+          "--help"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "version",
+        "args": [
+          "--version"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "empty",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "hello",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "names",
+        "args": [
+          "a",
+          "b",
+          "-"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "missing",
+        "args": [
+          "absent"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "missing-then-good",
+        "args": [
+          "absent",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "directory",
+        "args": [
+          "directory"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "no-names",
+        "args": [
+          "--no-names",
+          "a",
+          "b"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "raw",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "raw-many",
+        "args": [
+          "--raw",
+          "a",
+          "b"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "length0",
+        "args": [
+          "-l",
+          "0"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "length1",
+        "args": [
+          "-l",
+          "1"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "length65",
+        "args": [
+          "--length=65",
+          "--seek=63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "tag",
+        "args": [
+          "--tag",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "derive",
+        "args": [
+          "--derive-key",
+          "my context"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "keyed",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "keyed-short",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "keyed-long",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "check-empty",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "check-malformed",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "check-missing",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "check-mismatch",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "check-valid",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "check-quiet",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "check-prefix",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-0",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-0",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-0",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-0",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-0",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-0",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-0",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-0",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-1",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-1",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-1",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-1",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-1",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-1",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-1",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-1",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-2",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-2",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-2",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-2",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-2",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-2",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-2",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-2",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-63",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-63",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-63",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-63",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-63",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-63",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-63",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-63",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-64",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-64",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-64",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-64",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-64",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-64",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-64",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-64",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-65",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-65",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-65",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-65",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-65",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-65",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-65",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-65",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-1023",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-1023",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-1023",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-1023",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-1023",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-1023",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-1023",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-1023",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-1024",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-1024",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-1024",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-1024",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-1024",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-1024",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-1024",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-1024",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-1025",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-1025",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-1025",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-1025",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-1025",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-1025",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-1025",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-1025",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-2048",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-2048",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-2048",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-2048",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-2048",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-2048",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-2048",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-2048",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-16384",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-16384",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-16384",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-16384",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-16384",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-16384",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-16384",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-16384",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-hash-65537",
+        "args": []
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-raw-65537",
+        "args": [
+          "--raw"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-65537",
+        "args": [
+          "--raw",
+          "-l",
+          "97",
+          "--seek",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-65537",
+        "args": [
+          "--derive-key",
+          "Rustify context \ud83e\udd80"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-derive-seek-65537",
+        "args": [
+          "--derive-key",
+          "",
+          "--seek=1023",
+          "--length=65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-file-65537",
+        "args": [
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-65537",
+        "args": [
+          "--keyed",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-keyed-seek-65537",
+        "args": [
+          "--keyed",
+          "--raw",
+          "--seek",
+          "1023",
+          "-l",
+          "65",
+          "data"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-0",
+        "args": [
+          "-l",
+          "0"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-0",
+        "args": [
+          "--raw",
+          "--seek",
+          "0",
+          "-l",
+          "0"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-1",
+        "args": [
+          "-l",
+          "1"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-1",
+        "args": [
+          "--raw",
+          "--seek",
+          "1",
+          "-l",
+          "1"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-2",
+        "args": [
+          "-l",
+          "2"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-2",
+        "args": [
+          "--raw",
+          "--seek",
+          "2",
+          "-l",
+          "2"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-31",
+        "args": [
+          "-l",
+          "31"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-31",
+        "args": [
+          "--raw",
+          "--seek",
+          "31",
+          "-l",
+          "31"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-32",
+        "args": [
+          "-l",
+          "32"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-32",
+        "args": [
+          "--raw",
+          "--seek",
+          "32",
+          "-l",
+          "32"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-33",
+        "args": [
+          "-l",
+          "33"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-33",
+        "args": [
+          "--raw",
+          "--seek",
+          "33",
+          "-l",
+          "33"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-63",
+        "args": [
+          "-l",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-63",
+        "args": [
+          "--raw",
+          "--seek",
+          "63",
+          "-l",
+          "63"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-64",
+        "args": [
+          "-l",
+          "64"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-64",
+        "args": [
+          "--raw",
+          "--seek",
+          "64",
+          "-l",
+          "64"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-65",
+        "args": [
+          "-l",
+          "65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-65",
+        "args": [
+          "--raw",
+          "--seek",
+          "65",
+          "-l",
+          "65"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-127",
+        "args": [
+          "-l",
+          "127"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-127",
+        "args": [
+          "--raw",
+          "--seek",
+          "127",
+          "-l",
+          "127"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-length-8193",
+        "args": [
+          "-l",
+          "8193"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-seek-length-8193",
+        "args": [
+          "--raw",
+          "--seek",
+          "8193",
+          "-l",
+          "8193"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-name-0",
+        "args": [
+          "--tag",
+          "space name"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-name-1",
+        "args": [
+          "--tag",
+          "tab\tname"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-name-2",
+        "args": [
+          "--tag",
+          "line\nname"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-name-3",
+        "args": [
+          "--tag",
+          "cr\rname"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-name-4",
+        "args": [
+          "--tag",
+          "\u4e2d\u6587"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-name-5",
+        "args": [
+          "--tag",
+          "parentheses (name)"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-0-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-0-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-0-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-0-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-1-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-1-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-1-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-1-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-2-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-2-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-2-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-2-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-3-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-3-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-3-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-3-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-4-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-4-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-4-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-4-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-5-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-5-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-5-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-5-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-6-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-6-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-6-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-6-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-7-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-7-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-7-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-7-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-8-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-8-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-8-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-8-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-9-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-9-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-9-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-9-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-10-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-10-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-10-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-10-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-11-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-11-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-11-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-11-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-12-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-12-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-12-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-12-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-13-False",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-13-False",
+        "args": [
+          "--check",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-check-13-True",
+        "args": [
+          "--check",
+          "--quiet"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-checkfile-13-True",
+        "args": [
+          "--check",
+          "--quiet",
+          "sums"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-key-length-0",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-key-length-1",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-key-length-31",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-key-length-33",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-key-length-64",
+        "args": [
+          "--keyed",
+          "a"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-missing-many",
+        "args": [
+          "missing",
+          "a",
+          "missing2",
+          "b"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-directory-check",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-missing-checkfile",
+        "args": [
+          "--check",
+          "missing"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-extra-check-0",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-extra-check-1",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-extra-check-2",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-extra-check-3",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-extra-check-4",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-extra-check-5",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-audit-check-0",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-audit-check-1",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-audit-check-2",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-audit-check-3",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-audit-check-invalid-utf8",
+        "args": [
+          "--check"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "input": {
+        "id": "challenge-audit-keyed-stdin",
+        "args": [
+          "--keyed",
+          "-"
+        ]
+      },
+      "passed": true,
+      "differences": []
+    }
+  ],
+  "raw_report": "evaluations/b3sum/target/verification/raw/reference-self.json",
+  "raw_report_sha256": "cef1f2cae37613db82e489c061a65df4efc8ffbaafd9a155290a2df7d9aba896"
+}

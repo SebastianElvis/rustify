@@ -1,0 +1,58 @@
+{
+  "target": {
+    "path": "../../../../work/downloads/xh",
+    "version": "0.26.3",
+    "sha256": "ea62f476d76bdfd401e56bdee8fb2630d447aeb843b7c5fdde8bcd3de86b391d",
+    "origin": "https://github.com/ducaale/xh/releases/tag/v0.26.3",
+    "platform": "macOS arm64",
+    "resources": []
+  },
+  "scope": [
+    "GET and HEAD",
+    "Explicit and inferred POST",
+    "Raw text and ordered JSON data",
+    "String and typed JSON fields",
+    "Custom request headers",
+    "302, 303, and 307 redirects",
+    "HTTP status warnings and exit codes",
+    "Body-only stdout"
+  ],
+  "compatibility": {
+    "stdout": "Exact response bytes with --body --pretty=none --ignore-stdin",
+    "stderr": "Exact warnings for scoped HTTP statuses",
+    "exit_status": "Exact status codes",
+    "protocol": "Exact methods, paths, body bytes, selected header values, and redirect request sequence",
+    "permitted_differences": [
+      "Header order",
+      "Connection and Accept-Encoding defaults",
+      "Transport-internal implementation"
+    ]
+  },
+  "environment": {
+    "network": "HTTP on 127.0.0.1 only",
+    "fixture": "Python ThreadingHTTPServer",
+    "locale": "C",
+    "clock": "Response dates do not enter the compared body",
+    "source_access": "The reconstruction does not receive upstream source or tests."
+  },
+  "exclusions": [
+    "HTTPS and TLS",
+    "Remote hosts",
+    "Proxy support",
+    "Authentication",
+    "Sessions",
+    "Cookies",
+    "Form and multipart uploads",
+    "Downloads",
+    "Pretty output",
+    "Header and metadata output",
+    "Compressed responses",
+    "Request body input from stdin",
+    "Invalid CLI diagnostics",
+    "All unlisted options"
+  ],
+  "budget": {
+    "scope": "One independent network reconstruction",
+    "stop": "All scoped process and protocol checks pass before source reveal"
+  }
+}

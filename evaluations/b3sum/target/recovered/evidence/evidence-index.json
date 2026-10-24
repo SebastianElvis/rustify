@@ -1,0 +1,23 @@
+{
+  "archive": "blind-run.tar.gz",
+  "sha256": "1bd6ee7410eae91c2ad3406b7e0989b4c66b397378cb3b64f518ed0c7a709569",
+  "model_sources": "The original model paths resolve inside the archive.",
+  "records": [
+    "evidence/runtime.json",
+    "evidence/check-probes.json",
+    "evidence/rea-bundle.json",
+    "evidence/rea-snapshot.json",
+    "evidence/rea-rust-metadata.json",
+    "evidence/binary-only-main.rs",
+    "evidence/runtime-only-main.rs",
+    "challenge-first.json",
+    "challenge-extra-first.json",
+    "audit-first.json",
+    "evidence/upstream-main.rs",
+    "replay/official-expected-checks.json",
+    "replay/vector-comparison.json",
+    "replay/runtime-comparison.json",
+    "replay/reference-self.json",
+    "replay/negative-control.json"
+  ]
+}

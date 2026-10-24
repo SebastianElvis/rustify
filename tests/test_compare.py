@@ -1,0 +1,114 @@
+"""Test comparisons with real child processes."""
+
+import base64
+import importlib.util
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location("compare", ROOT / "skills/rustify-validate/scripts/compare.py")
+compare = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(compare)
+
+
+def encoded(value):
+    return base64.b64encode(value).decode("ascii")
+
+
+class CompareTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.root = Path(self.directory.name)
+        self.reference = self.program("reference", "import sys\nsys.stdout.buffer.write(sys.stdin.buffer.read())\n")
+        self.case = {"id": "binary", "args": [], "stdin_b64": encoded(b"\x00\xff\r\n")}
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def program(self, name, body):
+        path = self.root / name
+        path.write_text("#!" + sys.executable + "\n" + body)
+        path.chmod(0o755)
+        return path
+
+    def test_binary_data_and_fixture_files_match(self):
+        self.case["files"] = {"nested/data": encoded(b"\x00\xff")}
+        report = compare.compare(self.reference, self.reference, [self.case])
+        self.assertEqual(report["status"], "passed")
+        self.assertEqual(report["cases"][0]["reference"]["stdout_b64"], self.case["stdin_b64"])
+        self.assertEqual(report["cases"][0]["reference"]["files"]["nested/data"]["data_b64"], encoded(b"\x00\xff"))
+
+    def test_differences_are_separate(self):
+        candidates = {
+            "stdout_b64": "print('different')\n",
+            "stderr_b64": "import sys\nsys.stdout.buffer.write(sys.stdin.buffer.read())\nsys.stderr.write('different')\n",
+            "returncode": "import sys\nsys.stdout.buffer.write(sys.stdin.buffer.read())\nsys.exit(3)\n",
+            "files": "import sys\nsys.stdout.buffer.write(sys.stdin.buffer.read())\nopen('out', 'wb').write(b'different')\n",
+        }
+        for field, body in candidates.items():
+            with self.subTest(field=field):
+                candidate = self.program(field, body)
+                report = compare.compare(self.reference, candidate, [self.case])
+                self.assertEqual(report["status"], "failed")
+                self.assertEqual(report["cases"][0]["differences"], [field])
+
+    def test_equal_timeouts_fail(self):
+        slow = self.program("slow", "import time\ntime.sleep(10)\n")
+        report = compare.compare(slow, slow, [self.case], timeout=0.05)
+        self.assertEqual(report["failed"], 1)
+        self.assertIn("execution_error", report["cases"][0]["differences"])
+
+    def test_timeout_kills_descendants(self):
+        marker = self.root / "escaped"
+        body = "import subprocess, sys, time\nsubprocess.Popen([sys.executable, '-c', \"import time; time.sleep(0.5); open(\" + repr(str(marker)) + \", 'w').write('leak')\"])\ntime.sleep(10)\n"
+        slow = self.program("descendants", body)
+        report = compare.compare(slow, self.reference, [self.case], timeout=0.1)
+        self.assertEqual(report["status"], "failed")
+        time.sleep(0.6)
+        self.assertFalse(marker.exists())
+
+    def test_launch_errors_fail(self):
+        bad = self.program("bad", "")
+        bad.write_text("#!/this-interpreter-does-not-exist\n")
+        report = compare.compare(bad, bad, [self.case])
+        self.assertEqual(report["status"], "failed")
+        self.assertIn("execution_error", report["cases"][0]["differences"])
+
+    def test_symlinks_fail(self):
+        link = self.program("link", "import os\nos.symlink('/tmp', 'link')\n")
+        report = compare.compare(link, link, [self.case])
+        self.assertEqual(report["status"], "failed")
+        self.assertIn("execution_error", report["cases"][0]["differences"])
+
+    def test_invalid_cases_fail(self):
+        invalid = [[], {}, [self.case, self.case], [{"id": "x", "args": [], "stdin_b64": "!"}], [{"id": "x", "args": "bad"}]]
+        for name in ("../escape", "/absolute", "a/../escape", "./file", "a//b", "a\\b"):
+            invalid.append([{"id": "x", "args": [], "files": {name: ""}}])
+        invalid.append([{"id": "x", "args": [], "files": {"a": "", "a/b": ""}}])
+        invalid.append([{"id": "x", "args": [], "env": {"LC_ALL": "wrong"}}])
+        for cases in invalid:
+            with self.subTest(cases=cases), self.assertRaises(ValueError):
+                compare.compare(self.reference, self.reference, cases)
+
+    def test_invalid_timeout_fails(self):
+        for timeout in (0, -1, float("inf"), float("nan")):
+            with self.subTest(timeout=timeout), self.assertRaises(ValueError):
+                compare.compare(self.reference, self.reference, [self.case], timeout=timeout)
+
+    def test_cli_writes_report_and_returns_failure(self):
+        cases = self.root / "cases.json"
+        report = self.root / "report.json"
+        cases.write_text("[]")
+        result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-validate/scripts/compare.py"), "--reference", str(self.reference), "--candidate", str(self.reference), "--cases", str(cases), "--report", str(report)], capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(report.read_text())["status"], "error")
+
+
+if __name__ == "__main__":
+    unittest.main()

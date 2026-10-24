@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "commands": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--check"
+      ],
+      "returncode": 0,
+      "log": "verification/logs/fmt.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0,
+      "log": "verification/logs/clippy.log",
+      "log_sha256": "ee1d3fffa2022e962e63e0dbe4d35c9c198450a20c29fc09030f635dbb38bfcd"
+    },
+    {
+      "name": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked"
+      ],
+      "returncode": 0,
+      "log": "verification/logs/unit.log",
+      "log_sha256": "16a3d9e667d1c61621fafa26b62aa5e67209f7b8bd5bb0b2acb3286006f051fc"
+    }
+  ],
+  "live_gui_replay": false
+}

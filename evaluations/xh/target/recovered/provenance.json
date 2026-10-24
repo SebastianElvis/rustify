@@ -1,0 +1,49 @@
+{
+  "target": {
+    "name": "xh",
+    "version": "0.26.3",
+    "platform": "aarch64-apple-darwin",
+    "release_asset_url": "https://github.com/ducaale/xh/releases/download/v0.26.3/xh-v0.26.3-aarch64-apple-darwin.tar.gz",
+    "archive_sha256": "50d61bd755942752b054297a1612ec191654f137f8939673cda83c686cb5b0f2",
+    "binary_sha256": "ea62f476d76bdfd401e56bdee8fb2630d447aeb843b7c5fdde8bcd3de86b391d"
+  },
+  "source": {
+    "tag": "v0.26.3",
+    "commit": "319d39c2561d2a8697acb3eb9800abcc33bbad98",
+    "archive_url": "https://codeload.github.com/ducaale/xh/tar.gz/refs/tags/v0.26.3",
+    "archive_sha256": "8c54c7e8e878600d1a322151e0158c4fa6e6793283a45e355d0c1f87ca6d5640",
+    "reveal_started_at": "2026-10-24T14:08:49Z",
+    "license": "MIT",
+    "files": {
+      "Cargo.toml": "d552a297242245e4192aa4138ac11ebf2d7a04e5d7f4ad0142cc1d21885a0537",
+      "src/main.rs": "536e0fcc0a2f7998181c40f865a6c6f35bf361cfa2cfcc5f82e55b6d05559e79",
+      "src/cli.rs": "89764300b98f9ab1a5ec38c90b848888caf3748cbe1f8fd4eb2e8d103b2a513a",
+      "src/request_items.rs": "d8030f60568ec9c1a4ccafd46f42d2115de091ea14032de90a34022b6775135b",
+      "src/redirect.rs": "5946260dbe2345525107d1f680f0ec3646d1d7eb4288bc41f5f545148bd7ac5f",
+      "src/printer.rs": "052a472829b475650b7360997d7ad797ed0aa88ab50b0f0a28bd39f7c34123b4",
+      "tests/cli.rs": "6340c45403daf3a741c7922f43e09b13af6b2f410dc6100939d99fd5a11eec66"
+    }
+  },
+  "freeze": {
+    "manifest": "freeze.json",
+    "evidence_archive": "evidence/binary-only-evidence.zip",
+    "evidence_archive_sha256": "f1ecacd70e19d4e30115f4eccd8eee83e71e7c2f2a6b5b832e50c20c4853f9ec",
+    "source_access_before_freeze": false
+  },
+  "source_assisted_repair": {
+    "causes": [
+      "Case-sensitive method recognition",
+      "Repeated headers replaced earlier values",
+      "Missing --raw=value support"
+    ],
+    "initial_vector_results": {
+      "passed": 5,
+      "failed": 8
+    },
+    "patch": "../verification/source-assisted.patch",
+    "frozen_source_lines": 278,
+    "audited_source_lines": 278,
+    "audited_source_sha256": "d35e842299dc1b59d64aab81ca0fbd04688bfde298b0447f8aba9cadaf064771"
+  },
+  "scope": "Finite HTTP requests on 127.0.0.1. The evaluation excludes TLS and wider xh features."
+}

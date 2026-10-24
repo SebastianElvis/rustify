@@ -1,0 +1,37 @@
+{
+  "target": "zenity v0.10.15 macOS arm64",
+  "scope": [
+    "entry accept",
+    "entry cancel",
+    "question yes",
+    "question no",
+    "information accept"
+  ],
+  "compatibility": {
+    "exact": [
+      "stdout",
+      "stderr",
+      "exit status",
+      "entered text",
+      "button labels"
+    ],
+    "semantic": [
+      "visible dialog text",
+      "default entry text"
+    ],
+    "excluded": [
+      "pixel layout",
+      "application icon",
+      "title placement",
+      "other dialog modes",
+      "other platforms",
+      "timeouts",
+      "arbitrary option syntax"
+    ]
+  },
+  "evaluation": "The parent agent performs a small GUI smoke evaluation. This track has no independent reconstruction worker.",
+  "environment": {
+    "host": "macOS GUI session",
+    "data": "Temporary test dialogs contain no user data."
+  }
+}

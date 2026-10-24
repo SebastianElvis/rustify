@@ -1,0 +1,99 @@
+{
+  "status": "passed",
+  "passed": 5,
+  "failed": 0,
+  "method": "Independent checks of recorded native GUI process captures",
+  "live_gui_replay": false,
+  "cases": [
+    {
+      "id": "entry-accept",
+      "expected_returncode": 0,
+      "reference": {
+        "returncode": 0,
+        "stdout_b64": "UnVzdGlmeSBHVUkgdGVzdAo=",
+        "stderr_b64": ""
+      },
+      "candidate": {
+        "returncode": 0,
+        "stdout_b64": "UnVzdGlmeSBHVUkgdGVzdAo=",
+        "stderr_b64": ""
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "entry-cancel",
+      "expected_returncode": 1,
+      "reference": {
+        "returncode": 1,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "candidate": {
+        "returncode": 1,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "question-accept",
+      "expected_returncode": 0,
+      "reference": {
+        "returncode": 0,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "candidate": {
+        "returncode": 0,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "question-cancel",
+      "expected_returncode": 1,
+      "reference": {
+        "returncode": 1,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "candidate": {
+        "returncode": 1,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "passed": true,
+      "differences": []
+    },
+    {
+      "id": "info-accept",
+      "expected_returncode": 0,
+      "reference": {
+        "returncode": 0,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "candidate": {
+        "returncode": 0,
+        "stdout_b64": "",
+        "stderr_b64": ""
+      },
+      "passed": true,
+      "differences": []
+    }
+  ],
+  "executables": {
+    "reference": {
+      "path": "/Users/runchao/Projects/Personal/rustify/work/downloads/zenity",
+      "sha256": "5f917a17b59bc5c516fb8173a21d13f4ac0d47850ab09cd7097e19bcdb5495c5"
+    },
+    "candidate": {
+      "path": "/Users/runchao/Projects/Personal/rustify/evaluations/zenity/target/implementation/target/recorded/zenity",
+      "sha256": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306"
+    }
+  }
+}

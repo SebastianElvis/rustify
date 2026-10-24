@@ -1,0 +1,277 @@
+[
+  {
+    "id": "get-text",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/text"
+    ]
+  },
+  {
+    "id": "get-json",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/json"
+    ]
+  },
+  {
+    "id": "get-query",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/echo?q=two%20words&n=2"
+    ]
+  },
+  {
+    "id": "head",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "HEAD",
+      "http://127.0.0.1:18463/echo"
+    ]
+  },
+  {
+    "id": "empty-post",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "POST",
+      "http://127.0.0.1:18463/echo"
+    ]
+  },
+  {
+    "id": "json-fields",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "POST",
+      "http://127.0.0.1:18463/echo",
+      "hello=world",
+      "count:=2"
+    ]
+  },
+  {
+    "id": "json-types",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "POST",
+      "http://127.0.0.1:18463/echo",
+      "active:=true",
+      "items:=[1,2]",
+      "value:=null"
+    ]
+  },
+  {
+    "id": "json-order",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "POST",
+      "http://127.0.0.1:18463/echo",
+      "z=last",
+      "a=first"
+    ]
+  },
+  {
+    "id": "json-replace",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "POST",
+      "http://127.0.0.1:18463/echo",
+      "a=first",
+      "a=last"
+    ]
+  },
+  {
+    "id": "inferred-post",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/echo",
+      "hello=world"
+    ]
+  },
+  {
+    "id": "raw-post",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "POST",
+      "http://127.0.0.1:18463/echo",
+      "--raw",
+      "plain text"
+    ]
+  },
+  {
+    "id": "raw-empty",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/echo",
+      "--raw",
+      ""
+    ]
+  },
+  {
+    "id": "json-get",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "--json",
+      "http://127.0.0.1:18463/echo"
+    ]
+  },
+  {
+    "id": "custom-header",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/echo",
+      "X-Test:two words"
+    ]
+  },
+  {
+    "id": "header-equals",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/echo",
+      "X-Test:a=b"
+    ]
+  },
+  {
+    "id": "string-operator",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/echo",
+      "a=foo:=bar"
+    ]
+  },
+  {
+    "id": "custom-accept",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/echo",
+      "Accept:text/plain"
+    ]
+  },
+  {
+    "id": "custom-content-type",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "POST",
+      "http://127.0.0.1:18463/echo",
+      "--raw",
+      "hello",
+      "Content-Type:text/plain"
+    ]
+  },
+  {
+    "id": "redirect-stop",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/redirect/302"
+    ]
+  },
+  {
+    "id": "redirect-follow",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "--follow",
+      "http://127.0.0.1:18463/redirect/302"
+    ]
+  },
+  {
+    "id": "post-302",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "--follow",
+      "POST",
+      "http://127.0.0.1:18463/redirect/302",
+      "hello=world"
+    ]
+  },
+  {
+    "id": "post-303",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "--follow",
+      "POST",
+      "http://127.0.0.1:18463/redirect/303",
+      "hello=world"
+    ]
+  },
+  {
+    "id": "post-307",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "--follow",
+      "POST",
+      "http://127.0.0.1:18463/redirect/307",
+      "hello=world"
+    ]
+  },
+  {
+    "id": "status-404",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/status/404"
+    ]
+  },
+  {
+    "id": "status-500",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "http://127.0.0.1:18463/status/500"
+    ]
+  },
+  {
+    "id": "status-ignore",
+    "args": [
+      "--body",
+      "--pretty=none",
+      "--ignore-stdin",
+      "--no-check-status",
+      "http://127.0.0.1:18463/status/404"
+    ]
+  }
+]

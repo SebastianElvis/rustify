@@ -1,0 +1,392 @@
+[
+  {
+    "id": "TEST-get-text",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "get-text"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "aGVsbG8K",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-get-json",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "get-json"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJoZWxsbyI6IndvcmxkIiwibiI6MX0=",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-get-query",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "get-query"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiKi8qIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJHRVQiLCJwYXRoIjoiL2VjaG8/cT10d28lMjB3b3JkcyZuPTIifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-head",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "head"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-empty-post",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "empty-post"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiKi8qIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJQT1NUIiwicGF0aCI6Ii9lY2hvIn0=",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-json-fields",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "json-fields"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImV5Sm9aV3hzYnlJNkluZHZjbXhrSWl3aVkyOTFiblFpT2pKOSIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwiY29udGVudC10eXBlIjoiYXBwbGljYXRpb24vanNvbiIsInVzZXItYWdlbnQiOiJ4aC8wLjI2LjMifSwibWV0aG9kIjoiUE9TVCIsInBhdGgiOiIvZWNobyJ9",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-json-types",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "json-types"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImV5SmhZM1JwZG1VaU9uUnlkV1VzSW1sMFpXMXpJanBiTVN3eVhTd2lkbUZzZFdVaU9tNTFiR3g5IiwiaGVhZGVycyI6eyJhY2NlcHQiOiJhcHBsaWNhdGlvbi9qc29uLCAqLyo7cT0wLjUiLCJjb250ZW50LXR5cGUiOiJhcHBsaWNhdGlvbi9qc29uIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJQT1NUIiwicGF0aCI6Ii9lY2hvIn0=",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-json-order",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "json-order"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImV5SjZJam9pYkdGemRDSXNJbUVpT2lKbWFYSnpkQ0o5IiwiaGVhZGVycyI6eyJhY2NlcHQiOiJhcHBsaWNhdGlvbi9qc29uLCAqLyo7cT0wLjUiLCJjb250ZW50LXR5cGUiOiJhcHBsaWNhdGlvbi9qc29uIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJQT1NUIiwicGF0aCI6Ii9lY2hvIn0=",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-json-replace",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "json-replace"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImV5SmhJam9pYkdGemRDSjkiLCJoZWFkZXJzIjp7ImFjY2VwdCI6ImFwcGxpY2F0aW9uL2pzb24sICovKjtxPTAuNSIsImNvbnRlbnQtdHlwZSI6ImFwcGxpY2F0aW9uL2pzb24iLCJ1c2VyLWFnZW50IjoieGgvMC4yNi4zIn0sIm1ldGhvZCI6IlBPU1QiLCJwYXRoIjoiL2VjaG8ifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-inferred-post",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "inferred-post"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImV5Sm9aV3hzYnlJNkluZHZjbXhrSW4wPSIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwiY29udGVudC10eXBlIjoiYXBwbGljYXRpb24vanNvbiIsInVzZXItYWdlbnQiOiJ4aC8wLjI2LjMifSwibWV0aG9kIjoiUE9TVCIsInBhdGgiOiIvZWNobyJ9",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-raw-post",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "raw-post"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImNHeGhhVzRnZEdWNGRBPT0iLCJoZWFkZXJzIjp7ImFjY2VwdCI6ImFwcGxpY2F0aW9uL2pzb24sICovKjtxPTAuNSIsImNvbnRlbnQtdHlwZSI6ImFwcGxpY2F0aW9uL2pzb24iLCJ1c2VyLWFnZW50IjoieGgvMC4yNi4zIn0sIm1ldGhvZCI6IlBPU1QiLCJwYXRoIjoiL2VjaG8ifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-raw-empty",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "raw-empty"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwiY29udGVudC10eXBlIjoiYXBwbGljYXRpb24vanNvbiIsInVzZXItYWdlbnQiOiJ4aC8wLjI2LjMifSwibWV0aG9kIjoiUE9TVCIsInBhdGgiOiIvZWNobyJ9",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-json-get",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "json-get"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwiY29udGVudC10eXBlIjoiYXBwbGljYXRpb24vanNvbiIsInVzZXItYWdlbnQiOiJ4aC8wLjI2LjMifSwibWV0aG9kIjoiR0VUIiwicGF0aCI6Ii9lY2hvIn0=",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-custom-header",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "custom-header"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiKi8qIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyIsIngtdGVzdCI6InR3byB3b3JkcyJ9LCJtZXRob2QiOiJHRVQiLCJwYXRoIjoiL2VjaG8ifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-header-equals",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "header-equals"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiKi8qIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyIsIngtdGVzdCI6ImE9YiJ9LCJtZXRob2QiOiJHRVQiLCJwYXRoIjoiL2VjaG8ifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-string-operator",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "string-operator"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImV5SmhJam9pWm05dk9qMWlZWElpZlE9PSIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwiY29udGVudC10eXBlIjoiYXBwbGljYXRpb24vanNvbiIsInVzZXItYWdlbnQiOiJ4aC8wLjI2LjMifSwibWV0aG9kIjoiUE9TVCIsInBhdGgiOiIvZWNobyJ9",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-custom-accept",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "custom-accept"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoidGV4dC9wbGFpbiIsInVzZXItYWdlbnQiOiJ4aC8wLjI2LjMifSwibWV0aG9kIjoiR0VUIiwicGF0aCI6Ii9lY2hvIn0=",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-custom-content-type",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "custom-content-type"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImFHVnNiRzg9IiwiaGVhZGVycyI6eyJhY2NlcHQiOiJhcHBsaWNhdGlvbi9qc29uLCAqLyo7cT0wLjUiLCJjb250ZW50LXR5cGUiOiJ0ZXh0L3BsYWluIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJQT1NUIiwicGF0aCI6Ii9lY2hvIn0=",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-redirect-stop",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "redirect-stop"
+    ],
+    "expect": {
+      "returncode": 3,
+      "stdout_b64": "cmVkaXJlY3QK",
+      "stderr_b64": "eGg6IHdhcm5pbmc6IEhUVFAgMzAyIEZvdW5kCg=="
+    }
+  },
+  {
+    "id": "TEST-redirect-follow",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "redirect-follow"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiKi8qIiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJHRVQiLCJwYXRoIjoiL2VjaG8ifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-post-302",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "post-302"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJHRVQiLCJwYXRoIjoiL2VjaG8ifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-post-303",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "post-303"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6IiIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwidXNlci1hZ2VudCI6InhoLzAuMjYuMyJ9LCJtZXRob2QiOiJHRVQiLCJwYXRoIjoiL2VjaG8ifQ==",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-post-307",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "post-307"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "eyJib2R5X2I2NCI6ImV5Sm9aV3hzYnlJNkluZHZjbXhrSW4wPSIsImhlYWRlcnMiOnsiYWNjZXB0IjoiYXBwbGljYXRpb24vanNvbiwgKi8qO3E9MC41IiwiY29udGVudC10eXBlIjoiYXBwbGljYXRpb24vanNvbiIsInVzZXItYWdlbnQiOiJ4aC8wLjI2LjMifSwibWV0aG9kIjoiUE9TVCIsInBhdGgiOiIvZWNobyJ9",
+      "stderr_b64": ""
+    }
+  },
+  {
+    "id": "TEST-status-404",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "status-404"
+    ],
+    "expect": {
+      "returncode": 4,
+      "stdout_b64": "c3RhdHVzIDQwNAo=",
+      "stderr_b64": "eGg6IHdhcm5pbmc6IEhUVFAgNDA0IE5vdCBGb3VuZAo="
+    }
+  },
+  {
+    "id": "TEST-status-500",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "status-500"
+    ],
+    "expect": {
+      "returncode": 5,
+      "stdout_b64": "c3RhdHVzIDUwMAo=",
+      "stderr_b64": "eGg6IHdhcm5pbmc6IEhUVFAgNTAwIEludGVybmFsIFNlcnZlciBFcnJvcgo="
+    }
+  },
+  {
+    "id": "TEST-status-ignore",
+    "origin": "observed",
+    "evidence": [
+      "E-COMPARISON"
+    ],
+    "scenarios": [
+      "status-ignore"
+    ],
+    "expect": {
+      "returncode": 0,
+      "stdout_b64": "c3RhdHVzIDQwNAo=",
+      "stderr_b64": ""
+    }
+  }
+]

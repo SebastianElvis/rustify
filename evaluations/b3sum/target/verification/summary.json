@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "reference_sha256": "97017f4477d872b24752a9bdbe48a6e0296fe1a66fc4787906c20c040b15c299",
+  "candidate_sha256": "91eaef9391fcaee29623907c53b8383d5558aefb8f95c1fefc7acadacb8ed5c0",
+  "runtime_cases": 226,
+  "runtime_failures": 0,
+  "repeatability_cases": 226,
+  "vector_cases": 315,
+  "official_expected_checks": 630,
+  "official_expected_outputs_passed": true,
+  "declarative_expected_checks": 66,
+  "declarative_expected_outputs_passed": true,
+  "rust_tests": 8,
+  "negative_control_detected": true,
+  "source_assisted_repairs": true,
+  "raw_reports": "evaluations/b3sum/target/verification/raw",
+  "checkpoints": {
+    "completed": [
+      "prepare",
+      "discover",
+      "plan",
+      "implement",
+      "validate"
+    ],
+    "next": null,
+    "stale": null
+  }
+}

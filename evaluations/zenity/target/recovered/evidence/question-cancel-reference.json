@@ -1,0 +1,15 @@
+{
+  "case": {
+    "id": "question-cancel",
+    "args": [
+      "--question",
+      "--title",
+      "Rustify brief test",
+      "--text",
+      "Rustify will close this test dialog."
+    ]
+  },
+  "returncode": 1,
+  "stdout_b64": "",
+  "stderr_b64": ""
+}

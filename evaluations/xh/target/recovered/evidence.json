@@ -1,0 +1,56 @@
+[
+  {
+    "id": "IDENTITY",
+    "claim": "The selected binary is xh 0.26.3 for macOS arm64.",
+    "classification": "observed",
+    "source": "evidence/binary-only-evidence.zip#raw/rea-rust.json",
+    "limitations": [
+      "The version string alone does not authenticate release provenance."
+    ]
+  },
+  {
+    "id": "RUNTIME",
+    "claim": "The scoped requests and body-only outputs follow the captured rules.",
+    "classification": "observed",
+    "source": "evidence/binary-only-evidence.zip#raw/runtime-probes.json",
+    "limitations": [
+      "The probes use plain loopback HTTP."
+    ]
+  },
+  {
+    "id": "CLI",
+    "claim": "The help text exposes the captured command syntax and options.",
+    "classification": "observed",
+    "source": "evidence/binary-only-evidence.zip#raw/help.txt",
+    "limitations": [
+      "The evaluation does not implement all listed options."
+    ]
+  },
+  {
+    "id": "ARCH",
+    "claim": "The runtime flow has request construction, transport, redirect, and output responsibilities.",
+    "classification": "inferred",
+    "source": "RUNTIME",
+    "limitations": [
+      "A source audit can falsify the proposed decomposition."
+    ]
+  },
+  {
+    "id": "DEPENDENCIES",
+    "claim": "The original dependency graph and async runtime remain unknown.",
+    "classification": "unknown",
+    "source": "evidence/binary-only-evidence.zip#raw/rea-rust.json",
+    "limitations": [
+      "The binary has no .dep-v0 section."
+    ]
+  },
+  {
+    "id": "E-COMPARISON",
+    "claim": "The original supplies exact outputs for the scoped local HTTP cases.",
+    "classification": "observed",
+    "source": "../verification/raw/comparison.json",
+    "limitations": [
+      "The cases cover the finite loopback contract."
+    ]
+  }
+]

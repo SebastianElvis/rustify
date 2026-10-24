@@ -1,0 +1,3 @@
+# Git preserves exact reference output and patch evidence.
+evaluations/b3sum/target/implementation/help.txt -whitespace
+evaluations/xh/target/verification/source-assisted.patch -whitespace

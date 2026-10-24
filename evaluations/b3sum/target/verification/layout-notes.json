@@ -1,0 +1,13 @@
+{
+  "rust_and_cargo_changed": false,
+  "historical_freezes_changed": false,
+  "failure_history": [
+    {
+      "cause": "Moved Cargo cache retained the previous process-test binary path.",
+      "log": "raw/layout-cargo-test-first.log",
+      "repair": "The evaluator cleared only this track Cargo cache."
+    }
+  ],
+  "linker": "The runner scopes RUSTFLAGS=-C linker=/usr/bin/clang to its child commands.",
+  "checks": "The current report keeps retry history and records a passed status only after fresh format, Clippy, and test checks pass."
+}

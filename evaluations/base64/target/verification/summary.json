@@ -1,0 +1,89 @@
+{
+  "status": "passed",
+  "source_assisted_changes": false,
+  "commands": [
+    {
+      "args": [
+        "cargo",
+        "fmt",
+        "--check"
+      ],
+      "returncode": 0,
+      "log": "evaluations/base64/target/verification/logs/fmt.log",
+      "rustflags": null
+    },
+    {
+      "args": [
+        "cargo",
+        "clippy",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0,
+      "log": "evaluations/base64/target/verification/logs/clippy.log",
+      "rustflags": null
+    },
+    {
+      "args": [
+        "cargo",
+        "test"
+      ],
+      "returncode": 0,
+      "log": "evaluations/base64/target/verification/logs/unit.log",
+      "rustflags": null
+    },
+    {
+      "args": [
+        "cargo",
+        "build",
+        "--release"
+      ],
+      "returncode": 0,
+      "log": "evaluations/base64/target/verification/logs/build.log",
+      "rustflags": null
+    }
+  ],
+  "frozen_files_verified": 5,
+  "freeze_manifest_sha256": "f0b9780ddab29110647d071d299e48db2e6440473bf7937c7d93cf8cab738e78",
+  "unit_tests": 10,
+  "reference_sha256": "41dd92cf260491c5c8fc0084c42e58b1baaca9ebcc88aa38f60a17a2ef603570",
+  "candidate_sha256": "2de8c78d453d5e47de2c9edd5830422de3d98e6a541359db150b974706773568",
+  "challenge_cases": 279,
+  "upstream_vectors": 201,
+  "comparison_cases": 480,
+  "expected_output_assertions": 402,
+  "expected_output_failures": 0,
+  "reports": {
+    "repeatability": {
+      "status": "passed",
+      "passed": 480,
+      "failed": 0
+    },
+    "challenge": {
+      "status": "passed",
+      "passed": 279,
+      "failed": 0
+    },
+    "upstream": {
+      "status": "passed",
+      "passed": 201,
+      "failed": 0
+    }
+  },
+  "raw_reports": "evaluations/base64/target/verification/raw",
+  "checkpoints": {
+    "completed": [
+      "prepare",
+      "discover",
+      "plan",
+      "implement",
+      "validate"
+    ],
+    "next": null,
+    "stale": null
+  },
+  "layout_migration": "The migration changes paths only. Historical replacement/ names remain in the original freeze.",
+  "target_project": "evaluations/base64/target"
+}
