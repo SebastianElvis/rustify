@@ -33,7 +33,11 @@ def main():
         cases = directory / "cases.json"
         cases.write_text(json.dumps([{"id": "installed-helper", "args": []}]))
         subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/compare.py"), "--reference", "/usr/bin/true", "--candidate", "/usr/bin/true", "--cases", str(cases), "--report", str(directory / "report.json"), "--name", "true"], check=True)
-        print("The installer copied all seven skills. Both detached helpers pass.")
+        result = subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/parity.py"), "--project", str(project), "--report", str(directory / "parity.json")], capture_output=True)
+        parity = json.loads((directory / "parity.json").read_text())
+        if result.returncode != 1 or parity["status"] != "failed" or not parity["errors"]:
+            raise RuntimeError("The installed parity gate did not reject missing evidence.")
+        print("The installer copied all seven skills. All three detached helpers pass.")
 
 
 if __name__ == "__main__":

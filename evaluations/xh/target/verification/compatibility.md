@@ -34,7 +34,9 @@ The source audit later exposes three additional causes across eight new vectors.
 The evidence supports the scoped GET, HEAD, POST, JSON, header, redirect, and status workflows.
 The source confirms the recovered functional responsibilities.
 The source reveals a blocking original transport and a wider middleware design.
-The replacement uses async Tokio and reqwest.
+The implementation now preserves the original blocking reqwest execution model.
+The repair removes the direct Tokio dependency and async entry point.
+Reqwest still has a transitive Tokio dependency.
 The report does not claim identical internal architecture.
 
 ## Limits
@@ -63,3 +65,22 @@ The host's configured Homebrew linker rejects the installed SDK.
 The runner selects the system linker in its Darwin command environment.
 The runner preserves an explicit `RUSTFLAGS` setting.
 The runner changes no global configuration.
+
+## Strict-parity status
+
+This example remains a partial body-only loopback HTTP evaluation.
+Strict full-product parity remains unestablished.
+The blocking execution repair follows source reveal and the earlier CLI repair.
+The runtime Rust change adds 7 lines and removes 7 lines.
+The implementation source remains at 278 lines.
+The parser and test source bytes remain unchanged.
+`blocking-faithfulness.json` and `blocking-faithfulness.patch` record the new repair.
+`../recovered/evidence/source-assisted-before-blocking.zip` preserves the previous candidate and patch.
+The initial binary-only freeze and archive remain unchanged.
+
+The original middleware, complete CLI, printer, stateful features, and wider transport configuration remain open gaps.
+The original redirect-limit error path is not equivalent to the current reqwest policy stop.
+The implementation uses a different reqwest version and a smaller feature set.
+The finite contract retains its stated header-order and selected-default allowances.
+Those allowances do not establish strict full-product parity.
+`../recovered/component-mapping.md` and `../recovered/roadmap.md` track the remaining gaps.

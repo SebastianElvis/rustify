@@ -22,7 +22,7 @@
 \newcommand{\step}[1]{\tikz[baseline=(s.base)]\node[circle,fill=blue,text=white,inner sep=2pt,font=\sffamily\tiny\bfseries](s){#1};}
 \begin{document}
 \begin{tikzpicture}[x=1cm,y=1cm]
- \node[heading,font=\sffamily\bfseries\Large] at (.1,20.0) {Rustify: original software to a maintainable Rust project};
+ \node[heading,font=\sffamily\bfseries\Large] at (.1,20.0) {Rustify: original software to a faithful Rust implementation};
  \begin{scope}[on background layer]
   \filldraw[fill=blue!2,draw=gray,rounded corners=5pt] (4.8,8.7) rectangle (31.3,18.9);
   \filldraw[fill=white,draw=gray!65,rounded corners=4pt] (10.3,10.8) rectangle (18.8,16.8);
@@ -58,7 +58,7 @@
  \draw[repair] (validate.north) -- (29.2,17.05) -- (7.9,17.05) -- (main.north);
  \node[label,text=orange] at (22.1,17.35) {Differences reopen affected work};
  \node[helper] (state) at (7.9,10.1) {{\scriptsize\texttt{rustify/scripts/project.py}}\\[2pt]Phase order, hashes, freshness};
- \node[helper,text width=51mm] (comparison) at (27.9,10.1) {{\scriptsize\texttt{rustify-validate/scripts/compare.py}}\\[2pt]CLI captures and exact comparison};
+ \node[helper,text width=51mm] (comparison) at (27.9,10.1) {{\scriptsize\texttt{rustify-validate/scripts/}}\\\texttt{compare.py} and \texttt{parity.py}\\[2pt]Comparisons and parity gate};
  \draw[relation] (main.south) -- (state.north);
  \draw[relation] (validate.south) -- (29.2,11.15) -- (27.9,11.15) -- (comparison.north);
  \node[label,anchor=east] at (30.6,11.4) {Other profiles use host replay.};
@@ -73,18 +73,19 @@
  \draw[relation] (state.south) -- (7.9,6.3);
  \node[label,anchor=west] at (8.1,7.4) {State and artifact checks};
  \draw[relation] (comparison.south) -- (27.9,6.3);
- \node[label,anchor=west] at (28.1,7.4) {CLI reports};
+ \node[label,anchor=west] at (28.1,7.4) {Reports};
  \draw[flow] (validate.east) -- (32.3,13.6) -- (32.3,5.0) -- (31.3,5.0);
  \node[label,text width=22mm,anchor=west] at (32.55,9.1) {\step{6} Deliver\\project};
  \node[heading,font=\sffamily\bfseries\large] at (5.3,5.8) {TARGET PROJECT \quad Generated reconstruction output};
  \node[heading,font=\ttfamily\bfseries] at (5.4,4.95) {recovered/};
  \node[files] at (5.4,4.6) {\quad contract.json\\\quad state.json\\\quad product.md\\\quad ux.md\\\quad architecture.md\\\quad evidence.json\\\quad evidence/\\\quad scenarios.json\\\quad tests.json\\\quad roadmap.md};
  \node[label,anchor=north west,text width=54mm,align=left,font=\sffamily\small] at (10.7,3.5) {\texttt{tests.json} contains declarative test specifications.\\[4pt]Each test has an observed, inferred, or proposed origin.};
+ \node[files,font=\ttfamily\scriptsize] at (10.7,1.65) {diagrams/ (when grounded)\\data-models/ (when present)};
  \node[heading,font=\ttfamily\bfseries] at (18.6,4.95) {implementation/};
  \node[files] at (18.6,4.6) {\quad Cargo.toml\\\quad Cargo.lock\\\quad src/\\\quad tests/ (optional)};
  \node[label,anchor=north west,text width=50mm,align=left,font=\sffamily\scriptsize] at (18.6,2.4) {Unit tests can also reside in \texttt{src/}.\\Process E2E tests can use external replay files.};
  \node[heading,font=\ttfamily\bfseries] at (25.5,4.95) {verification/};
- \node[files] at (25.5,4.6) {\quad checks.json\\\quad comparison.json\\\quad compatibility.md\\\quad logs/};
+ \node[files] at (25.5,4.6) {\quad checks.json\\\quad comparison.json\\\quad parity-matrix.json\\\quad parity.json\\\quad compatibility.md\\\quad logs/};
  \node[label,anchor=west,font=\sffamily\small] at (.1,-.1) {Blue arrows show reconstruction. Orange arrows show refinement. Gray lines show tool and workspace relations.};
  \node[label,anchor=west,font=\sffamily\small] at (.1,-.65) {The host runs discovery sequentially when parallel agents are unavailable. REA remains an external investigation backend.};
 \end{tikzpicture}

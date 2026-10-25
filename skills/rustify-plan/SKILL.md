@@ -1,22 +1,21 @@
 ---
 name: rustify-plan
-description: Plan an idiomatic Rust implementation from recovered binary evidence. Use after Rustify discovery or when new evidence changes the contract or Rust design.
+description: Plan a faithful one-to-one Rust implementation from recovered product, interface, and architecture evidence. Use after Rustify discovery or when evidence changes parity requirements.
 ---
 
-# Plan the Rust implementation
+# Plan the faithful Rust implementation
 
-The agent reads the files in `recovered/` and [the Rust stack guide](docs/rust-stack.md).
-The [state contract](../rustify/docs/project.md) identifies the external agent workspace.
+The agent reads `recovered/` and [the project contract](../rustify/references/project.md).
+The default goal preserves product, UX, behavior, data, interfaces, and component boundaries.
 
-- The agent connects each scoped feature to its interface, evidence, scenarios, declarative tests, and tasks.
-- The agent defines acceptance checks before substantial implementation.
-- The agent blocks dependent tasks when required behavior remains unknown.
-- The agent selects the smallest stack that satisfies the contract.
-- The agent separates the recovered architecture from the proposed Rust architecture.
-- The agent records choices, rejected alternatives, and compatibility constraints in `WORK/rust-design.md`.
-- The agent writes task dependencies and workflow milestones in `WORK/plan.json`.
-- The agent updates proposed work in `recovered/roadmap.md` without presenting it as shipped behavior.
+1. The agent reads [the planning method](references/planning.md).
+2. The agent uses [the output schema and templates](references/outputs.md) for traceability and dependency milestones.
+3. The agent reads [the stack rules](references/rust-stack.md) before selecting dependencies.
+4. The agent writes `rust-design.md` and `plan.json` in the external `work_dir` from `recovered/state.json`.
+5. The agent completes the `plan` checkpoint after the design, mappings, tests, and tasks agree.
 
-Here, `WORK` is the external `work_dir` from `recovered/state.json`.
-The agent keeps both planning files outside the target project.
-The agent completes the `plan` checkpoint after the outputs agree.
+The agent maps each scoped original component to its Rust component.
+Rust idioms do not authorize semantic or structural changes.
+The agent explains each necessary deviation and obtains an approved contract exception before implementation.
+The agent keeps parity gaps first in `recovered/roadmap.md`.
+The agent does not present inferred original goals or future plans as facts.

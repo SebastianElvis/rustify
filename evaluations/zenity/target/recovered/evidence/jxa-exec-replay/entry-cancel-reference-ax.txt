@@ -1,0 +1,13 @@
+Window: "Rustify desktop test", App: desktop-reference.
+0 dialogue Rustify desktop test, Secondary Actions: Raise
+	1 text Rustify input test
+	2 text field (settable) seed
+	3 button OK
+	4 button Cancel
+	5 text Rustify desktop test
+
+Selected text: ```
+seed
+```
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

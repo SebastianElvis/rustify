@@ -5,8 +5,10 @@ description: Reconstruct local software from a binary or package in idiomatic Ru
 
 # Rustify
 
-Rustify produces a maintainable Rust implementation and a recovered model with evidence.
+Rustify reconstructs the original product faithfully in Rust.
 The original application supplies the behavioral reference.
+The default contract requires one-to-one feature, behavior, UX, data, and component mappings where evidence permits them.
+The agent keeps every known mismatch open until a repair or an explicit user exception resolves it.
 
 ## Required peer skills
 
@@ -17,7 +19,9 @@ The agent reports missing peers before dependent work.
 
 ## Prepare and resume
 
-- The agent reads [the project contract and state format](docs/project.md).
+- The agent reads [the project contract and state format](references/project.md).
+- The agent fills [the contract asset](assets/contract.json) from the target and request.
+- The agent reads [the REA connection guide](references/rea.md) when discovery needs its tools.
 - The agent resolves the target, resources, platform, compatibility goal, and budget.
 - The agent runs `python3 <rustify>/scripts/project.py init PROJECT --target BINARY --profile cli`.
 - The agent selects `cli`, `desktop`, `service`, or `game` for the actual target.

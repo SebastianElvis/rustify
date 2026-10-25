@@ -1,0 +1,25 @@
+{
+  "case": {
+    "id": "entry-cancel",
+    "args": [
+      "--entry",
+      "--title",
+      "Rustify desktop test",
+      "--text",
+      "Rustify input test",
+      "--entry-text",
+      "seed"
+    ]
+  },
+  "executable_sha256": "a88c5b2011ecb83b878e0b16c80c56f79bd10357487d6f4bab105e993318d3da",
+  "captured_at_utc": "2026-10-25T02:05:38.807833+00:00",
+  "capture_method": "host-native CUA",
+  "returncode": 1,
+  "stdout_b64": "",
+  "stderr_b64": "",
+  "ax_file": "entry-cancel-candidate-ax.txt",
+  "screenshot_file": "entry-cancel-candidate.png",
+  "source_pin_sha256": "666aece3d4e0be2ac261c5a915b3371c581261b531ffc144f6c1ef080484fd6f",
+  "ax_sha256": "9a91048a7b6e03f7223b89014d2cc251694fbf5d0a5a3e5ff53bb518257fb48b",
+  "screenshot_sha256": "e51c90c140e7833ca8fa5eb8358f0363f7b47dcda3c2abb7b701ac68c58659d6"
+}

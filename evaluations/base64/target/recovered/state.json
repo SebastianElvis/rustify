@@ -37,9 +37,9 @@
       "implementation/src/version.txt": "0f2c3bb31e21d9c3080a45293f6c2483eb1de37303a34a325b17c93cf816cb6a"
     },
     "validate": {
-      "verification/comparison.json": "a2c0ba8e7ddbb95792e54b61b26fa38483267e72d7370b008b99009c83aee817",
+      "verification/comparison.json": "ebd0ead742c90e9c52396a064371d6fdcf8d2637a5ddc7a85efa6500ec691d2b",
       "verification/compatibility.md": "01d8080138a92ef8e63b7e3b0ed770ddbfeb7076e39547b113142239a75e0205",
-      "implementation/target/release/base64": "2de8c78d453d5e47de2c9edd5830422de3d98e6a541359db150b974706773568"
+      "implementation/target/release/base64": "37dce211ceec3355a448d9beae50b6f35e6dfbf653f19bd55b52fec185748469"
     }
   }
 }

@@ -26,8 +26,8 @@ The source archive SHA-256 is `8c54c7e8e878600d1a322151e0158c4fa6e6793283a45e355
 
 The binary-only model does not claim source module names or a dependency graph.
 The source reveals clap, serde_json, blocking reqwest, printer logic, and middleware.
-The original does not use the replacement's async entry point.
-The replacement uses Tokio and async reqwest by design.
+The prior source-assisted candidate used an async entry point with Tokio.
+The new faithfulness repair replaces that unnecessary difference with blocking reqwest.
 The replacement delegates redirects to reqwest.
 The original implements a redirect middleware for its wider feature set.
 The report evaluates recovered responsibilities separately from replacement design.
@@ -67,3 +67,30 @@ The upstream suite also covers TLS, authentication, proxies, sessions, nested da
 files, forms, compression, downloads, and terminal formatting.
 These features stay outside the local HTTP evaluation contract.
 The audit does not execute the full original test suite.
+
+## Blocking execution faithfulness repair
+
+The later strict-parity review finds an unnecessary execution-model redesign.
+Original `src/main.rs` imports `reqwest::blocking::Client` and runs synchronous request middleware.
+The implementation now imports `reqwest::blocking::Client` and uses synchronous `execute` and `main` functions.
+The repair removes the async entry-point attribute, awaits, and direct Tokio dependency.
+Reqwest still uses Tokio internally through its blocking adapter.
+The repair preserves parser and test source bytes.
+The runtime Rust change adds 7 lines and removes 7 lines.
+The runtime source remains at 278 lines.
+
+`blocking-faithfulness.patch` records this new source-assisted repair.
+`blocking-faithfulness.json` records the current source hashes and line budget.
+`../recovered/evidence/source-assisted-before-blocking.zip` preserves the previous source-assisted candidate and its original patch.
+The original `freeze.json` and binary-only archive remain unchanged.
+The archived original source hash remains pinned in the provenance record.
+`../recovered/component-mapping.md` gives an evidence-backed component mapping.
+The temporary current design and plan come from the wrapper's `agent-fixtures/` and remain outside the target project.
+
+The original uses custom middleware and reqwest 0.13.2.
+The implementation still uses reqwest 0.12.28 and its redirect policy.
+The original redirect-limit error differs from the current policy stop.
+The finite 302, 303, and 307 cases do not close that gap.
+The custom CLI and body-only writer also cover only part of the original product.
+The new repair does not establish strict full-product parity.
+All remaining component and feature gaps stay open in the parity backlog.

@@ -19,8 +19,7 @@ class ProjectTests(unittest.TestCase):
         self.root = self.base / "target"
         self.target = self.base / "original"
         self.target.write_bytes(b"original binary")
-        state = project.init(self.root, self.target, "cli")
-        self.workspace = Path(state["work_dir"])
+        self.workspace = Path(project.init(self.root, self.target, "cli")["work_dir"])
 
     def write(self, name, data):
         path = (self.workspace if name in project.REQUIRED["plan"] else self.root) / name
@@ -29,7 +28,8 @@ class ProjectTests(unittest.TestCase):
 
     def artifacts(self, phase):
         for name in project.REQUIRED[phase]:
-            self.write(name, '{"content": true}' if name.endswith(".json") else "content\n")
+            data = {"compatibility": [], "scope": []} if name == "recovered/contract.json" else {"content": True}
+            self.write(name, json.dumps(data) if name.endswith(".json") else "content\n")
         if phase == "implement":
             self.write("implementation/src/main.rs", "fn main() {}\n")
             self.write("verification/checks.json", json.dumps({
@@ -259,6 +259,23 @@ class ProjectTests(unittest.TestCase):
         path.write_text(json.dumps([{"id": "TEST-1", "origin": "observed", "evidence": ["E-1"], "scenarios": ["S-1"], "expect": {"returncode": 0}}]))
         project.checkpoint(self.root, "discover")
         self.assertEqual(project.status(self.root)["next"], "plan")
+
+    def test_full_faithful_contract_requires_a_passing_parity_gate(self):
+        self.through("implement")
+        self.write("recovered/contract.json", json.dumps({"scope": {"mode": "full_product"}, "compatibility": {"mode": "faithful"}}))
+        for phase in project.PHASES[:4]:
+            project.checkpoint(self.root, phase)
+        self.artifacts("validate")
+        with self.assertRaises((ValueError, OSError)):
+            project.checkpoint(self.root, "validate")
+        valid = {"status": "passed", "full_parity_gate_pass": True, "errors": [], "gaps": [], "target_sha256": project.digest(self.target), "inputs": {"recovered/product.md": project.digest(self.root / "recovered/product.md")}}
+        for changes in ({"status": "partial"}, {"full_parity_gate_pass": False}, {"gaps": ["unknown feature"]}, {"errors": ["mismatch"]}, {"target_sha256": "wrong"}, {"inputs": {"recovered/product.md": "stale"}}):
+            self.write("verification/parity.json", json.dumps({**valid, **changes}))
+            with self.assertRaises(ValueError):
+                project.checkpoint(self.root, "validate")
+        self.write("verification/parity.json", json.dumps(valid))
+        project.checkpoint(self.root, "validate")
+        self.assertIsNone(project.status(self.root)["next"])
 
     def test_evidence_and_workspace_symlinks_fail(self):
         self.through("discover")

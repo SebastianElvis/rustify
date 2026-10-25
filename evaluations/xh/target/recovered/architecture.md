@@ -27,7 +27,7 @@ identifies the exact Mach-O arm64 artifact.
 REA finds no `.dep-v0` section.
 The missing section does not prove that the binary has no dependencies.
 REA does not recover functions or runtime architecture through this inspection.
-The original async runtime and dependency graph remain unknown before source reveal.
+The original execution model and dependency graph remain unknown before source reveal.
 
 ## Flow
 
@@ -40,3 +40,16 @@ CLI input -> Request construction -> HTTP transport -> Local server
                                       |
                                 Status mapping -> stderr and exit code
 ```
+
+## Source-revealed execution mapping
+
+The later source audit identifies `reqwest::blocking::Client` in original `src/main.rs::run`.
+The source-assisted faithfulness repair now preserves that blocking execution model.
+The implementation removes its async entry point and direct Tokio dependency.
+Reqwest retains Tokio internally as a transitive dependency.
+The current component mapping is `component-mapping.md`.
+The original source is archived in `evidence/original-xh-v0.26.3.tar.gz`.
+The canonical evidence records use `SRC-XH-*` identifiers.
+The original custom middleware still has no equivalent implementation component.
+The full parser, printer, transport configuration, and stateful feature mappings remain incomplete.
+Strict full-product architecture parity remains unestablished.

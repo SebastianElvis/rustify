@@ -1,16 +1,17 @@
 # Rustify product
 
 Rustify reconstructs local software as a maintainable Rust product.
+Rustify preserves the original product through one-to-one mappings wherever evidence permits them.
 The input consists of a binary, its resources, and a compatibility goal.
 The output includes recovered specifications, a Rust implementation, tests, and measured gaps.
 
 ## Vision
 
 A maintainer should understand and extend the implementation without the original source.
-The product model, design language, architecture, decisions, and roadmap support that goal.
+The product model, design language, architecture, decisions, and parity backlog support that goal.
 The binary provides evidence of shipped behavior.
 The binary does not prove creator intent or future plans.
-Rustify labels recovered facts, inferred explanations, and proposed improvements separately.
+Rustify labels recovered facts, inferred explanations, and unresolved parity gaps separately.
 The user controls publication of the resulting repository.
 
 ## User workflows
@@ -56,6 +57,8 @@ Each test records its observed, inferred, or proposed origin.
 ## Acceptance
 
 - Every scoped feature links to evidence, scenarios, and tasks.
+- Every original feature, state, interface, and recoverable component maps to the implementation.
+- Every known mismatch remains open until a repair or an explicit user exception resolves it.
 - The recovered architecture distinguishes facts from hypotheses.
 - The Rust design explains dependency and architecture choices.
 - Unit tests verify internal logic.
@@ -66,6 +69,9 @@ Each test records its observed, inferred, or proposed origin.
 
 Tests support finite compatibility claims.
 Tests do not establish complete equivalence for every possible input.
+The default workflow targets the full product.
+The dataset uses explicit bounded evaluations.
+Its passing checks do not establish full-product parity.
 
 ## Roadmap
 

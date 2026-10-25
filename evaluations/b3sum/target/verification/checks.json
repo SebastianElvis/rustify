@@ -186,6 +186,254 @@
       ],
       "returncode": 0,
       "log": "evaluations/b3sum/target/verification/logs/runtime-cases-1792853636969080000.log"
+    },
+    {
+      "name": "cargo-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--check"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-fmt-1792855817812345000.log"
+    },
+    {
+      "name": "cargo-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-clippy-1792855817887753000.log"
+    },
+    {
+      "name": "cargo-test",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-test-1792855818398050000.log"
+    },
+    {
+      "name": "cargo-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-build-1792855818422446000.log"
+    },
+    {
+      "name": "runtime-cases",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/fixtures/runtime_cases.py",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/verification/raw/runtime-cases.json"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/runtime-cases-1792855818463430000.log"
+    },
+    {
+      "name": "cargo-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--check"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-fmt-1792855988577777000.log"
+    },
+    {
+      "name": "cargo-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-clippy-1792855988657946000.log"
+    },
+    {
+      "name": "cargo-test",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-test-1792855988919069000.log"
+    },
+    {
+      "name": "cargo-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-build-1792855988943281000.log"
+    },
+    {
+      "name": "runtime-cases",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/fixtures/runtime_cases.py",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/verification/raw/runtime-cases.json"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/runtime-cases-1792855988984188000.log"
+    },
+    {
+      "name": "cargo-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--check"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-fmt-1792894541405628000.log"
+    },
+    {
+      "name": "cargo-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-clippy-1792894542925937000.log"
+    },
+    {
+      "name": "cargo-test",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-test-1792894544981965000.log"
+    },
+    {
+      "name": "cargo-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-build-1792894545012498000.log"
+    },
+    {
+      "name": "runtime-cases",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/fixtures/runtime_cases.py",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/verification/raw/runtime-cases.json"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/runtime-cases-1792894545055077000.log"
+    },
+    {
+      "name": "cargo-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--check"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-fmt-1792894896755616000.log"
+    },
+    {
+      "name": "cargo-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-clippy-1792894896836661000.log"
+    },
+    {
+      "name": "cargo-test",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-test-1792894897333687000.log"
+    },
+    {
+      "name": "cargo-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--manifest-path",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/Cargo.toml"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/cargo-build-1792894897364143000.log"
+    },
+    {
+      "name": "runtime-cases",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/fixtures/runtime_cases.py",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/verification/raw/runtime-cases.json"
+      ],
+      "returncode": 0,
+      "log": "evaluations/b3sum/target/verification/logs/runtime-cases-1792894897406345000.log"
     }
   ]
 }

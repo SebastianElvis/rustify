@@ -1,5 +1,9 @@
 # CLI comparison
 
+The helper checks deterministic process cases.
+The helper does not certify product, UI, component, or data-model parity.
+The parity workflow and matrix supply those acceptance requirements.
+
 The helper accepts a nonempty scenario list.
 Each scenario has a unique `id`, an `args` list, optional `stdin_b64`, optional `files`, and optional `env`.
 The stdin value and file values encode raw bytes as base64.

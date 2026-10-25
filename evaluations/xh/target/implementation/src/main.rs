@@ -1,5 +1,6 @@
 use reqwest::{
-    Client, Method, StatusCode, Url,
+    Method, StatusCode, Url,
+    blocking::Client,
     header::{HeaderMap, HeaderValue},
     redirect::Policy,
 };
@@ -163,7 +164,7 @@ fn result_code(status: StatusCode, check: bool) -> u8 {
     }
 }
 
-async fn execute(request: Request) -> Result<u8, ClientError> {
+fn execute(request: Request) -> Result<u8, ClientError> {
     let follow = request.follow;
     let client = Client::builder()
         .no_proxy()
@@ -183,9 +184,9 @@ async fn execute(request: Request) -> Result<u8, ClientError> {
     if let Some(body) = request.body {
         builder = builder.body(body);
     }
-    let response = builder.send().await.map_err(ClientError::Http)?;
+    let response = builder.send().map_err(ClientError::Http)?;
     let status = response.status();
-    let body = response.bytes().await.map_err(ClientError::Http)?;
+    let body = response.bytes().map_err(ClientError::Http)?;
     std::io::stdout()
         .lock()
         .write_all(&body)
@@ -201,9 +202,8 @@ async fn execute(request: Request) -> Result<u8, ClientError> {
     Ok(code)
 }
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> ExitCode {
-    let result = async { execute(parse(env::args().skip(1))?).await }.await;
+fn main() -> ExitCode {
+    let result = parse(env::args().skip(1)).and_then(execute);
     match result {
         Ok(code) => ExitCode::from(code),
         Err(error) => {

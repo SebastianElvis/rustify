@@ -1,6 +1,12 @@
 {
   "status": "passed",
   "reference_sha256": "ea62f476d76bdfd401e56bdee8fb2630d447aeb843b7c5fdde8bcd3de86b391d",
+  "scope": "Partial body-only loopback HTTP evaluation",
+  "strict_full_product_parity": "unestablished",
+  "source_assisted_repairs": [
+    "CLI parity repair",
+    "blocking execution-model repair"
+  ],
   "commands": [
     {
       "name": "fmt",
@@ -26,7 +32,7 @@
       ],
       "returncode": 0,
       "log": "evaluations/xh/target/verification/logs/clippy.log",
-      "log_sha256": "8c233a54790c4800d3dd585436af679aa838da259bfdb129412e2d51cdb75cdc"
+      "log_sha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6"
     },
     {
       "name": "rust-tests",
@@ -37,7 +43,7 @@
       ],
       "returncode": 0,
       "log": "evaluations/xh/target/verification/logs/rust-tests.log",
-      "log_sha256": "af7596c1565cf32f0918e47cc8bda40f974893fd7dffe322889519ddd8713021"
+      "log_sha256": "24a2b587e783137ca9b0a00fbe7424eb2ecfec61e84438d7fa935bb03968c164"
     },
     {
       "name": "build",
@@ -97,7 +103,13 @@
     6,
     1
   ],
-  "candidate_sha256": "806d0ce2962e9fdc6dad13dfbbe8da868cb7e1e30b4b0e47d5c6622e332c6186",
+  "candidate_sha256": "e50e06d586e150634609496591ccc8d61df8084dd531a8d5c6dfa5d51ec17ef3",
+  "runtime_rust_line_budget": {
+    "added": 7,
+    "removed": 7,
+    "before": 278,
+    "after": 278
+  },
   "checkpoint": {
     "completed": [
       "prepare",

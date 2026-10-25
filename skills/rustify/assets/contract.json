@@ -1,0 +1,33 @@
+{
+  "target": {
+    "name": "{{target_name}}",
+    "executable": "{{absolute_binary_path}}",
+    "sha256": "{{binary_sha256}}",
+    "resources": [],
+    "platform": "{{observed_platform}}"
+  },
+  "scope": {
+    "mode": "full_product",
+    "features": [],
+    "unexplored": []
+  },
+  "compatibility": {
+    "mode": "faithful",
+    "product": "one-to-one",
+    "behavior": "exact observed outcomes",
+    "ux": "original appearance and interaction",
+    "data": "original formats and invariants",
+    "interfaces": "original CLI, API, protocol, and errors",
+    "architecture": "traceable original-to-Rust components where recoverable",
+    "exceptions": []
+  },
+  "environment": {
+    "locale": "{{reference_locale}}",
+    "execution": "{{isolated_execution_method}}",
+    "external_services": []
+  },
+  "exclusions": [],
+  "budget": {
+    "limit": "{{user_limit_or_unbounded}}"
+  }
+}

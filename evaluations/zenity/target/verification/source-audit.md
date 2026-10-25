@@ -1,70 +1,67 @@
-# Desktop smoke source audit
+# Source audit and verified exec-boundary repair
 
-The parent freezes the Rust source and native replay evidence before source review.
+The current source-assisted candidate passes the five recorded native workflows.
+Fresh CUA proof binds to the immutable exec-stage source pin.
+Five pure Rust tests and eight proof-integrity tests pass without opening dialogs.
+Full zenity product parity remains unestablished.
+
+## Original identity and boundary
+
 The audit uses the official `ncruces/zenity` tag `v0.10.15`.
-`../recovered/provenance.json` records its archive URL and SHA-256.
+The archive hash is `ed900c7f0a16976fa57c06000f4a9e06e65dce669a475f54d52ddc2b77027e24`.
+`../recovered/evidence/original-zenity-v0.10.15.tar.gz` preserves the source.
+The reference's Go metadata marks its source as dirty.
+The tag cannot establish that binary's exact source identity.
 
-## Product, experience, and architecture
-
-| Recovered claim | Tag source evidence | Audit result |
+| Original component | Current implementation | Evidence and limit |
 | --- | --- | --- |
-| The CLI selects entry, question, and information dialogs. | `cmd/zenity/main.go::main`, `loadFlags` | The source confirms the selected dialog modes. |
-| An accepted entry returns text with a newline. | `entry_darwin.go::entry`, `cmd/zenity/main.go::strResult` | The source supports the recorded accepted-entry result. |
-| Cancellation returns status 1. | `cmd/zenity/main.go::errResult` | The source supports the recorded cancel result. |
-| Questions have default Yes and No labels. | `cmd/zenity/main.go::loadFlags` | The source confirms these CLI defaults. |
-| Entry dialogs contain a title, message, answer, and buttons. | `entry_darwin.go::entry` | The source fills the corresponding native-dialog fields. |
-| Information dialogs contain a title, message, and OK button. | `msg_darwin.go::message`, `loadFlags` | The source supports the recorded controls. |
-| The Go CLI delegates native dialogs through an OS script boundary. | `internal/zenutil/run_darwin.go::Run` | The source renders a template and runs `osascript -l JavaScript`. |
+| CLI `loadFlags` | Rust `parse` and `parameters` | The five cases preserve their original inputs and button defaults. The full CLI remains outside this smoke. |
+| `entry_darwin.go::entry` | Entry parameter data and `assets/dialog.js` | Both paths select displayDialog with title and default answer. Both fresh Entry cases pass. |
+| `msg_darwin.go::message` and CLI labels | Question and Info parameter data | The CLI supplies Yes/No labels, so both message modes use displayAlert. Three fresh alert cases pass. |
+| `util_darwin.go::getButtons` | Button arrays and default/cancel indexes | The verifier checks every AX capture against tests.json. The parent reviews controls and focus. |
+| `internal/zenutil/run_darwin.go::Run` | Anonymous `script_file` and CommandExt::exec | Both paths replace the command process with osascript. Rust no longer waits for a child. |
+| `osascripts/common.gojs` | Top-level currentApplication activation | The fresh Info alert has the same active blue OK button and background. |
+| `osascripts/dialog.gojs` | Top-level result and status handling | Standard C imports supply cancellation and exit codes. The native script supplies stdout directly. All ten process results pass. |
 
-The original architecture has this flow:
+Rust encodes JSON data and escapes Unicode line and paragraph separators before script compilation.
+The tempfile dependency supplies safe anonymous-file ownership.
+The implementation uses no AppKit bindings or System Events automation.
+The command clears its environment and routes stderr to null, following the original empty environment and closed stderr boundary.
+This smoke does not establish every failure, signal, or fallback-exec behavior.
 
-```text
-Go CLI -> Dialog data -> Script template -> osascript/JXA -> Native dialog
-```
+## Preserved stages
 
-The Rust replacement has this flow:
+The original direct-AppKit stage remains in the historical freeze and recording archive.
+The first JXA stage spawns osascript and leaves a Rust parent waiting.
+Its five process results pass, but its Info dialog has inactive gray controls and background.
+An icon click does not resolve that mismatch.
+`../recovered/evidence/jxa-child-focus-failure.zip` preserves the failed stage, source, pin, and captures.
+The old pin remains unchanged at `../recovered/evidence/jxa-source-pin.json`.
 
-```text
-Rust options -> objc2 AppKit bindings -> NSAlert and NSTextField
-```
+The exec repair restores process replacement and top-level script activation.
+Its immutable pin is `../recovered/evidence/jxa-exec-source-pin.json`.
+The pin's pending label records its creation before replay.
+The later successful result belongs in `fresh-proof.json` and `comparison.json`.
+The code contains 172 Rust lines and 14 JavaScript lines, including tests.
+The repair adds 104 Rust lines and 14 JavaScript lines and removes 118 Rust lines.
+The total remains at the former 186-line budget.
 
-The tag source confirms the inferred script boundary.
-The replacement uses a different internal architecture.
-The recorded binary metadata marks its source as dirty.
-The tag cannot establish the exact source of that binary.
-The audit therefore compares tag behavior and architecture with the recorded binary model.
+## Fresh proof and limits
 
-## Upstream test mapping
+`../recovered/evidence/jxa-exec-replay/` preserves all raw process, AX, and image records.
+The verifier consumes original-derived process expectations and buttons from tests.json.
+It checks executable hashes, source pins, capture times, raw hashes, and all manual visual verdicts.
+The verdicts cover focus, title, icon, family, and controls for every case.
+Four screenshot pairs have identical raw bytes.
+Entry acceptance differs only in the external pointer effect within `[192, 80, 225, 113]`.
+Both raw images remain unchanged, and the report discloses that difference.
+The tool supplies JPEG bytes under `.png` filenames; the verifier detects the format without transcoding.
+Hashes establish file integrity rather than capture authenticity.
+The parent supplies the trusted CUA observations and visual review.
 
-| Recorded workflow | Related upstream behavior | Adaptation |
-| --- | --- | --- |
-| Entry acceptance | `entry_test.go::TestEntry_script` cases `123` and `abc` | The smoke uses `Rustify GUI test` and checks CLI output. |
-| Entry cancellation | `entry_test.go::TestEntry_script/Cancel` | The smoke maps the cancellation result to CLI status 1. |
-| Question Yes | `msg_test.go::TestMessage_script/QuestionYes` | The smoke uses the CLI's two default buttons. |
-| Question No | `msg_test.go::TestMessage_script/QuestionNo` and CLI `loadFlags` | The library test uses an extra No button. The smoke uses the CLI's No cancel button. |
-| Information OK | `msg_test.go::TestMessage_script/InfoOK` | The smoke checks CLI success and empty output. |
-
-The upstream question test has an extra-button result distinct from cancellation.
-The captured CLI No flow has empty stdout and status 1.
-The audit does not treat these as identical test executions.
-The upstream script tests require interactive dialogs.
-This export does not execute those tests.
-The runner verifies the parent's recorded evidence and runs fresh Rust unit tests.
-
-## Corrections and limits
-
-The parent corrects missing `NSApplication::finishLaunching` before the freeze.
-The correction uses runtime feedback.
-The audit makes no source-assisted Rust changes.
-The smoke permits icon, title placement, and pixel-layout differences.
-The parent checks semantic text, buttons, entered value, and process results.
-The parent performs this GUI smoke without an independent reconstruction worker.
-The export does not claim full zenity reconstruction or broad desktop compatibility.
-
-## Freeze state exception
-
-All 37 non-state frozen files still match their recorded hashes.
-The parent checkpoints `state.json` after the freeze.
-The original state snapshot is unavailable.
-The export preserves the later state and discloses its different hash.
-The source and GUI evidence have no hash exception.
+The upstream interactive suite is not executed.
+Other modes, options, platforms, timeouts, and full-product mappings remain open.
+The historical archive has 37 matching non-state frozen files.
+The original frozen state snapshot is unavailable after the parent's later operational checkpoint.
+The preserved later state and its different hash remain disclosed in provenance.
+That exception does not authorize acceptance for different source.

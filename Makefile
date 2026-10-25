@@ -4,6 +4,7 @@ PYTHON ?= python3
 
 test:
 	$(PYTHON) -m unittest discover -s tests -v
+	$(PYTHON) -m unittest discover -s skills/rustify-validate/tests -v
 
 evaluate:
 	$(PYTHON) scripts/evaluate.py

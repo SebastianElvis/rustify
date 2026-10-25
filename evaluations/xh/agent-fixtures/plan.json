@@ -1,0 +1,193 @@
+{
+  "features": [
+    {
+      "id": "HTTP-01",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "get-text",
+        "get-json",
+        "get-query"
+      ],
+      "tasks": [
+        "T1",
+        "T2"
+      ]
+    },
+    {
+      "id": "HTTP-02",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "head"
+      ],
+      "tasks": [
+        "T2"
+      ]
+    },
+    {
+      "id": "HTTP-03",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "inferred-post"
+      ],
+      "tasks": [
+        "T1",
+        "T2"
+      ]
+    },
+    {
+      "id": "HTTP-04",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "json-fields",
+        "json-types"
+      ],
+      "tasks": [
+        "T1"
+      ]
+    },
+    {
+      "id": "HTTP-05",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "raw-post"
+      ],
+      "tasks": [
+        "T1",
+        "T2"
+      ]
+    },
+    {
+      "id": "HTTP-06",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "custom-header",
+        "custom-content-type"
+      ],
+      "tasks": [
+        "T1"
+      ]
+    },
+    {
+      "id": "HTTP-07",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "redirect-stop",
+        "redirect-follow"
+      ],
+      "tasks": [
+        "T2"
+      ]
+    },
+    {
+      "id": "HTTP-08",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "post-302",
+        "post-303",
+        "post-307"
+      ],
+      "tasks": [
+        "T2"
+      ]
+    },
+    {
+      "id": "HTTP-09",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "status-404",
+        "status-500"
+      ],
+      "tasks": [
+        "T2"
+      ]
+    },
+    {
+      "id": "HTTP-10",
+      "evidence": [
+        "RUNTIME"
+      ],
+      "scenarios": [
+        "status-ignore"
+      ],
+      "tasks": [
+        "T2"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "work": "Parse inputs and construct typed requests.",
+      "depends_on": []
+    },
+    {
+      "id": "T2",
+      "work": "Send requests and map response output and status.",
+      "depends_on": [
+        "T1"
+      ]
+    },
+    {
+      "id": "T3",
+      "work": "Compare process outputs and protocol captures.",
+      "depends_on": [
+        "T2"
+      ]
+    },
+    {
+      "id": "T4",
+      "work": "Freeze source and recovered models for a separate source audit.",
+      "depends_on": [
+        "T3"
+      ]
+    },
+    {
+      "id": "T5",
+      "work": "Preserve the revealed blocking HTTP execution model without changing scoped CLI or protocol behavior.",
+      "depends_on": [
+        "T2"
+      ],
+      "original_evidence": [
+        "SRC-XH-EXECUTION",
+        "SRC-XH-CARGO"
+      ],
+      "acceptance": [
+        "The client uses reqwest::blocking::Client.",
+        "The implementation has no direct Tokio dependency.",
+        "All finite process, protocol, repeatability, upstream, and Rust checks pass."
+      ],
+      "remaining_gaps": [
+        "XH-CLI",
+        "XH-REDIRECTS",
+        "XH-OUTPUT",
+        "XH-TRANSPORT",
+        "XH-STATE"
+      ]
+    }
+  ],
+  "milestones": [
+    "A GET request returns exact bytes.",
+    "POST data and headers reach the fixture server.",
+    "Redirect and error workflows match.",
+    "All scoped process and protocol checks pass."
+  ],
+  "scope_label": "The plan covers a partial body-only loopback HTTP evaluation. Strict full-product parity remains unestablished."
+}

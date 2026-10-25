@@ -1,0 +1,70 @@
+{
+  "features": [
+    {
+      "id": "entry",
+      "evidence": [
+        "E-ENTRY"
+      ],
+      "scenarios": [
+        "entry-accept",
+        "entry-cancel"
+      ]
+    },
+    {
+      "id": "alerts",
+      "evidence": [
+        "E-ALERT"
+      ],
+      "scenarios": [
+        "question-accept",
+        "question-cancel",
+        "info-accept"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "options",
+      "depends_on": [],
+      "work": "Parse scoped options and encode original operation, text, and button data."
+    },
+    {
+      "id": "dialogs",
+      "depends_on": [
+        "options"
+      ],
+      "work": "Write an anonymous script file, rewind it, and exec osascript with top-level activation and native result handling."
+    },
+    {
+      "id": "native-replay",
+      "depends_on": [
+        "dialogs"
+      ],
+      "work": "Verify all five fresh source-bound CUA cases, original process/button expectations, raw hashes, and complete manual visual verdicts."
+    }
+  ],
+  "limitations": [
+    "This parent-run smoke track does not claim full zenity reconstruction."
+  ],
+  "source_assisted_fidelity_repair": {
+    "original_boundary": "CLI dialog data -> anonymous JavaScript file -> Unix exec -> osascript -> native dialogs",
+    "rust_boundary": "Rust JSON data -> anonymous JavaScript file -> Unix exec -> osascript -> native dialogs",
+    "required_replay": [
+      "entry-accept",
+      "entry-cancel",
+      "question-accept",
+      "question-cancel",
+      "info-accept"
+    ],
+    "status": "Five fresh source-bound workflows pass.",
+    "full_product_parity": "unestablished"
+  },
+  "result_handling": "The Unix exec delegates stdout and process status directly to osascript. Rust does not wait for a child or parse a JSON result.",
+  "unit_tests": [
+    "question_defaults_match_the_observed_buttons",
+    "missing_values_and_modes_fail",
+    "parameters_preserve_the_original_dialog_protocol",
+    "parameters_preserve_quotes_unicode_and_script_text",
+    "script_file_starts_at_the_complete_program"
+  ]
+}

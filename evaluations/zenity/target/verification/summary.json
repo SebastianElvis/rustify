@@ -1,10 +1,12 @@
 {
   "status": "passed",
-  "mode": "Recorded GUI evidence with fresh Rust unit checks",
-  "fresh_unit_tests": 4,
-  "recorded_gui_cases": 5,
+  "mode": "SOURCE-ASSISTED JXA fidelity repair",
+  "fresh_unit_tests": 5,
+  "historical_gui_cases": 5,
+  "fresh_gui_cases": 5,
   "live_gui_replay": false,
-  "upstream_test_suite_executed": false,
+  "source_assisted_changes": true,
+  "full_product_parity": "unestablished",
   "commands": [
     {
       "name": "fmt",
@@ -13,9 +15,19 @@
         "fmt",
         "--check"
       ],
+      "executable": "/opt/homebrew/bin/cargo",
       "returncode": 0,
       "log": "verification/logs/fmt.log",
-      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build_environment": {
+        "RUSTC": "/opt/homebrew/bin/rustc",
+        "RUSTDOC": "/opt/homebrew/bin/rustdoc",
+        "RUSTFLAGS": "-C linker=/usr/bin/clang -C link-arg=-fuse-ld=/usr/bin/ld",
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_TARGET_DIR": null,
+        "SDKROOT": null,
+        "MACOSX_DEPLOYMENT_TARGET": null
+      }
     },
     {
       "name": "clippy",
@@ -28,9 +40,19 @@
         "-D",
         "warnings"
       ],
+      "executable": "/opt/homebrew/bin/cargo",
       "returncode": 0,
       "log": "verification/logs/clippy.log",
-      "log_sha256": "ee1d3fffa2022e962e63e0dbe4d35c9c198450a20c29fc09030f635dbb38bfcd"
+      "log_sha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6",
+      "build_environment": {
+        "RUSTC": "/opt/homebrew/bin/rustc",
+        "RUSTDOC": "/opt/homebrew/bin/rustdoc",
+        "RUSTFLAGS": "-C linker=/usr/bin/clang -C link-arg=-fuse-ld=/usr/bin/ld",
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_TARGET_DIR": null,
+        "SDKROOT": null,
+        "MACOSX_DEPLOYMENT_TARGET": null
+      }
     },
     {
       "name": "unit",
@@ -39,14 +61,76 @@
         "test",
         "--locked"
       ],
+      "executable": "/opt/homebrew/bin/cargo",
       "returncode": 0,
       "log": "verification/logs/unit.log",
-      "log_sha256": "16a3d9e667d1c61621fafa26b62aa5e67209f7b8bd5bb0b2acb3286006f051fc"
+      "log_sha256": "9c5ba49d55b1dc75f2e5064f6deff9d92683364780448107d8ee5346a23ca5ce",
+      "build_environment": {
+        "RUSTC": "/opt/homebrew/bin/rustc",
+        "RUSTDOC": "/opt/homebrew/bin/rustdoc",
+        "RUSTFLAGS": "-C linker=/usr/bin/clang -C link-arg=-fuse-ld=/usr/bin/ld",
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_TARGET_DIR": null,
+        "SDKROOT": null,
+        "MACOSX_DEPLOYMENT_TARGET": null
+      }
+    },
+    {
+      "name": "build-release",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "executable": "/opt/homebrew/bin/cargo",
+      "returncode": 0,
+      "log": "verification/logs/build-release.log",
+      "log_sha256": "6bfa9e18ffdef821c711a542cfebd7db0982665615563e5a191285e489609c6f",
+      "build_environment": {
+        "RUSTC": "/opt/homebrew/bin/rustc",
+        "RUSTDOC": "/opt/homebrew/bin/rustdoc",
+        "RUSTFLAGS": "-C linker=/usr/bin/clang -C link-arg=-fuse-ld=/usr/bin/ld",
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_TARGET_DIR": null,
+        "SDKROOT": null,
+        "MACOSX_DEPLOYMENT_TARGET": null
+      }
+    },
+    {
+      "name": "proof-negative",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/runchao/Projects/Personal/rustify/evaluations/zenity/test_verifier.py"
+      ],
+      "executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "returncode": 0,
+      "log": "verification/logs/proof-negative.log",
+      "log_sha256": "01db1e3b123fbf6b9484bba95ff79cbfecfdfcd82a48d92a72adaa4770aafe03",
+      "build_environment": {
+        "RUSTC": "/opt/homebrew/bin/rustc",
+        "RUSTDOC": "/opt/homebrew/bin/rustdoc",
+        "RUSTFLAGS": "-C linker=/usr/bin/clang -C link-arg=-fuse-ld=/usr/bin/ld",
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_TARGET_DIR": null,
+        "SDKROOT": null,
+        "MACOSX_DEPLOYMENT_TARGET": null
+      }
     }
   ],
-  "recorded_candidate_sha256": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306",
+  "historical_candidate_sha256": "5cbc0a9804564986469bc8f2b892af8dd4359e1fe8a301c45226f41256f80306",
   "frozen_files_verified": 37,
   "freeze_state_snapshot_available": false,
+  "candidate_sha256": "a88c5b2011ecb83b878e0b16c80c56f79bd10357487d6f4bab105e993318d3da",
+  "runtime_line_budget": {
+    "old_all_rust_lines": 186,
+    "new_all_rust_lines": 172,
+    "new_js_lines": 14,
+    "added_rust_lines": 104,
+    "removed_rust_lines": 118,
+    "includes_unit_tests": true,
+    "added_rust_and_js_lines": 118
+  },
   "checkpoint": {
     "completed": [
       "prepare",
@@ -57,5 +141,15 @@
     ],
     "next": null,
     "stale": null
-  }
+  },
+  "required_fresh_workflows": [
+    "entry-accept",
+    "entry-cancel",
+    "question-accept",
+    "question-cancel",
+    "info-accept"
+  ],
+  "raw_identical_screenshot_pairs": 4,
+  "proof_tests": 8,
+  "source_pin_sha256": "666aece3d4e0be2ac261c5a915b3371c581261b531ffc144f6c1ef080484fd6f"
 }

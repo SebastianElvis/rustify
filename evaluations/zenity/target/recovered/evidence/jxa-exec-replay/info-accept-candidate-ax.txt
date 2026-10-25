@@ -1,0 +1,7 @@
+Window: "", App: desktop-candidate.
+0 dialogue Description: alert, Secondary Actions: Raise
+	1 image osascript alert
+	2 text Rustify brief test Rustify will close this test dialog.
+	3 button OK, ID: action-button-1
+
+The focused UI element is 0 dialogue Description: alert, Secondary Actions: Raise

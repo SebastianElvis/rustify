@@ -1,75 +1,161 @@
 # Rustify
 
-Rustify reconstructs local software from binary evidence in idiomatic Rust.
-The output includes a product model, design specification, architecture, decisions, roadmap, tests, and compatibility results.
+**Closed source should not block reconstruction.**
 
-![Rustify architecture](docs/architecture.svg)
+Rustify gives AI agents a workflow to reconstruct software from a binary in idiomatic Rust.
+It recovers product specifications, UX, architecture, evidence, and tests alongside the implementation.
+Rustify depends on [REA](https://github.com/morluto/rea) for reverse engineering.
+The goal is software that you can inspect, build, and maintain without the original source.
 
-## Install
+## Installation
 
-The bundle follows the [Agent Skills format](https://github.com/vercel-labs/skills/blob/main/docs/creating-skills.md).
-The instructions work with any host that loads that format.
+The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3, and Rust with Cargo.
+
+### 1. Set up REA
+
+REA supplies the tools for product, UX, and architecture discovery.
+
+```sh
+npx rea-agents setup
+```
+
+You select the agents that will use REA.
+You review the proposed configuration and approve the changes.
+Setup registers the MCP server and installs REA's matching workflow instructions.
+You restart the agents named in the completion message.
+
+Native binary analysis needs Hopper, Ghidra, or IDA.
+Setup can connect an existing Hopper or Ghidra installation.
+It can also install Hopper when you select that option.
+Other target types can use REA's built-in inspection tools.
+The [REA setup reference](https://github.com/morluto/rea/blob/main/docs/installation.md) provides additional provider settings and troubleshooting steps.
+
+### 2. Install Rustify
+
+You run this command from your project folder:
 
 ```sh
 npx skills add SebastianElvis/rustify --skill '*'
 ```
 
-The repository is private. The installer requires Git access.
-The full bundle requires all seven skills.
-The user can ask the host agent to use `rustify` with a binary path and a compatibility goal.
-The host uses its native skill invocation and task tools.
+The [Skills CLI](https://github.com/vercel-labs/skills) installs all seven Rustify skills and prompts you to select your agents.
+The installation applies to the current project.
+The `-g` option makes the bundle available across your projects:
 
-| Skill | Output |
+```sh
+npx skills add SebastianElvis/rustify --skill '*' -g
+```
+
+Rustify follows the [Agent Skills format](https://agentskills.io/specification).
+[Compatible agents](https://github.com/vercel-labs/skills/blob/main/docs/agents.md) include Claude Code, Codex, Cursor, and OpenCode.
+Local and cloud agents use the same skill files.
+Their environment must provide REA, the target binary, its resources, and a compatible runtime.
+Desktop investigation also needs a GUI session.
+
+### 3. Check the setup
+
+This command checks the installed REA workflow:
+
+```sh
+npx rea-agents doctor --skill --json
+```
+
+Native analysis also needs a working provider.
+This example checks Hopper:
+
+```sh
+npx rea-agents doctor --provider hopper --json
+```
+
+You can replace `hopper` with `ghidra` or `ida` for your configured provider.
+Your agent must expose the REA tools before reconstruction starts.
+
+## Usage
+
+You give your agent the binary path, its resources, and an output folder.
+You invoke the main `rustify` skill through your agent's skill interface or a prompt:
+
+```text
+Use the rustify skill to reconstruct /path/to/program in Rust.
+Write the target project to ./reconstructed-program.
+Preserve the original features, behavior, UX, data, and component boundaries.
+Recover the product and architecture documents with supporting evidence.
+Run unit tests and E2E comparisons against the original.
+Keep every known mismatch open until a repair resolves it.
+```
+
+The default contract covers the full product.
+You can request a bounded evaluation in your prompt.
+The agent saves checkpoints and reopens affected phases when inputs change.
+
+### Output
+
+The target project contains three folders:
+
+| Folder | Contents |
 | --- | --- |
-| `rustify` | The skill prepares the target project and coordinates the phases. |
-| `rustify-product` | The skill recovers workflows, rules, and proposed maintenance priorities. |
-| `rustify-design` | The skill recovers interface behavior and design language. |
-| `rustify-architecture` | The skill recovers technical components, data, and execution flows. |
-| `rustify-plan` | The skill defines the Rust design, acceptance checks, and task dependencies. |
-| `rustify-implement` | The skill builds complete Rust workflows and tests. |
-| `rustify-validate` | The skill compares results and directs evidence-based repairs. |
+| `recovered/` | Product and UX specifications, architecture, diagrams, data models, contract, state, evidence, declarative tests, and a parity backlog. |
+| `implementation/` | The Rust project, dependencies, source, and executable tests. |
+| `verification/` | Check results, original-to-Rust comparisons, parity assessments, reports, and logs. |
 
-The three discovery skills run in parallel when the host supports parallel tasks.
-The host runs them sequentially otherwise.
-REA supplies the binary investigation backend.
-The installed skill folders contain their runtime resources.
-The target project stores generated files outside the installed bundle.
-The target project contains `recovered/`, `implementation/`, and `verification/`.
-The agent keeps temporary design and task plans in a separate workspace.
+The agent produces diagrams and data models when the evidence supports them.
+Temporary Rust design and task plans stay in a separate agent workspace.
+The [project contract](skills/rustify/references/project.md) defines the output formats.
 
-## Documentation
+## Workflow
 
-- [Product and vision](docs/product.md)
-- [Architecture and LaTeX source](docs/architecture.md)
-- [Evaluation method and dataset](docs/evaluation.md)
-- [Target-project contract](skills/rustify/docs/project.md)
-- [Rust stack guide](skills/rustify-plan/docs/rust-stack.md)
+![Rustify architecture](docs/architecture.svg)
 
-## Checks
+1. **Preparation:** `rustify` records the target, environment, and compatibility contract.
+2. **Discovery:** `rustify-product`, `rustify-design`, and `rustify-architecture` collect evidence in parallel when the agent supports parallel work.
+3. **Planning:** `rustify-plan` maps original components to Rust components and defines acceptance checks.
+4. **Implementation:** `rustify-implement` builds complete workflows and runs Rust quality checks.
+5. **Validation:** `rustify-validate` compares both versions and returns defects to the affected phase.
+
+The agent runs discovery tasks sequentially when parallel execution is unavailable.
+The [architecture guide](docs/architecture.md) includes the diagram's editable LaTeX source.
+
+## Design principles
+
+- **We strive for one-to-one mapping.** Rustify maps the original product, UX, behavior, data, and architecture to the Rust implementation. Known differences remain open until a repair resolves them.
+- **Evidence and user experience guide reconstruction.** Observed workflows, interface states, binary evidence, and tests support each mapping. Unit tests, E2E comparisons, independent expectations, and available upstream vectors challenge the result.
+- **Rust code follows Rust conventions.** The implementation preserves original responsibilities and execution boundaries. The [stack guide](skills/rustify-plan/references/rust-stack.md) ties dependencies to those requirements.
+- **Reports keep gaps visible.** A passing subset does not establish full-product parity. Changed evidence invalidates stale results.
+
+## Development and evaluation
+
+Contributors run these checks from the repository root:
 
 ```sh
 make test
 make evaluate
-make diagram
 python3 scripts/check_install.py
 ```
 
-The helper tests use Python's standard library.
-The evaluations need Rust and the pinned reference binaries.
-The first setup downloads release binaries and Cargo dependencies.
-The fast evaluation then uses local inputs and a loopback HTTP server.
-The reference binaries require macOS and the indicated CPU support.
-The `b3sum` reference uses x86_64 and requires Rosetta on arm64.
-The skill instructions themselves have no macOS requirement.
-
-The default evaluation covers base64, BLAKE3, and HTTP.
-The desktop evaluation needs a native GUI session for a fresh replay.
-This command verifies the saved GUI captures and runs fresh Rust unit tests:
+The compact dataset covers GNU base64, BLAKE3 hashing, an HTTP client, and native desktop dialogs.
+The default evaluation runs the first three tracks.
+The desktop option verifies saved GUI captures and runs fresh Rust tests:
 
 ```sh
 python3 scripts/evaluate.py --recorded-desktop
 ```
 
-That command does not claim a fresh GUI replay.
-Each track reports its scope and source-assisted repairs.
-The results do not establish equivalence for every binary or input.
+The evaluation fixtures require macOS.
+These fixture requirements do not restrict the skill bundle to macOS.
+The [evaluation guide](docs/evaluation.md) records scopes, source-assisted repairs, and reproduction details.
+
+Contributors rebuild the architecture figure with `make diagram`.
+The build needs LaTeX, latexmk, and Poppler.
+Each skill keeps its main instructions short and stores supporting methods, templates, and helpers in its resource folders.
+
+## Documentation
+
+- [Product and vision](docs/product.md)
+- [Architecture and diagram source](docs/architecture.md)
+- [Evaluation method and dataset](docs/evaluation.md)
+- [Target-project contract](skills/rustify/references/project.md)
+- [Rust stack guide](skills/rustify-plan/references/rust-stack.md)
+
+## License
+
+Rustify uses the [GNU General Public License v3.0](LICENSE).
