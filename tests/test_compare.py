@@ -36,14 +36,16 @@ class CompareTests(unittest.TestCase):
     def tearDown(self):
         self.directory.cleanup()
 
-    def test_file_mode_and_kept_time_are_part_of_the_view(self):
+    def test_file_ownership_mode_and_kept_time_are_part_of_the_view(self):
         keep = self.program("keep", "import shutil\nshutil.copy2('in', 'out')\n")
-        touch = self.program("touch", "import shutil\nshutil.copyfile('in', 'out')\n")
         case = {"id": "copy", "args": [], "files": {"in": encoded(b"data")}}
-        report = compare.compare(keep, touch, [case], name="copy", timeout=30)
-        files = {label: report["cases"][0][label]["files"]["out"] for label in ("reference", "candidate")}
-        self.assertEqual((files["reference"]["mtime"], files["candidate"]["mtime"], files["reference"]["mode"]), ("fixture", "new", "644"))
-        self.assertIn("files", report["cases"][0]["differences"])
+        for field, call, before, after in [("mtime", "utime('out', None)", "fixture", "new"),
+                *[("gid", f"chown('out', -1, {gid})", os.getgid(), gid) for gid in os.getgroups() if gid != os.getgid()][:1]]:
+            touch = self.program("touch", f"import os,shutil\nshutil.copy2('in', 'out')\nos.{call}\n")
+            report = compare.compare(keep, touch, [case], name="copy", timeout=30)
+            files = {label: report["cases"][0][label]["files"]["out"] for label in ("reference", "candidate")}
+            self.assertEqual((files["reference"][field], files["candidate"][field], files["reference"]["mode"], files["reference"]["uid"], files["candidate"]["uid"]), (before, after, "644", os.getuid(), os.getuid()))
+            self.assertIn("files", report["cases"][0]["differences"])
 
     def program(self, name, body):
         path = self.root / name

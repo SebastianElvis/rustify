@@ -72,10 +72,8 @@ def capture_files(root):
             raise ValueError("A process produced a symlink or a special file.")
         data, status = path.read_bytes(), path.lstat()
         files[path.relative_to(root).as_posix()] = {
-            "sha256": hashlib.sha256(data).hexdigest(),
-            "data_b64": base64.b64encode(data).decode("ascii"),
-            "mode": format(stat.S_IMODE(status.st_mode), "o"),
-            "mtime": "fixture" if int(status.st_mtime) == FIXTURE_TIME else "new",
+            "sha256": hashlib.sha256(data).hexdigest(), "data_b64": base64.b64encode(data).decode("ascii"),
+            "mode": format(stat.S_IMODE(status.st_mode), "o"), "mtime": "fixture" if int(status.st_mtime) == FIXTURE_TIME else "new", "uid": status.st_uid, "gid": status.st_gid,
         }
     return files
 
