@@ -46,7 +46,7 @@ Optional `env` entries configure uncontrolled variables.
 The helper reserves locale, timezone, home, and path variables.
 
 ```sh
-python3 skills/rustify-validate/scripts/compare.py --reference /path/to/original --candidate /path/to/implementation --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name base64
+python3 skills/rustify-probe/scripts/compare.py --reference /path/to/original --candidate /path/to/implementation --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name base64
 ```
 
 The helper runs each program in a separate temporary directory.

@@ -9,6 +9,7 @@ The agent reads `recovered/` and [the project format](../rustify/references/proj
 The agent writes with [the standards guide](../rustify/references/standards.md).
 
 1. The agent reads [the planning method](references/planning.md).
+   The agent uses captures and traces and invokes [rustify-probe](../rustify-probe/SKILL.md) for unresolved boundaries.
 2. The agent reads [the stack rules](references/rust-stack.md) before selecting dependencies.
 3. The agent writes the `correspondences` and `slices` sections of `recovered/model.yaml` with [the output rules](references/outputs.md).
 4. The agent writes `implementation/docs/design.md` and one ADR in `implementation/docs/adr/` for each design decision.

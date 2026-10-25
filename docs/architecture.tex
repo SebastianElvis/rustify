@@ -58,16 +58,23 @@
  \draw[repair] (validate.north) -- (29.2,17.05) -- (7.9,17.05) -- (main.north);
  \node[label,text=orange] at (22.1,17.35) {Differences reopen affected work};
  \node[helper] (state) at (7.9,10.1) {{\scriptsize\texttt{rustify/scripts/project.py}}\\[2pt]Phase order, ledger, Rust checks};
- \node[helper,text width=51mm] (comparison) at (27.9,10.1) {{\scriptsize\texttt{rustify-validate/scripts/}}\\\texttt{compare.py}, \texttt{fuzz.py}, \texttt{parity.py}\\[2pt]Comparisons, fuzzing, and gate};
+ \node[component,text width=38mm] (probe) at (14.6,10.0) {\texttt{rustify-probe}\\Shared captures and traces};
+ \node[helper,text width=41mm] (probeTools) at (20.9,10.0) {{\scriptsize\texttt{rustify-probe/scripts/}}\\\texttt{compare.py}, \texttt{fuzz.py}};
+ \node[helper,text width=51mm] (comparison) at (27.9,10.0) {{\scriptsize\texttt{rustify-validate/scripts/}}\\\texttt{parity.py}\\[2pt]Evidence and parity gate};
+ \draw[relation] (7.9,11.0) -- (29.2,11.0);
+ \foreach \x in {20.9,25.0,29.2} {\draw[relation] (\x,12.95) -- (\x,11.0);}
+
+ \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (14.6,11.0) -- (probe.north);
+ \draw[relation] (probe.east) -- (probeTools.west);
  \draw[relation] (main.south) -- (state.north);
- \draw[relation] (validate.south) -- (29.2,11.15) -- (27.9,11.15) -- (comparison.north);
- \node[label,anchor=east] at (30.6,11.4) {Other profiles use host replay.};
+ \draw[relation] (29.2,11.0) -- (27.9,11.0) -- (comparison.north);
+ \node[label,anchor=east] at (30.6,11.55) {All phases request probes.};
  \node[external,text width=38mm,minimum height=11mm] (rea) at (14.6,7.5) {REA\\Investigation backend};
- \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (14.6,10.8) -- (rea.north);
- \node[label,anchor=west,text width=42mm,align=left] at (14.9,9.35) {Analysis requests\\and exported evidence};
+ \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (probe.south) -- (rea.north);
+ \node[label,anchor=east,text width=29mm,align=right] at (14.2,8.65) {Binary and runtime\\evidence};
  \node[box,fill=white,text width=46mm,minimum height=16mm] (workspace) at (20.9,7.5) {\textbf{AGENT WORKSPACE}\\[2pt]Worker shards\\Progress notes};
- \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (workspace.north) -- (20.9,10.3) -- (18.15,10.3) -- (18.15,11.2);
- \node[label,anchor=west] at (21.1,9.35) {Shards to merge};
+ \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (workspace.east) -- (23.8,7.5) -- (23.8,11.0);
+ \node[label,anchor=west] at (24.0,8.4) {Worker shards};
  \draw[repair] (28.2,12.95) -- (28.2,12.05) -- (25.0,12.05) -- (implement.south);
  \node[label,text=orange,anchor=south] at (26.6,12.1) {Next slice};
  \draw[relation] (state.south) -- (7.9,6.3);

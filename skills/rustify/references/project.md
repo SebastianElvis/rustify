@@ -63,7 +63,7 @@ The citation of an inferred record names its observations and a falsifying exper
 The citation of an unknown record names the missing evidence.
 The agent labels creator intent and design rationale as inferences.
 
-CLI scenarios use the `rustify-validate` comparison format.
+CLI scenarios use the `rustify-probe` comparison format.
 Other profiles use target-specific replay data with the same report fields.
 The compatibility constraints in `recovered/product.md` define tolerances for variable results.
 The agent does not normalize unexplained differences.

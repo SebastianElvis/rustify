@@ -28,7 +28,7 @@ def load(name, path):
     return module
 
 
-compare = load("rustify_compare", REPOSITORY / "skills/rustify-validate/scripts/compare.py")
+compare = load("rustify_compare", REPOSITORY / "skills/rustify-probe/scripts/compare.py")
 project_helper = load("rustify_project", REPOSITORY / "skills/rustify/scripts/project.py")
 
 

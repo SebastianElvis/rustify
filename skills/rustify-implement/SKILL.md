@@ -14,5 +14,7 @@ The agent does not select a different architecture for convenience.
 - The agent reads [the output rules](references/outputs.md) before recording checks.
 - The agent follows [the shared project format](../rustify/references/project.md) for paths and checkpoints.
 
+The agent uses current slice captures and mapped traces before coding.
+The agent invokes [rustify-probe](../rustify-probe/SKILL.md) when the slice needs new evidence.
 The agent returns unknown or unmapped requirements to discovery and planning.
 A slice is done only when its acceptance tests pass against the original and the Rust implementation.

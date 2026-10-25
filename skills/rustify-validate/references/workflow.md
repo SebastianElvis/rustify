@@ -45,6 +45,8 @@ A failed slice returns to implementation. A new behavior returns to discovery.
 5. The agent runs the implementation `check` command with `--mutants` when the tool is installed.
 6. The agent runs the parity gate and writes `verification/compatibility.md`.
 
+The agent obtains fresh captures through `rustify-probe`.
+The agent checks mapped trace relations against the current implementation.
 The agent tests complete workflows through their real interfaces.
 The agent does not count process checks as UI checks.
 The agent does not count recorded GUI evidence as a fresh live replay.

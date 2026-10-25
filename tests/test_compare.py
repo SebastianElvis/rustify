@@ -13,11 +13,11 @@ import unittest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("compare", ROOT / "skills/rustify-validate/scripts/compare.py")
+SPEC = importlib.util.spec_from_file_location("compare", ROOT / "skills/rustify-probe/scripts/compare.py")
 compare = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(compare)
 sys.modules["compare"] = compare
-FUZZ = importlib.util.spec_from_file_location("fuzz", ROOT / "skills/rustify-validate/scripts/fuzz.py")
+FUZZ = importlib.util.spec_from_file_location("fuzz", ROOT / "skills/rustify-probe/scripts/fuzz.py")
 fuzz = importlib.util.module_from_spec(FUZZ)
 FUZZ.loader.exec_module(fuzz)
 
@@ -120,7 +120,7 @@ class CompareTests(unittest.TestCase):
         cases = self.root / "cases.yaml"
         report = self.root / "report.yaml"
         cases.write_text("[]")
-        result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-validate/scripts/compare.py"), "--reference", str(self.reference), "--candidate", str(self.reference), "--cases", str(cases), "--report", str(report)], capture_output=True)
+        result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-probe/scripts/compare.py"), "--reference", str(self.reference), "--candidate", str(self.reference), "--cases", str(cases), "--report", str(report)], capture_output=True)
         self.assertEqual(result.returncode, 1)
         self.assertEqual(yaml.safe_load(report.read_text())["status"], "error")
 

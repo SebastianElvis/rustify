@@ -15,7 +15,7 @@ You install it with `python3 -m pip install pyyaml`.
 
 ### 1. Set up REA
 
-REA supplies the tools for product, UX, and architecture discovery.
+REA supplies binary analysis and runtime evidence through `rustify-probe`.
 
 ```sh
 npx rea-agents setup
@@ -26,7 +26,7 @@ You review the proposed configuration and approve the changes.
 Setup registers the MCP server and installs REA's matching workflow instructions.
 You restart the agents named in the completion message.
 
-Native binary analysis needs Hopper, Ghidra, or IDA.
+Native decompilation uses Hopper, Ghidra, or IDA.
 Setup can connect an existing Hopper or Ghidra installation.
 It can also install Hopper when you select that option.
 Other target types can use REA's built-in inspection tools.
@@ -40,7 +40,7 @@ You run this command from your project folder:
 npx skills add SebastianElvis/rustify --skill '*'
 ```
 
-The [Skills CLI](https://github.com/vercel-labs/skills) installs all seven Rustify skills and prompts you to select your agents.
+The [Skills CLI](https://github.com/vercel-labs/skills) installs all eight Rustify skills and prompts you to select your agents.
 The installation applies to the current project.
 The `-g` option makes the bundle available across your projects:
 
@@ -70,7 +70,7 @@ npx rea-agents doctor --provider hopper --json
 ```
 
 You can replace `hopper` with `ghidra` or `ida` for your configured provider.
-Your agent must expose the REA tools before reconstruction starts.
+Your agent must have access to REA through MCP or the CLI.
 
 ## Usage
 
@@ -110,12 +110,13 @@ The [standards guide](skills/rustify/references/standards.md) defines the writin
 ![Rustify architecture](docs/architecture.svg)
 
 1. **Preparation:** `rustify` records the target identity and the checkpoint state.
-2. **Characterization:** `rustify` captures the original outputs for the first scenarios.
+2. **Characterization:** `rustify-probe` captures the first scenarios and relevant binary evidence through REA.
 3. **Discovery:** `rustify-product`, `rustify-design`, and `rustify-architecture` write EARS requirements, C4 components, and evidence in parallel when the agent supports parallel work.
 4. **Planning:** `rustify-plan` maps each original component to one Rust module and plans a walking skeleton and risk-ordered slices.
 5. **Slices:** `rustify-implement` builds one slice at a time with acceptance tests first. `rustify-validate` checks each slice before the next one.
-6. **Acceptance:** `rustify-validate` runs comparisons, differential fuzzing, the reflexion check, and the parity gate, and writes an assurance case.
+6. **Acceptance:** `rustify-validate` requests fresh probes, runs the reflexion check and parity gate, and writes an assurance case.
 
+The discovery, planning, implementation, and validation skills use `rustify-probe` for shared captures and execution traces.
 The agent runs discovery tasks sequentially when parallel execution is unavailable.
 The [architecture guide](docs/architecture.md) includes the diagram's editable LaTeX source.
 

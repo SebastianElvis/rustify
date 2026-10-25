@@ -14,7 +14,7 @@ The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent reconstructs original behavior without product improvements.
 
 1. The agent reads [the investigation method](references/investigation.md) before discovery.
-2. The agent uses the existing [REA tools](https://github.com/morluto/rea) and the current provider.
+2. The agent invokes [rustify-probe](../rustify-probe/SKILL.md) for original behavior and binary evidence.
    The orchestrator owns dependency setup and shared session coordination.
 3. The agent reads [the output rules](references/output-format.md) before writing.
 4. The agent uses the [product specification template](assets/product-specification.md) for `recovered/product.md`.

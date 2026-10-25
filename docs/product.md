@@ -2,7 +2,7 @@
 
 Rustify reconstructs local software as a maintainable Rust product.
 Rustify preserves the original product through one-to-one mappings wherever evidence permits them.
-The input consists of a binary, its resources, and a compatibility goal.
+The input consists of a binary and its resources.
 The output includes recovered specifications, a Rust implementation, tests, and measured gaps.
 
 ## Vision
@@ -19,6 +19,7 @@ The user controls publication of the resulting repository.
 | Workflow | Required result |
 | --- | --- |
 | The user supplies a target. | Rustify records its identity and execution constraints. |
+| The user requests evidence. | Rustify captures behavior and binary evidence through the REA-dependent probe skill. |
 | The user requests reconstruction. | Rustify recovers product, experience, and architecture evidence. |
 | The user requests an implementation. | Rustify plans and implements complete Rust workflows. |
 | The user requests proof. | Rustify compares both applications with reproducible cases. |
@@ -33,8 +34,9 @@ Rustify always reconstructs the full product with one-to-one compatibility.
 `recovered/roadmap.md` records the investigation limits and stopping conditions.
 
 Rustify supports CLI, desktop, local service, and game investigation profiles.
-The evaluation dataset covers a CLI, cryptographic hashing, an HTTP client, and native desktop dialogs.
-Each track has finite scored cases and a source audit.
+The dataset covers utilities, hashing, HTTP, compression, databases, interpreters, build tools, games, dialogs, and document conversion.
+Open tracks use upstream evidence after the source and recovered model freeze.
+Closed tracks use original behavior and independent format checks.
 The desktop track records five native GUI workflows.
 The automated desktop runner verifies those captures and runs fresh unit tests.
 The runner does not claim a fresh GUI replay.
@@ -47,6 +49,7 @@ The runner does not claim a fresh GUI replay.
 
 The ledger `recovered/model.yaml` links requirements, components, Rust modules, slices, and gaps.
 The agent workspace holds only temporary worker shards and progress notes.
+The probe skill supplies controlled captures and execution traces throughout discovery, planning, implementation, and validation.
 The declarative tests state observable requirements before the Rust tests implement them.
 Each test records its observed, inferred, or proposed origin.
 
@@ -66,7 +69,7 @@ Each test records its observed, inferred, or proposed origin.
 Tests support finite compatibility claims.
 Tests do not establish complete equivalence for every possible input.
 The default workflow targets the full product.
-The dataset uses explicit bounded evaluations.
+The dataset records finite evaluation coverage.
 Its passing checks do not establish full-product parity.
 
 ## Roadmap

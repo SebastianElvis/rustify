@@ -2,13 +2,14 @@
 
 The helper checks deterministic process cases.
 The helper does not certify product, UI, component, or data-model parity.
-The parity workflow and matrix supply those acceptance requirements.
+The validation workflow and ledger supply those acceptance requirements.
 
 The helper accepts a nonempty scenario list.
 Each scenario has a unique `id`, an `args` list, optional `stdin_b64`, optional `files`, and optional `env`.
 The stdin value and file values encode raw bytes as base64.
 Fixture files use safe relative paths.
-The helper reserves locale, timezone, home, and path variables.
+The helper controls home and path variables.
+Cases can set locale and timezone values.
 
 ```yaml
 - id: encode-stdin
@@ -22,10 +23,10 @@ Each argument is a string. The agent quotes an argument that YAML reads as a num
 The agent runs the installed helper with these arguments.
 
 ```sh
-python3 <rustify-validate>/scripts/compare.py --reference ORIGINAL --candidate IMPLEMENTATION --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name PROGRAM
+python3 <rustify-probe>/scripts/compare.py --reference ORIGINAL --candidate IMPLEMENTATION --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name PROGRAM
 ```
 
-Here, `<rustify-validate>` means this installed skill folder.
+Here, `<rustify-probe>` means this installed skill folder.
 The helper gives both processes the same argv[0] and deterministic environment.
 The helper uses separate temporary directories and compares output bytes, errors, status, and regular files.
 The report preserves inputs, raw captures, and executable hashes.
@@ -41,7 +42,7 @@ It also keeps each input that produces a new pair of exit status and diagnostic 
 This steering follows NEZHA (Petsios et al., IEEE S&P 2017).
 
 ```sh
-python3 <rustify-validate>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEMENTATION --seeds PROJECT/recovered/scenarios.yaml --report PROJECT/verification/fuzz.yaml --name PROGRAM --iterations 500 --seed 0
+python3 <rustify-probe>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEMENTATION --seeds PROJECT/recovered/scenarios.yaml --report PROJECT/verification/fuzz.yaml --name PROGRAM --iterations 500 --seed 0
 ```
 
 The report lists each divergence with both captures.
