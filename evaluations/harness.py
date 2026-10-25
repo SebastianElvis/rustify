@@ -1,0 +1,122 @@
+"""Score one agent-generated project for an evaluation track."""
+
+import argparse
+import hashlib
+import importlib.util
+import io
+import json
+from pathlib import Path
+import re
+import subprocess
+import tarfile
+import zipfile
+
+
+REPOSITORY = Path(__file__).resolve().parents[1]
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+compare = load("rustify_compare", REPOSITORY / "skills/rustify-validate/scripts/compare.py")
+project_helper = load("rustify_project", REPOSITORY / "skills/rustify/scripts/project.py")
+
+
+def save(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, indent=2) + "\n")
+
+
+def extract(data, member):
+    if data.startswith(b"PK"):
+        bundle = zipfile.ZipFile(io.BytesIO(data))
+        items = [name for name in bundle.namelist() if not name.endswith("/") and member in (name, Path(name).name)]
+        read = bundle.read
+    else:
+        bundle = tarfile.open(fileobj=io.BytesIO(data))
+        items = [item for item in bundle.getmembers() if item.isfile() and member in (item.name, Path(item.name).name)]
+        read = lambda item: bundle.extractfile(item).read()
+    if len(items) != 1:
+        raise ValueError("The reference archive must contain one matching executable.")
+    return read(items[0])
+
+
+def reference(track, pin):
+    path = REPOSITORY / "work/downloads" / track
+    if path.is_file() and not path.is_symlink() and digest(path.read_bytes()) == pin["sha256"]:
+        return path
+    command = ["curl", "-fsSL", "--retry", "2", "--max-time", "120", pin["url"]]
+    config = None
+    if "token_url" in pin:
+        token = json.loads(subprocess.check_output(["curl", "-fsSL", pin["token_url"]]))["token"]
+        command += ["--config", "-"]
+        config = f'header = "Authorization: Bearer {token}"\n'.encode()
+    data = subprocess.run(command, input=config, capture_output=True, check=True).stdout
+    if "archive_sha256" in pin:
+        if digest(data) != pin["archive_sha256"]:
+            raise ValueError("The reference archive hash differs from the pin.")
+        data = extract(data, pin["member"])
+    if digest(data) != pin["sha256"]:
+        raise ValueError("The reference binary hash differs from the pin.")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    path.chmod(0o755)
+    return path
+
+
+def rust(project, logs):
+    commands = []
+    for label, args in (("fmt", ["fmt", "--check"]), ("clippy", ["clippy", "--locked", "--all-targets", "--", "-D", "warnings"]), ("test", ["test", "--locked"]), ("build", ["build", "--release", "--locked", "--message-format=json"])):
+        result = subprocess.run(["cargo", *args], cwd=project / "implementation", capture_output=True, timeout=900)
+        log = logs / f"{label}.log"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        log.write_bytes(result.stdout + result.stderr)
+        commands.append({"command": ["cargo", *args], "returncode": result.returncode, "log": str(log)})
+        if result.returncode:
+            raise RuntimeError(f"The {label} check failed. Read {log}.")
+    messages = [json.loads(line) for line in result.stdout.splitlines() if line.startswith(b"{")]
+    binaries = sorted({item["executable"] for item in messages if item.get("executable") and "bin" in item["target"]["kind"]})
+    if len(binaries) != 1:
+        raise ValueError("The implementation must build exactly one executable.")
+    tests = sum(map(int, re.findall(rb"test result: ok\. (\d+) passed", (logs / "test.log").read_bytes())))
+    return Path(binaries[0]), {"commands": commands, "rust_tests": tests}
+
+
+def run(track, pin, score):
+    parser = argparse.ArgumentParser(description=f"Score a {track} reconstruction against the pinned reference.")
+    parser.add_argument("--project", type=Path, default=REPOSITORY / "work/projects" / track)
+    project = parser.parse_args().project.resolve()
+    output = REPOSITORY / "work/evaluation" / track
+    report = {"track": track, "project": str(project), "status": "failed"}
+    try:
+        executable = reference(track, pin)
+        report["reference_sha256"] = pin["sha256"]
+        if not (project / "implementation/Cargo.toml").is_file():
+            raise ValueError(f"The project is missing. Reconstruct {executable} into {project}.")
+        build = project / "implementation/target"
+        report["freeze"] = {path.relative_to(project).as_posix(): digest(path.read_bytes()) for path in sorted(project.rglob("*")) if path.is_file() and build not in path.parents}
+        try:
+            report["checkpoints"] = project_helper.status(project)
+        except (OSError, ValueError, KeyError) as error:
+            report["checkpoints"] = {"error": str(error)}
+        candidate, report["rust"] = rust(project, output / "logs")
+        report["candidate_sha256"] = digest(candidate.read_bytes())
+        reports, failures = score(executable, candidate, project)
+        for name, value in reports.items():
+            save(output / f"{name}.json", value)
+        report["reports"] = {name: {key: value[key] for key in ("status", "passed", "failed")} for name, value in reports.items()}
+        report["failures"] = failures
+        report["status"] = "passed" if reports and all(value["status"] == "passed" for value in reports.values()) and not failures else "failed"
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
+        report["error"] = str(error)
+    save(output / "report.json", report)
+    print(json.dumps({key: value for key, value in report.items() if key != "freeze"}, indent=2))
+    return 0 if report["status"] == "passed" else 1

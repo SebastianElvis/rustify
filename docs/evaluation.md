@@ -70,29 +70,37 @@ Other hosts use an equivalent target-specific replay tool.
 | Client | xh 0.26.3 | Local HTTP methods, headers, bodies, redirects, and error status. |
 | Desktop | zenity 0.10.15 | Entry acceptance, entry cancellation, question choices, and information acknowledgement. |
 
-Each evaluation wrapper has a `run.py` outside its generated `target/`.
-The target directory follows the three-folder product layout.
-The wrapper can keep historical agent fixtures outside that directory.
-The original source remains hidden until a recorded source and model freeze.
-Archives preserve the original files when later audits require source-assisted repairs.
-The cryptography, client, and desktop tracks disclose these repairs.
-The base64 implementation needs no source-assisted repair.
+The repository stores the dataset, not agent outputs.
+Each track folder has a `run.py` scorer and its pinned reference, cases, and upstream vectors.
+`evaluations/harness.py` provides the shared download, freeze, Rust checks, and report steps.
 
-The default replay runs CLI, cryptography, and client checks.
-The desktop option checks recorded GUI evidence and fresh Rust unit tests.
-The desktop report states that it does not perform a fresh native replay.
-The desktop runner rejects captures from an earlier implementation.
-The initial desktop investigation uses actual native controls and process captures.
-The desktop source audit maps its scenarios to upstream interactive tests.
-The audit does not claim that the upstream interactive suite ran.
+1. The scorer downloads and verifies the reference in `work/downloads/<track>`.
+2. The agent reconstructs that binary into `work/projects/<track>`.
+3. The agent receives only the binary, the skill, and the scope from the table above.
+4. The scorer records the hash of each project file before it reveals any case.
+5. The scorer runs Cargo format, Clippy, test, and release build checks.
+6. The scorer compares the Rust executable with the reference on its own cases and upstream vectors.
+7. The scorer writes its reports in `work/evaluation/<track>/`.
+
+Git ignores `work/`.
+A run without a project still downloads the reference and then fails.
+The scorer reports the project checkpoint state but does not require it.
+
+The default evaluation scores the CLI, cryptography, and client tracks.
+The desktop option also scores the zenity track.
+The scorer does not open dialogs.
+The operator replays the five cases with host-native CUA on both executables.
+The operator saves the captures and a visual review in `verification/gui-captures/` of the project.
+The scorer accepts only captures of the reference and of the executable that it builds.
 
 ```sh
 make evaluate
-python3 scripts/evaluate.py --recorded-desktop
+python3 scripts/evaluate.py --desktop
+python3 evaluations/xh/run.py --project /path/to/project
 ```
 
-The first setup needs internet access for pinned binaries and Cargo dependencies.
-Subsequent replay uses local inputs and loopback HTTP.
+The first run needs internet access for pinned binaries and Cargo dependencies.
+Later runs use local inputs and loopback HTTP.
 The dataset requires macOS and the reference binaries' CPU support.
 The skill bundle remains host-neutral.
 
@@ -120,7 +128,7 @@ The skill bundle remains host-neutral.
 The architecture assessment maps original components to Rust components.
 Each mapping preserves responsibilities, interfaces, state ownership, and execution boundaries where evidence permits them.
 The report keeps unknown and different mappings open.
-Each track stores its report in `evaluations/<track>/target/verification/compatibility.md`.
+The agent stores its report in `verification/compatibility.md` of its project.
 
 ## Strict parity gate
 

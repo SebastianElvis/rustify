@@ -1,12 +1,9 @@
 """Check independent expectations from the original HTTP tests."""
 
-import argparse
 import base64
-import json
-from pathlib import Path
 
-from evaluate import TARGET, REPOSITORY, compare, save
 from fixture import start
+from harness import compare
 
 
 def vectors(url):
@@ -73,18 +70,3 @@ def evaluate(reference, candidate):
         server.server_close()
     return {"status": "passed" if all(record["passed"] for record in records) else "failed", "passed": sum(record["passed"] for record in records), "failed": sum(not record["passed"] for record in records), "cases": records}
 
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--reference", type=Path, default=REPOSITORY / "work/downloads/xh")
-    parser.add_argument("--candidate", type=Path, default=TARGET / "implementation/target/debug/xh")
-    parser.add_argument("--report", type=Path, default=TARGET / "verification/raw/upstream.json")
-    args = parser.parse_args()
-    report = evaluate(args.reference.resolve(), args.candidate.resolve())
-    save(args.report, report)
-    print(json.dumps({key: report[key] for key in ("status", "passed", "failed")}))
-    return 0 if report["status"] == "passed" else 1
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
