@@ -31,7 +31,10 @@ REPEATS = 3
 
 def execute(executable, case, timeout=60):
     """Run the steps of one case in a fresh folder and capture the view: process results and files."""
-    profile = f'(version 1)(allow default)(deny process-exec)(allow process-exec (literal "{executable}"))'
+    # The sandbox denies every exec except the program and the shell that the control scripts need.
+    # A candidate therefore cannot delegate a conversion to /usr/bin/textutil or another tool.
+    executable = Path(executable).resolve()
+    profile = f'(version 1)(allow default)(deny process-exec)(allow process-exec (literal "{executable}") (literal "/bin/sh") (literal "/bin/bash") (literal "/bin/dash"))'
     result = {"steps": [], "files": {}, "window": [time.time(), None], "error": None}
     with tempfile.TemporaryDirectory(prefix="rustify-") as directory:
         root = Path(directory)
@@ -159,12 +162,12 @@ def score(reference, candidate, project, workers=os.cpu_count()):
         wrong.write_text('#!/bin/sh\nprintf "wrong\\n"\n')
         wrong.chmod(0o755)
         control = groups["surface-manual"][:3]
-        if all(not differ(runs[case["id"]][0][0], execute(wrong.resolve(), case)) for case in control):
+        if all(not differ(runs[case["id"]][0][0], execute(wrong, case)) for case in control):
             failures.append("The wrong-output control passes.")
         wrapper = Path(directory) / "wrapper"
         wrapper.write_text(f'#!/bin/sh\nexec {reference} "$@"\n')
         wrapper.chmod(0o755)
-        if all(not differ(runs[case["id"]][0][0], execute(wrapper.resolve(), case)) for case in control):
+        if all(not differ(runs[case["id"]][0][0], execute(wrapper, case)) for case in control):
             failures.append("The framework-wrapper control passes.")
     return reports, failures
 
