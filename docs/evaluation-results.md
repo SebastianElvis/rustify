@@ -32,6 +32,9 @@ The new reference repeatability check passes all 26 cases.
 The private state tool also passes an independent adaptive challenge.
 The challenger makes 60 oracle calls and replays 30 cases.
 The challenger finds zero witnesses.
+The bzip2 baseline also passes an independent adaptive challenge.
+The challenger uses all 80 oracle calls and replays 40 cases.
+The challenge finds zero witnesses.
 These counts do not prove equivalence for arbitrary inputs.
 
 The private tracks use the updated skills.
