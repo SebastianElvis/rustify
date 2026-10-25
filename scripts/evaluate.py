@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--track", choices=("base64", "b3sum", "xh", "zenity"), action="append")
+    parser.add_argument("--track", choices=sorted(path.parent.name for path in (ROOT / "evaluations").glob("*/*/run.py")), action="append")
     parser.add_argument("--desktop", action="store_true", help="Also score the zenity track from saved GUI captures.")
     parser.add_argument("--projects", type=Path, default=ROOT / "work/projects")
     args = parser.parse_args()

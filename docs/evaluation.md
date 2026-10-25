@@ -57,29 +57,34 @@ The helper fails on time limits and execution errors even when both programs fai
 The POSIX helper does not provide OS-level containment for hostile binaries.
 Other hosts use an equivalent target-specific replay tool.
 
-## Compact dataset
+## Dataset
 
-| Track | Reference | Scope |
+The dataset has two tiers. Every track targets the full product.
+
+| Tier | Track | Reference |
 | --- | --- | --- |
-| CLI | GNU base64 9.12 | Encoding, decoding, wrapping, files, options, and error behavior. |
-| Cryptography | b3sum 1.8.7 | Hashing, keyed hashing, derivation, XOF output, and checksum verification. |
-| Client | xh 0.26.3 | Local HTTP methods, headers, bodies, redirects, and error status. |
-| Desktop | zenity 0.10.15 | Entry acceptance, entry cancellation, question choices, and information acknowledgement. |
-| Compression | bzip2 1.0.8 | The complete `bzip2` command and byte-exact `.bz2` output. |
-| Interpreter | Lua 5.5.1 | The command line, the language core, and the deterministic standard libraries. |
-| Database | SQLite 3.54.1 shell | Shell basics, core SQL, and rollback-journal database files. |
-| Build tool (C++) | Ninja 1.13.2 | The manifest language, dirty checks, logs, flags, and tools. |
-| Game | doomgeneric with Freedoom 0.13.0 | Startup, WAD loading, demo simulation, and the software renderer. |
+| Open source | `base64` | GNU base64 9.12 |
+| Open source | `b3sum` | b3sum 1.8.7 |
+| Open source | `xh` | xh 0.26.3 |
+| Open source | `zenity` | zenity 0.10.15 |
+| Open source | `bzip2` | bzip2 1.0.8, hardened build |
+| Open source | `lua` | Lua 5.5.1, hardened build |
+| Open source | `sqlite` | SQLite 3.54.1 shell, hardened build |
+| Open source | `ninja` | Ninja 1.13.2, hardened build |
+| Open source | `doom` | doomgeneric with Freedoom 0.13.0, hardened build |
+| Closed source | `iconutil` | macOS `/usr/bin/iconutil` |
+| Closed source | `textutil` | macOS `/usr/bin/textutil` |
 
-Each track folder has a `README.md` with the product, the selection rationale, the reference build, the oracle, and the scope.
-`evaluations/README.md` explains the dataset design and its relation to published benchmarks.
+Each track folder in `evaluations/open/` or `evaluations/closed/` has a `README.md` with the product, the selection rationale, the reference, and the oracles.
+[evaluations/README.md](../evaluations/README.md) explains the indistinguishability game, the two tiers, and the relation to published benchmarks.
+`scripts/distinguish.py` runs the adaptive distinguisher against a scored project.
 
 ## Reference builds
 
 The first four tracks pin upstream release binaries.
 The upstream projects control their compiler flags.
 The last five tracks pin a hardened local build from pinned source.
-`scripts/build_reference.py <track>` reads `evaluations/<track>/reference.yaml` and builds the binary in `work/references/<track>/`.
+`scripts/build_reference.py <track>` reads `evaluations/open/<track>/reference.yaml` and builds the binary in `work/references/<track>/`.
 
 - The C and C++ flags are `-O3 -flto -fvisibility=hidden -DNDEBUG`.
 - The link flags are `-flto -Wl,-dead_strip`.
