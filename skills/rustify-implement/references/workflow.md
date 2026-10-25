@@ -64,3 +64,7 @@ A missed mutant in a requirement path needs a new test or a recorded gap.
 The implementation checkpoint requires current successful checks.
 The agent also runs the planned [quality checks](../../rustify-validate/references/quality.md) before acceptance.
 Format, lint, and unit tests do not establish bounded resource use.
+
+The check supervisor limits each process group to 8 GiB and 64 processes.
+The deadline is 900 seconds per check and 3600 seconds for mutation testing.
+A limit failure remains a failed check. The agent plans bounded batches when a complete run needs more time.

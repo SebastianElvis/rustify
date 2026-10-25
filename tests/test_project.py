@@ -206,6 +206,15 @@ class ProjectTests(unittest.TestCase):
             self.assertEqual(project.check(self.root)["status"], "failed")
         self.assertEqual(project.status(self.root)["stale"], "implement")
 
+    def test_resource_limit_blocks_a_check_with_zero_exit_status(self):
+        self.through("plan")
+        self.artifacts("implement")
+        completed = type("Completed", (), {"returncode": 0, "stdout": b"", "stderr": b""})()
+        with patch.object(project.supervisor, "execute", return_value=(completed, "The process group exceeded the memory limit.", {})):
+            self.assertEqual(project.check(self.root, ["mutants"])["status"], "failed")
+        checks = yaml.safe_load((self.root / "verification/checks.yaml").read_text())
+        self.assertTrue(all(record["returncode"] == 1 and record["error"] for record in checks["commands"][-4:]))
+
     def test_plan_needs_one_skeleton_an_acyclic_graph_and_full_coverage(self):
         self.through("discover")
         self.artifacts("plan")

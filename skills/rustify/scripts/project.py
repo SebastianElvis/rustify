@@ -3,6 +3,7 @@
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -12,6 +13,10 @@ import time
 
 import yaml
 
+
+PROBE = importlib.util.spec_from_file_location("rustify_supervisor", Path(__file__).resolve().parents[2] / "rustify-probe/scripts/compare.py")
+supervisor = importlib.util.module_from_spec(PROBE)
+PROBE.loader.exec_module(supervisor)
 
 PHASES = ("discover", "plan", "implement", "validate")
 REQUIRED = {
@@ -225,9 +230,12 @@ def check(project, extra=()):
         log = root / "verification/logs" / f"{stamp}.log"
         command = CHECKS[name] + ([str(log.with_suffix(""))] if name == "mutants" else [])
         log.parent.mkdir(parents=True, exist_ok=True)
-        with log.open("wb") as stream:
-            returncode = subprocess.run(command, cwd=root / "implementation", stdout=stream, stderr=subprocess.STDOUT).returncode
-        record = {"name": name, "command": command, "returncode": returncode, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
+        result, error, resources = supervisor.execute(command, cwd=root / "implementation", timeout=3600 if name == "mutants" else 900, memory_mib=8192)
+        returncode = result.returncode or int(error is not None)
+        log.write_bytes(result.stdout + result.stderr + (error.encode() if error else b""))
+        record = {"name": name, "command": command, "returncode": returncode, "error": error, "resources": resources, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
+        if error:
+            status = "failed"
         if name == "mutants":
             outcomes = log.with_suffix("") / "mutants.out/outcomes.json"
             counts = json.loads(outcomes.read_text()) if outcomes.is_file() else {}
