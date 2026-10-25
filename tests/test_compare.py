@@ -54,7 +54,7 @@ class CompareTests(unittest.TestCase):
     def test_binary_data_and_fixture_files_match(self):
         self.case["files"] = {"nested/data": encoded(b"\x00\xff")}
         report = compare.compare(self.reference, self.reference, [self.case])
-        self.assertEqual(report["status"], "passed")
+        self.assertEqual(report["status"], "passed", report)
         self.assertEqual(report["cases"][0]["reference"]["stdout_b64"], self.case["stdin_b64"])
         self.assertEqual(report["cases"][0]["reference"]["files"]["nested/data"]["data_b64"], encoded(b"\x00\xff"))
 
@@ -70,7 +70,7 @@ class CompareTests(unittest.TestCase):
                 candidate = self.program(field, body)
                 report = compare.compare(self.reference, candidate, [self.case])
                 self.assertEqual(report["status"], "failed")
-                self.assertEqual(report["cases"][0]["differences"], [field])
+                self.assertEqual(report["cases"][0]["differences"], [field], report)
 
     def test_equal_timeouts_fail(self):
         slow = self.program("slow", "import time\ntime.sleep(10)\n")

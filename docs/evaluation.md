@@ -151,12 +151,29 @@ The scorers above grade one project. The agent evaluation also produces the proj
 6. The `grade` step rejects a project that changed after the freeze.
 7. It runs the track scorer, the parity gate, and the quality measures on each trial.
 
+The harness records both installed skill copies before the agent starts.
+The grader rejects a changed skill copy before it loads the trial's parity helper.
+The report records that helper's hash and the skill verification result.
+An older trial without an initial skill manifest uses the current trusted gate.
+That trial cannot establish the original skill bundle's integrity.
+
 ```sh
 python3 scripts/agent_eval.py run --agent "claude -p --output-format json --dangerously-skip-permissions" --trials 3
 python3 scripts/agent_eval.py grade work/agent-eval/<stamp>
+python3 scripts/agent_eval.py resume work/agent-eval/<stamp> --agent "claude -p --output-format json --dangerously-skip-permissions" --no-grade
 ```
 
+The `resume` command continues failed trials in their saved agent sessions.
+The command keeps the installed skills and project files.
+The command records a new freeze after the agent exits.
+The command rejects a trial that already has a score folder.
+The `--no-grade` option delays grading until the blind work ends.
+The harness lets Claude workers finish within the outer time limit.
+The harness stops the agent process group when that limit expires.
+
 The harness never repairs a project. Every score is a blind score.
+The blind protocol relies on agent compliance.
+The harness does not isolate filesystem or network access.
 The default tracks are base64, b3sum, and xh. The desktop track needs an operator.
 
 ### Held-out tracks
