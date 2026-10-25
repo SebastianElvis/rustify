@@ -57,7 +57,7 @@ def validate(cases):
         for key, value in env.items():
             if not isinstance(key, str) or not key or "=" in key or "\0" in key or not isinstance(value, str) or "\0" in value:
                 raise ValueError("Case environment values must be valid strings.")
-            if key in {"HOME", "LANG", "LC_ALL", "TZ", "PATH"}:
+            if key in {"HOME", "PATH"}:
                 raise ValueError("A case cannot replace the controlled environment.")
     return cases
 

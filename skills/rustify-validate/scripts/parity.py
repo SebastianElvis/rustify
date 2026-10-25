@@ -82,12 +82,10 @@ def reflexion(root, model, components, inputs):
     owners = {}
     for identity, path in mapped.items():
         owners.setdefault(path, []).append(identity)
-    edges = records(model["edges"])
-    for edge in edges.values():
+    expected = {}
+    for edge in records(model["edges"]).values():
         if edge["source"] not in components or edge["target"] not in components or edge["kind"] not in {"control", "data", "static"}:
             raise ValueError(f"The edge has an invalid component or kind: {edge['id']}")
-    expected = {}
-    for edge in edges.values():
         pair = (mapped.get(edge["source"]), mapped.get(edge["target"]))
         if edge["kind"] != "data" and None not in pair and pair[0] != pair[1]:
             expected[pair] = edge["id"]
@@ -150,11 +148,12 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
                 raise ValueError(f"{owner}: An evidence reference is unresolved.")
             return evidence[reference]["classification"] == "observed"
 
-        for item in components.values():
-            if item["level"] not in {"container", "component"} or item["classification"] not in CLASSES:
-                raise ValueError(f"The component has an invalid level or classification: {item['id']}")
-            if item["classification"] != "observed" or not all(bound(name, item["id"]) for name in item["evidence"]):
-                gaps.append(f"{item['id']}: The component remains uncertain.")
+        for kind, item in [("component", item) for item in components.values()] + [("edge", item) for item in records(model["edges"]).values()]:
+            if item["classification"] not in CLASSES or (kind == "component" and item["level"] not in {"container", "component"}):
+                raise ValueError(f"The {kind} has an invalid level or classification: {item['id']}")
+            observations = [bound(name, item["id"]) for name in item["evidence"]]
+            if item["classification"] != "observed" or not observations or not all(observations):
+                gaps.append(f"{item['id']}: The {kind} remains uncertain.")
         structure = result["reflexion"] = reflexion(root, model, components, inputs)
         gaps += [f"{item}: The reflexion check reports {kind.replace('_', ' ')}." for kind in ("absences", "divergences", "merged", "unmapped", "extra_modules") for item in structure[kind]]
         statuses = {}

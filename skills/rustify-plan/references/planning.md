@@ -22,7 +22,7 @@ An async runtime or a webview does not establish equivalent behavior.
 
 ## Plan a walking skeleton and slices
 
-The first slice has `kind: skeleton`. It runs one real scenario through every container end to end.
+The first slice has `kind: skeleton`. It runs one core product workflow through every container, including data and state changes.
 The skeleton proves the build, the process boundary, and the differential comparison before feature work.
 Each later slice has `kind: slice` and depends on the skeleton directly or through other slices.
 A slice delivers complete requirements through all components that they use. It is a vertical slice.

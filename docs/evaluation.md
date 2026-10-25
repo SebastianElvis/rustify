@@ -151,6 +151,8 @@ The scorers above grade one project. The agent evaluation also produces the proj
 6. The `grade` step rejects a project that changed after the freeze.
 7. It runs the track scorer, the parity gate, and the quality measures on each trial.
 
+A successful trial requires both the scorer and the full parity gate to pass.
+
 The harness records both installed skill copies before the agent starts.
 The grader rejects a changed skill copy before it loads the trial's parity helper.
 The report records that helper's hash and the skill verification result.
@@ -171,7 +173,8 @@ The `--no-grade` option delays grading until the blind work ends.
 The harness lets Claude workers finish within the outer time limit.
 The harness stops the agent process group when that limit expires.
 
-The harness never repairs a project. Every score is a blind score.
+The harness never repairs a project.
+The evaluator reports later repairs and snapshots separately from each initial blind score.
 The blind protocol relies on agent compliance.
 The harness does not isolate filesystem or network access.
 The default tracks are base64, b3sum, and xh. The desktop track needs an operator.
@@ -225,6 +228,10 @@ The agent never sees `grading.yaml`.
 
 Pattern recall is a coarse measure. A match does not prove a correct requirement.
 The evaluator audits a sample of requirements against the source to estimate precision.
+An unsuccessful reference repeatability check makes the score invalid.
+An invalid score has no candidate pass rate.
+The behavior rate excludes `parsers-format` and `parse-outputs` reports.
+Those auxiliary checks still block full acceptance when they fail.
 
 ## Parity gate
 

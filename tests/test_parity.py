@@ -30,7 +30,7 @@ class ParityTests(unittest.TestCase):
         self.write("implementation/docs/design.md", "C-1 C-2\n")
         self.write("recovered/roadmap.md", "No open gaps.\n")
         self.state = {"target": {"sha256": "a" * 64}}
-        self.evidence = [{"id": "E1", "classification": "observed", "path": "recovered/evidence/original.yaml", "sha256": self.sha("recovered/evidence/original.yaml")}]
+        self.evidence = [{"id": "E1", "classification": "observed", "path": "recovered/evidence/original.yaml", "sha256": self.sha("recovered/evidence/original.yaml")}, {"id": "E2", "classification": "unknown"}]
         self.tests = [{"id": "T1", "origin": "observed", "evidence": ["E1"], "scenarios": ["S1"], "expect": {"returncode": 0, "stdout_b64": "YQ=="}}]
         result = {"returncode": 0, "stdout_b64": "YQ==", "stderr_b64": "", "error": None}
         self.report = {"status": "passed", "passed": 1, "failed": 0, "executables": {"reference": {"sha256": "a" * 64}}, "cases": [{"input": {"id": "S1"}, "reference": result.copy(), "candidate": result.copy(), "passed": True, "differences": []}]}
@@ -121,13 +121,14 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(result["assessment"], "incomplete")
         self.assertTrue(any(gap.startswith("REQ-2:") for gap in result["gaps"]))
 
-    def test_uncertain_inventory_and_claims_remain_gaps(self):
-        self.model["inventory"]["complete"] = False
-        self.model["requirements"][0]["classification"] = "inferred"
-        self.evidence[0] = {"id": "E1", "classification": "unknown"}
-        result = self.run_check()
-        self.assertEqual(result["assessment"], "incomplete")
-        self.assertGreaterEqual(len(result["gaps"]), 4)
+    def test_uncertain_claims_and_unresolved_evidence_block_acceptance(self):
+        for section in ("components", "edges", "requirements"):
+            for changes in ({"evidence": []}, {"classification": "inferred"}, {"classification": "unknown"}, {"evidence": ["E2"]}, {"evidence": ["missing"]}):
+                saved = copy.deepcopy(self.model[section][0])
+                self.model[section][0].update(changes)
+                result = self.run_check(True)
+                self.assertEqual((result["status"], result["assessment"], result["full_parity_gate_pass"]), ("failed" if "missing" in changes.get("evidence", []) else "partial", "incomplete", False))
+                self.model[section][0] = saved
 
     def test_matching_wrong_outputs_fail_independent_expectations(self):
         for label in ("reference", "candidate"):

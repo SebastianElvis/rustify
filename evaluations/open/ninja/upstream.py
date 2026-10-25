@@ -1,8 +1,6 @@
 """Run the upstream Ninja tests and adapt the upstream parser test inputs to black-box scenarios."""
 
 import ast
-import json
-import os
 from pathlib import Path
 import re
 import subprocess
@@ -27,7 +25,9 @@ FEATURES = {
     "test_explain_output": "restat", "test_issue_2586": "pools", "test_issue_2621": "dyndep", "test_issue_2681": "interrupt",
 }
 DRIVER = """
-import importlib.util, json, sys, unittest
+import importlib.util, sys, unittest
+sys.path.insert(0, sys.argv[3])
+import yaml
 spec = importlib.util.spec_from_file_location("upstream_test", sys.argv[1])
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
@@ -41,7 +41,7 @@ class Result(unittest.TestResult):
     def addSkip(self, test, reason):
         self.outcomes[test.id()] = ["skipped", reason]
 unittest.defaultTestLoader.loadTestsFromModule(module).run(Result())
-open(sys.argv[2], "w").write(json.dumps(Result.outcomes))
+open(sys.argv[2], "w").write(yaml.safe_dump(Result.outcomes, sort_keys=False))
 """
 LITERAL = r'(?:\s*"(?:[^"\\\n]|\\.)*")+'
 TEST = re.compile(r"\nTEST(?:_F)?\(\w+, (\w+)\)(.*?)(?=\nTEST|\Z)", re.S)
@@ -65,44 +65,30 @@ def sources():
         return {item.name[len(prefix):]: bundle.extractfile(item).read().decode() for item in bundle.getmembers() if item.isfile() and re.fullmatch(r"(misc/[\w.]+\.py|src/\w+_test\.cc)", item.name[len(prefix):])}
 
 
-def python_tests(executable, files, script, attempts=3):
-    """Run one upstream test file up to three times and keep the first passing outcome of each test.
-
-    The upstream test_issue_2621 depends on the completion order of two parallel commands, so one attempt can fail on the reference.
-    """
-    outcomes = {}
-    for _ in range(attempts):
-        for name, outcome in python_attempt(executable, files, script).items():
-            if outcomes.get(name, ["missing"])[0] != "passed":
-                outcomes[name] = outcome
-        if outcomes and all(outcome[0] == "passed" for outcome in outcomes.values()):
-            break
-    return outcomes
-
-
 def python_attempt(executable, files, script):
     """Run one upstream Python test file against one executable and return each outcome."""
     with tempfile.TemporaryDirectory(prefix="rustify-ninja-upstream-") as directory:
         root = Path(directory)
         (root / "misc").mkdir()
+        # The issue_2621 probe uses one job to fix the command completion order.
         for name in (script, *HELPERS):
-            (root / name).write_text(files[name])
+            (root / name).write_text(files[name].replace('            "-v",\n            r"""[1/4] printf', '            "-j1 -v",\n            r"""[1/4] printf') if name == script else files[name])
         (root / "work").mkdir()
         (root / "work/ninja").symlink_to(executable)
         env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": directory, "PATH": "/usr/bin:/bin"}
         # The upstream tests run `script`, which forwards EOF from a closed stdin to the pty, so stdin stays open.
-        process = subprocess.Popen([sys.executable, "-I", "-c", DRIVER, str(root / script), str(root / "outcomes.json")], cwd=root / "work", env=env, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        process = subprocess.Popen([sys.executable, "-I", "-c", DRIVER, str(root / script), str(root / "outcomes.yaml"), str(Path(yaml.__file__).resolve().parent.parent)], cwd=root / "work", env=env, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             process.wait(timeout=600)
         finally:
             process.stdin.close()
             process.kill()
-        path = root / "outcomes.json"
-        return {key.rsplit(".", 1)[-1]: value for key, value in json.loads(path.read_text()).items()} if path.exists() else {}
+        path = root / "outcomes.yaml"
+        return {key.rsplit(".", 1)[-1]: value for key, value in yaml.safe_load(path.read_text()).items()} if path.exists() else {}
 
 
 def python_report(reference, candidate, files, script):
-    results = {label: python_tests(binary, files, script) for label, binary in (("reference", reference), ("candidate", candidate))}
+    results = {label: python_attempt(binary, files, script) for label, binary in (("reference", reference), ("candidate", candidate))}
     names = sorted(set(results["reference"]) | set(results["candidate"]) | set(re.findall(r"\n    def (test_\w+)", files[script])))
     rows = [{"id": f"{FEATURES.get(name, 'jobserver')}/{name}", **{label: dict(zip(("outcome", "detail"), result.get(name, ["missing", ""]))) for label, result in results.items()}} for name in names]
     for row in rows:

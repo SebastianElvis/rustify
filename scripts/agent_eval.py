@@ -39,7 +39,6 @@ def load(name, path):
     return module
 
 
-sys.path.insert(0, str(ROOT / "evaluations"))
 harness = load("harness", ROOT / "evaluations/harness.py")
 
 
@@ -141,18 +140,18 @@ def grade_trial(workspace, directory, grading):
     result["skills_verified"] = skills is not None
     subprocess.run([sys.executable, str(directory / "run.py"), "--project", str(project), "--output", str(workspace / "score")], capture_output=True)
     score = yaml.safe_load((workspace / "score/report.yaml").read_text())
-    reports = [value for name, value in score.get("reports", {}).items() if name != "repeatability"]
+    reports = [value for name, value in score.get("reports", {}).items() if name not in {"repeatability", "parsers-format", "parse-outputs"}]
     total = sum(value["passed"] + value["failed"] for value in reports)
-    result.update(success=score["status"] == "passed", scorer_error=score.get("error"), expected_failures=len(score.get("failures", [])))
-    result["blind_pass_rate"] = round(sum(value["passed"] for value in reports) / total, 3) if total else None
+    result.update(success=score["status"] == "passed", scorer_status=score["status"], scorer_error=score.get("error"), expected_failures=len(score.get("failures", [])))
+    result["blind_pass_rate"] = round(sum(value["passed"] for value in reports) / total, 3) if total and score["status"] != "invalid" else None
     result["product_recall"] = recall(grading["features"], text(project, ("recovered/product.md", "recovered/ux.md"), "requirements", ("statement",)))
     result["architecture_recall"] = recall(grading["components"], text(project, ("recovered/architecture.md",), "components", ("name", "responsibility")))
     gate_path = (workspace / ".agents/skills" if skills is not None else ROOT / "skills") / "rustify-validate/scripts/parity.py"
     gate = load("trial_parity", gate_path).check(project)
-    structure = gate.get("reflexion")
+    result["success"] = result["success"] and gate["full_parity_gate_pass"]
     result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"]), "helper_sha256": hashlib.sha256(gate_path.read_bytes()).hexdigest()}
     result["structural_fidelity"] = result["edge_convergence"] = None
-    if structure:
+    if structure := gate.get("reflexion"):
         model = yaml.safe_load((project / "recovered/model.yaml").read_text())
         merged = sum(item["rust"] in structure["merged"] for item in model["correspondences"])
         components, edges = len(model["components"]), len(structure["convergences"]) + len(structure["absences"])

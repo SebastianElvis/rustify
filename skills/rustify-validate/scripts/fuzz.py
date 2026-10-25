@@ -42,7 +42,7 @@ def fuzz(reference, candidate, seeds, iterations=200, seed=0, name="program", ti
     compare.validate(seeds)
     rng = random.Random(seed)
     paths = {"reference": Path(reference).resolve(strict=True), "candidate": Path(candidate).resolve(strict=True)}
-    corpus, classes, divergences = list(seeds), set(), []
+    corpus, classes, divergences, errors = list(seeds), set(), [], []
     for index in range(iterations):
         case = rng.choice(corpus)
         for _ in range(rng.randrange(1, 9)):
@@ -51,14 +51,14 @@ def fuzz(reference, candidate, seeds, iterations=200, seed=0, name="program", ti
         results = {label: compare.run(path, name, case, timeout) for label, path in paths.items()}
         differences = compare.differ(results)
         if differences:
-            divergences.append({"input": case, **results, "differences": differences})
+            (errors if "execution_error" in differences else divergences).append({"input": case, **results, "differences": differences})
         behavior = tuple((result["returncode"], hashlib.sha256(compare.decode(result["stderr_b64"])).hexdigest()) for result in results.values())
         if behavior not in classes:
             classes.add(behavior)
             corpus.append(case)
     return {
-        "status": "failed" if divergences else "passed", "iterations": iterations, "seed": seed,
-        "behavior_classes": len(classes), "corpus": len(corpus), "divergences": divergences,
+        "status": "invalid" if errors or iterations <= 0 else "failed" if divergences else "passed", "iterations": iterations, "seed": seed,
+        "behavior_classes": len(classes), "corpus": len(corpus), "divergences": divergences, "errors": errors,
         "executables": {label: {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for label, path in paths.items()},
     }
 
@@ -78,7 +78,7 @@ def main():
     destination = Path(args.report)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(yaml.safe_dump(report, sort_keys=False))
-    print(yaml.safe_dump({key: report[key] for key in ("status", "iterations", "behavior_classes")} | {"divergences": len(report["divergences"])}, sort_keys=False), end="")
+    print(yaml.safe_dump({key: report[key] for key in ("status", "iterations", "behavior_classes")} | {"divergences": len(report["divergences"]), "errors": len(report["errors"])}, sort_keys=False), end="")
     return 0 if report["status"] == "passed" else 1
 
 

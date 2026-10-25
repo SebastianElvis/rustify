@@ -93,13 +93,15 @@ class HarnessTests(unittest.TestCase):
             (root / "implementation").mkdir()
             binary = root / "implementation/Cargo.toml"
             binary.write_bytes(b"binary")
-            for quality, controls in (({}, ["The negative control passes."]), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, []), ({}, [])):
-                reports = {"replay": {"status": "passed" if quality or controls else "failed", "passed": int(bool(quality or controls)), "failed": 0 if quality or controls else 2, "cases": [] if quality or controls else [{"input": {"id": "shared/case"}, "passed": False}, {"id": "custom/case", "passed": False}]}}
+            for quality, controls, reference_failure in (({}, ["The negative control passes."], None), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, [], None), ({}, [], None), ({}, [], "repeatability"), ({}, [], "capture")):
+                reports = {"replay": {"status": "passed" if quality or controls else "failed", "passed": int(bool(quality or controls)), "failed": 0 if quality or controls else 3, "cases": [] if quality or controls else [{"input": {"id": "shared/case"}, "passed": False}, {"id": "custom/case", "passed": False}, {"id": "timeout/case", "passed": False, "differences": ["execution_error"], "reference": {"error": "timeout" if reference_failure == "capture" else None}}]}}
+                if reference_failure == "repeatability":
+                    reports["repeatability"] = {"status": "failed", "passed": 0, "failed": 1, "cases": [{"id": "original/timeout", "passed": False, "differences": ["execution_error"]}]}
                 with mock.patch.multiple(harness, reference=lambda *args: binary, rust=lambda *args: (binary, quality)), mock.patch.object(harness.project_helper, "status", return_value={}), mock.patch.object(harness.subprocess, "run", return_value=mock.Mock(stdout="")), mock.patch.object(sys, "argv", ["score", "--project", directory, "--output", str(root / "score")]), mock.patch("builtins.print"):
                     self.assertEqual(harness.run("control", {"sha256": "pin"}, lambda *args: (reports, controls)), 1)
                 result = yaml.safe_load((root / "score/report.yaml").read_text())
-                self.assertEqual((result["status"], result["reports"]["replay"]["passed"]), ("failed", int(bool(quality or controls))))
-                self.assertEqual([(item["id"], Path(item["report"]).name, Path(item["report"]).is_file()) for item in result["witnesses"]["replay"]], [] if quality or controls else [("shared/case", "replay.yaml", True), ("custom/case", "replay.yaml", True)])
+                self.assertEqual((result["status"], result["reports"]["replay"]["passed"]), ("invalid" if reference_failure else "failed", int(bool(quality or controls))))
+                self.assertEqual([(item["id"], Path(item["report"]).name, Path(item["report"]).is_file()) for rows in result["witnesses"].values() for item in rows], [] if quality or controls else [("shared/case", "replay.yaml", True), ("custom/case", "replay.yaml", True)])
 
     def test_quality_failure_does_not_block_release_build(self):
         harness = zenity.harness
@@ -132,6 +134,17 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(runner.sessions(None, None, [{"id": "bytes"}])["failed"], 1)
         with mock.patch.multiple(runner, reset=lambda *args: None, invoke=lambda *args: step), mock.patch.object(runner, "snapshot", side_effect=files):
             self.assertEqual(runner.crossread(None, None, [{"id": "bytes", "write": "", "read": ""}])["failed"], 1)
+
+    def test_ninja_yaml_driver_keeps_the_first_failure(self):
+        with mock.patch.dict(sys.modules, runner=zenity.harness.load("ninja_runner", ROOT / "evaluations/open/ninja/runner.py")):
+            with mock.patch.dict(sys.modules, cases=zenity.harness.load("ninja_cases", ROOT / "evaluations/open/ninja/cases.py")):
+                upstream = zenity.harness.load("ninja_upstream", ROOT / "evaluations/open/ninja/upstream.py")
+        files = {name: "" for name in upstream.HELPERS}
+        files["test.py"] = "import unittest\nclass Example(unittest.TestCase):\n    def test_status(self): self.assertEqual('é', 'é')\n"
+        self.assertEqual(upstream.python_attempt(Path("/usr/bin/true"), files, "test.py"), {"test_status": ["passed", ""]})
+        with mock.patch.object(upstream, "python_attempt", side_effect=[{"test_status": ["passed", ""]}, {"test_status": ["failed", "first"]}, {"test_status": ["passed", ""]}]) as attempt:
+            self.assertEqual(upstream.python_report(Path("reference"), Path("candidate"), files, "test.py")["failed"], 1)
+            self.assertEqual(attempt.call_count, 2)
 
     def test_grading_patterns_compile(self):
         for path in (ROOT / "evaluations").rglob("grading.yaml"):

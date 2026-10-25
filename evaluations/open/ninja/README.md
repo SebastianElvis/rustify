@@ -21,6 +21,9 @@ Many large C and C++ projects build with it.
 
 ## Oracle
 
+The `issue_2621` probe uses `-j1 -v` to fix command completion order.
+The scorer runs each upstream test once.
+
 - Byte-exact stdout, stderr, and exit status for build scenarios.
 - The same executed commands in the same order.
 - Mutual acceptance of `.ninja_log` and `.ninja_deps` files.

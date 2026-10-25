@@ -49,7 +49,7 @@ Each surface item links to the requirements that cover it. The gate fails an unc
 | `state` | Each file, setting, or log that a later run reads. |
 | `interface` | Each window, dialog, menu, control, and visible state. |
 
-The agent applies equivalence partitioning and boundary value analysis (ISO/IEC/IEEE 29119-4) to each option value and input.
+The agent applies equivalence partitioning and boundary value analysis (ISO/IEC/IEEE 29119-4) to each option, environment value, and input.
 Each partition and each boundary gets a probe on the original.
 The agent provokes each diagnostic string. A diagnostic that no probe reaches stays an open gap with its next probe.
 
