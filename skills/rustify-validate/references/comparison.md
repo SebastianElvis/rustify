@@ -10,21 +10,19 @@ The stdin value and file values encode raw bytes as base64.
 Fixture files use safe relative paths.
 The helper reserves locale, timezone, home, and path variables.
 
-```json
-[
-  {
-    "id": "encode-stdin",
-    "args": ["-w", "0"],
-    "stdin_b64": "aGVsbG8=",
-    "files": {}
-  }
-]
+```yaml
+- id: encode-stdin
+  args: [-w, '0']
+  stdin_b64: aGVsbG8=
+  files: {}
 ```
+
+Each argument is a string. The agent quotes an argument that YAML reads as a number, a boolean, or null.
 
 The agent runs the installed helper with these arguments.
 
 ```sh
-python3 <rustify-validate>/scripts/compare.py --reference ORIGINAL --candidate IMPLEMENTATION --cases PROJECT/recovered/scenarios.json --report PROJECT/verification/comparison.json --name PROGRAM
+python3 <rustify-validate>/scripts/compare.py --reference ORIGINAL --candidate IMPLEMENTATION --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name PROGRAM
 ```
 
 Here, `<rustify-validate>` means this installed skill folder.
@@ -43,7 +41,7 @@ It also keeps each input that produces a new pair of exit status and diagnostic 
 This steering follows NEZHA (Petsios et al., IEEE S&P 2017).
 
 ```sh
-python3 <rustify-validate>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEMENTATION --seeds PROJECT/recovered/scenarios.json --report PROJECT/verification/fuzz.json --name PROGRAM --iterations 500 --seed 0
+python3 <rustify-validate>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEMENTATION --seeds PROJECT/recovered/scenarios.yaml --report PROJECT/verification/fuzz.yaml --name PROGRAM --iterations 500 --seed 0
 ```
 
 The report lists each divergence with both captures.

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Check a real Skills CLI installation in a temporary project."""
 
-import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
+
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,12 +31,12 @@ def main():
         helper = detached / "rustify/scripts/project.py"
         project = directory / "target-project"
         subprocess.run([sys.executable, str(helper), "init", str(project), "--target", str(Path(sys.executable).resolve())], check=True)
-        cases = directory / "cases.json"
-        cases.write_text(json.dumps([{"id": "installed-helper", "args": []}]))
-        subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/compare.py"), "--reference", "/usr/bin/true", "--candidate", "/usr/bin/true", "--cases", str(cases), "--report", str(directory / "report.json"), "--name", "true"], check=True)
-        subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/fuzz.py"), "--reference", "/usr/bin/true", "--candidate", "/usr/bin/true", "--seeds", str(cases), "--report", str(directory / "fuzz.json"), "--iterations", "3"], check=True)
-        result = subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/parity.py"), "--project", str(project), "--report", str(directory / "parity.json")], capture_output=True)
-        parity = json.loads((directory / "parity.json").read_text())
+        cases = directory / "cases.yaml"
+        cases.write_text(yaml.safe_dump([{"id": "installed-helper", "args": []}]))
+        subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/compare.py"), "--reference", "/usr/bin/true", "--candidate", "/usr/bin/true", "--cases", str(cases), "--report", str(directory / "report.yaml"), "--name", "true"], check=True)
+        subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/fuzz.py"), "--reference", "/usr/bin/true", "--candidate", "/usr/bin/true", "--seeds", str(cases), "--report", str(directory / "fuzz.yaml"), "--iterations", "3"], check=True)
+        result = subprocess.run([sys.executable, str(detached / "rustify-validate/scripts/parity.py"), "--project", str(project), "--report", str(directory / "parity.yaml")], capture_output=True)
+        parity = yaml.safe_load((directory / "parity.yaml").read_text())
         if result.returncode != 1 or parity["status"] != "failed" or not parity["errors"]:
             raise RuntimeError("The installed parity gate did not reject missing evidence.")
         print("The installer copied all seven skills. All four detached helpers pass.")

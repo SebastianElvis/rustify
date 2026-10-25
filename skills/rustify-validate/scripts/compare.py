@@ -4,7 +4,6 @@
 import argparse
 import base64
 import hashlib
-import json
 import math
 import os
 from pathlib import Path, PurePosixPath
@@ -12,6 +11,8 @@ import signal
 import stat
 import subprocess
 import tempfile
+
+import yaml
 
 
 def decode(value):
@@ -155,14 +156,14 @@ def main():
     parser.add_argument("--name", default="base64")
     args = parser.parse_args()
     try:
-        cases = json.loads(Path(args.cases).read_text())
+        cases = yaml.safe_load(Path(args.cases).read_text())
         report = compare(args.reference, args.candidate, cases, args.timeout, args.name)
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, yaml.YAMLError) as error:
         report = {"status": "error", "passed": 0, "failed": 0, "error": str(error), "cases": []}
     destination = Path(args.report)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(report, indent=2) + "\n")
-    print(json.dumps({key: report[key] for key in ("status", "passed", "failed")}))
+    destination.write_text(yaml.safe_dump(report, sort_keys=False))
+    print(yaml.safe_dump({key: report[key] for key in ("status", "passed", "failed")}, sort_keys=False), end="")
     return 0 if report["status"] == "passed" else 1
 
 

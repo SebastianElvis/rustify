@@ -56,7 +56,7 @@ Each statement uses exactly one EARS pattern and exactly one "shall".
 | `optional` | Where `<feature>`, the `<system>` shall `<response>`. |
 | `complex` | A combination of the `While`, `When`, `If`, and `Where` clauses, in that order. |
 
-The `<system>` is the original product name from the contract.
+The `<system>` is the original product name from `recovered/product.md`.
 The `<response>` states an observable result: bytes, status, state, effect, or interface change.
 The statement does not name a Rust type, a library, or an inferred intent.
 
@@ -76,7 +76,7 @@ The requirement set must also be complete, consistent, and free of duplicates.
 
 ### Attributes
 
-Each requirement record in `recovered/model.json` has these attributes.
+Each requirement record in `recovered/model.yaml` has these attributes.
 
 | Attribute | Content |
 | --- | --- |
@@ -90,7 +90,6 @@ Each requirement record in `recovered/model.json` has these attributes.
 | `tests` | Declarative test identifiers for the `test` method. |
 | `records` | Evidence identifiers for the other methods. |
 | `components` | Original component identifiers that realize the requirement. |
-| `in_scope` | `false` only for a requirement outside an authorized subset. |
 
 ## Architecture rules
 
@@ -140,7 +139,6 @@ The source column names the standard that defines the concept.
 | failure | An observed difference between the original and the Rust implementation. | 24765 |
 | defect | The cause of a failure in the Rust implementation. | 24765 |
 | gap | A known failure, an unknown result, or a missing mapping that stays open. | Rustify |
-| exception | A user authorization to accept a stated difference. ISO/IEC/IEEE 24765 calls this a waiver. | 24765 |
 | traceability | A relation between two work products, for example requirement and test. | 24765 |
 | baseline | A frozen set of artifacts with recorded hashes. | 24765 |
 | slice | A delivery increment that completes one or more requirements through all components. | Patton, *User Story Mapping* |

@@ -18,7 +18,7 @@ The agent prefers `test`. The other methods need evidence records with captures.
 
 The agent runs the original against itself under the same controlled conditions.
 The agent preserves variable outputs and their causes as evidence.
-The agent applies only normalization rules in an explicit user contract.
+The agent applies only the normalization rules in `recovered/product.md`.
 An unexplained variation remains a gap.
 
 Each exact expected assertion links to original evidence.
@@ -52,8 +52,8 @@ The agent does not invent a tolerance because both applications use native contr
 ## Repairs and independence
 
 The agent preserves each failure and its smallest reproducer.
-The agent classifies it as a Rust defect, a recovery error, a user-authorized exception, or unknown.
-The agent repairs defects without changing the original contract.
+The agent classifies it as a Rust defect, a recovery error, or unknown.
+The agent repairs defects without a product change.
 The agent reruns affected checks and complete workflows after repairs.
 
 Independent versions can fail in the same way (Knight and Leveson).

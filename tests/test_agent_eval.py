@@ -3,12 +3,13 @@
 import base64
 import hashlib
 import importlib.util
-import json
 from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("agent_eval", ROOT / "scripts/agent_eval.py")
@@ -22,10 +23,10 @@ PROJECT = {
     "implementation/Cargo.lock": 'version = 3\n\n[[package]]\nname = "upper"\nversion = "0.1.0"\n',
     "implementation/src/main.rs": "use std::io::{Read, Write};\n\nfn main() {\n    let mut data = Vec::new();\n    std::io::stdin().read_to_end(&mut data).unwrap();\n    std::io::stdout()\n        .write_all(&data.to_ascii_uppercase())\n        .unwrap();\n}\n",
 }
-AGENT = f"""import json, re, sys
+AGENT = f"""import re, sys
 from pathlib import Path
 project = Path(re.search(r"Write the target project to (.+)[.]", sys.stdin.read()).group(1))
-for name, text in json.loads({json.dumps(json.dumps(PROJECT))}).items():
+for name, text in {PROJECT!r}.items():
     (project / name).parent.mkdir(parents=True, exist_ok=True)
     (project / name).write_text(text)
 """
@@ -55,7 +56,7 @@ def score(reference, candidate, project):
 if __name__ == "__main__":
     raise SystemExit(harness.run({TRACK!r}, PIN, score))
 """)
-        (self.track / "grading.json").write_text(json.dumps({"scope": "uppercase conversion", "features": [{"id": "uppercase", "pattern": "(?i)uppercase"}, {"id": "help", "pattern": "--help"}], "components": [{"id": "entry", "pattern": "(?i)entry"}]}))
+        (self.track / "grading.yaml").write_text(yaml.safe_dump({"features": [{"id": "uppercase", "pattern": "(?i)uppercase"}, {"id": "help", "pattern": "--help"}], "components": [{"id": "entry", "pattern": "(?i)entry"}]}))
         (self.root / "agent.py").write_text(AGENT)
 
     def test_scripted_agent_trials_are_frozen_and_graded(self):

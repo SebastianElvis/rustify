@@ -3,10 +3,11 @@
 
 import argparse
 import hashlib
-import json
 import os
 from pathlib import Path
 import re
+
+import yaml
 
 
 DIMENSIONS = {"product", "ux", "data", "behavior"}
@@ -31,7 +32,7 @@ def file(root, name):
     path = Path(name)
     if path.is_absolute() or ".." in path.parts:
         raise ValueError("An input must stay inside the project.")
-    if path.as_posix() in {"recovered/state.json", "verification/parity.json"}:
+    if path.as_posix() in {"recovered/state.yaml", "verification/parity.yaml"}:
         raise ValueError("Operational state and gate output cannot be parity inputs.")
     path = root / path
     for parent in (path, *path.parents):
@@ -47,7 +48,7 @@ def file(root, name):
 def read(root, name, inputs, parse=True):
     data = file(root, name).read_bytes()
     inputs[name] = hashlib.sha256(data).hexdigest()
-    return json.loads(data) if parse else data.decode(errors="replace")
+    return yaml.safe_load(data) if parse else data.decode(errors="replace")
 
 
 def records(values, key="id"):
@@ -104,21 +105,17 @@ def reflexion(root, model, components, inputs):
     }
 
 
-def check(project, comparisons=("verification/comparison.json",), allow_partial=False):
+def check(project, comparisons=("verification/comparison.yaml",), allow_partial=False):
     root = Path(project).resolve()
     result = {"status": "failed", "assessment": "incomplete", "full_parity_gate_pass": False, "semantic_truth_verified": False, "inputs": {}, "errors": [], "gaps": []}
     try:
         inputs = result["inputs"]
-        contract = read(root, "recovered/contract.json", inputs)
-        model = read(root, "recovered/model.json", inputs)
-        evidence = records(read(root, "recovered/evidence.json", inputs))
-        tests = records(read(root, "recovered/tests.json", inputs))
-        target = result["target_sha256"] = contract["target"]["sha256"]
+        model = read(root, "recovered/model.yaml", inputs)
+        evidence = records(read(root, "recovered/evidence.yaml", inputs))
+        tests = records(read(root, "recovered/tests.yaml", inputs))
+        target = result["target_sha256"] = yaml.safe_load((root / "recovered/state.yaml").read_text())["target"]["sha256"]
         if not isinstance(target, str) or not re.fullmatch(r"[0-9a-f]{64}", target):
             raise ValueError("The original identity must be a lowercase SHA-256 value.")
-        scope = contract["scope"]
-        if scope["mode"] not in {"full_product", "subset"}:
-            raise ValueError("The scope must identify the full product or a subset.")
         for item in evidence.values():
             if item["classification"] not in CLASSES:
                 raise ValueError(f"The evidence has an invalid classification: {item['id']}")
@@ -144,13 +141,7 @@ def check(project, comparisons=("verification/comparison.json",), allow_partial=
             cases.update(rows)
         components = records(model["components"])
         requirements = records(model["requirements"])
-        exceptions = records(model["exceptions"])
-        edges = records(model["edges"])
-        scoped_items = {name for item in requirements.values() if item.get("in_scope", True) for name in item["components"]}
-        scoped_items |= {edge["id"] for edge in edges.values() if {edge["source"], edge["target"]} & scoped_items}
-        excepted = {item for value in exceptions.values() if value.get("user_instruction") for item in value["items"]}
         gaps = []
-        used = set()
         open_gaps = {}
         for gap in records(model["gaps"]).values():
             if gap["status"] == "open":
@@ -166,14 +157,9 @@ def check(project, comparisons=("verification/comparison.json",), allow_partial=
             if item["level"] not in {"container", "component"} or item["classification"] not in CLASSES:
                 raise ValueError(f"The component has an invalid level or classification: {item['id']}")
             if item["classification"] != "observed" or not all(bound(name, item["id"]) for name in item["evidence"]):
-                gaps.append((item["id"], item["id"] in scoped_items, f"{item['id']}: The component remains uncertain."))
+                gaps.append(f"{item['id']}: The component remains uncertain.")
         structure = result["reflexion"] = reflexion(root, model, components, inputs)
-        for kind in ("absences", "divergences", "merged", "unmapped", "extra_modules"):
-            for item in structure[kind]:
-                if item in excepted:
-                    used.add(item)
-                else:
-                    gaps.append((item, item in scoped_items or kind in {"divergences", "merged", "extra_modules"}, f"{item}: The reflexion check reports {kind.replace('_', ' ')}."))
+        gaps += [f"{item}: The reflexion check reports {kind.replace('_', ' ')}." for kind in ("absences", "divergences", "merged", "unmapped", "extra_modules") for item in structure[kind]]
         statuses = {}
         for identity, item in requirements.items():
             pattern = PATTERNS.get(item["pattern"])
@@ -206,45 +192,32 @@ def check(project, comparisons=("verification/comparison.json",), allow_partial=
                         continue
                     for label in ("reference", "candidate"):
                         actual = case[label]
-                        if actual.get("error") is not None or any(name not in actual or json.dumps(actual[name], sort_keys=True) != json.dumps(value, sort_keys=True) for name, value in test["expect"].items()):
+                        if actual.get("error") is not None or any(name not in actual or yaml.safe_dump(actual[name]) != yaml.safe_dump(value) for name, value in test["expect"].items()):
                             reasons.append(f"{scenario}/{label}: An exact expected assertion fails.")
                             mismatch = mismatch or label == "candidate"
                     if case.get("passed") is not True:
                         reasons.append(f"{scenario}: The recorded comparison fails.")
                         mismatch = True
-            statuses[identity] = "passed" if not reasons else "exception" if identity in excepted else "failed" if mismatch else "incomplete"
-            if statuses[identity] == "exception":
-                used.add(identity)
-            else:
-                gaps += [(identity, item.get("in_scope", True), f"{identity}: {reason}") for reason in reasons]
-            if not item.get("in_scope", True):
-                gaps.append((identity, False, f"{identity}: The requirement is outside the authorized subset."))
+            statuses[identity] = "passed" if not reasons else "failed" if mismatch else "incomplete"
+            gaps += [f"{identity}: {reason}" for reason in reasons]
         for kind, names in DOCUMENTS:
             text = "".join(read(root, name, inputs, False) for name in names)
-            gaps += [(identity, True, f"{identity}: {' or '.join(names)} does not name this item.") for identity in (requirements if kind == "requirements" else components) if not re.search(rf"\b{re.escape(identity)}\b", text)]
+            gaps += [f"{identity}: {' or '.join(names)} does not name this item." for identity in (requirements if kind == "requirements" else components) if not re.search(rf"\b{re.escape(identity)}\b", text)]
         roadmap = read(root, "recovered/roadmap.md", inputs, False)
-        gaps += [(name, True, f"{name}: recovered/roadmap.md does not name this open gap.") for names in open_gaps.values() for name in names if name not in roadmap]
+        gaps += [f"{name}: recovered/roadmap.md does not name this open gap." for names in open_gaps.values() for name in names if name not in roadmap]
         if model["inventory"]["complete"] is not True:
-            gaps.append(("inventory", False, "The original inventory remains incomplete."))
-        if scope["mode"] == "subset" and not scope.get("user_instruction"):
-            gaps.append(("scope", True, "The subset has no recorded user instruction."))
-        if scope["mode"] == "full_product" and any(not item.get("in_scope", True) for item in requirements.values()):
-            gaps.append(("scope", True, "The full-product contract cannot exclude a requirement."))
-        result["gaps"] = sorted({message for _, _, message in gaps})
+            gaps.append("The original inventory remains incomplete.")
+        result["gaps"] = sorted(set(gaps))
         result["requirements"] = statuses
         result["slices"] = {item["id"]: all(statuses.get(name) == "passed" for name in item["requirements"]) for item in model["slices"]}
-        result["dimensions"] = {name: {status: sum(requirements[key]["dimension"] == name and value == status for key, value in statuses.items()) for status in ("passed", "failed", "incomplete", "exception")} for name in sorted(DIMENSIONS)}
-        result["exceptions_used"] = sorted(used)
-        scoped = not any(in_scope for _, in_scope, _ in gaps) and all(statuses[key] in {"passed", "exception"} for key, item in requirements.items() if item.get("in_scope", True))
-        if not gaps and not result["exceptions_used"] and scope["mode"] == "full_product":
+        result["dimensions"] = {name: {status: sum(requirements[key]["dimension"] == name and value == status for key, value in statuses.items()) for status in ("passed", "failed", "incomplete")} for name in sorted(DIMENSIONS)}
+        if not gaps:
             result.update(status="passed", assessment="full_parity_pass", full_parity_gate_pass=True)
         elif "failed" in statuses.values():
             result["assessment"] = "failed"
-        elif scoped and scope["mode"] == "subset":
-            result.update(status="passed", assessment="scoped_pass")
         if result["status"] != "passed" and allow_partial:
             result["status"] = "partial"
-    except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, yaml.YAMLError) as error:
         result["errors"].append(str(error))
     return result
 
@@ -256,11 +229,11 @@ def main():
     parser.add_argument("--report", required=True)
     parser.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args()
-    result = check(args.project, args.comparison or ["verification/comparison.json"], args.allow_partial)
+    result = check(args.project, args.comparison or ["verification/comparison.yaml"], args.allow_partial)
     path = Path(args.report)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-    print(json.dumps({key: result[key] for key in ("status", "assessment", "errors")} | {"gaps": len(result["gaps"])}, indent=2))
+    path.write_text(yaml.safe_dump(result))
+    print(yaml.safe_dump({key: result[key] for key in ("status", "assessment", "errors")} | {"gaps": len(result["gaps"])}, sort_keys=False), end="")
     return 0 if result["status"] in {"passed", "partial"} and not result["errors"] else 1
 
 

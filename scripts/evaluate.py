@@ -2,11 +2,12 @@
 """Score agent-generated projects against the compact binary reconstruction dataset."""
 
 import argparse
-import json
 from pathlib import Path
 import subprocess
 import sys
 import time
+
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,10 +33,10 @@ def main():
         "tracks": results,
         "seconds": round(time.monotonic() - start, 2),
     }
-    destination = ROOT / "work/evaluation/summary.json"
+    destination = ROOT / "work/evaluation/summary.yaml"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(report, indent=2) + "\n")
-    print(json.dumps(report, indent=2))
+    destination.write_text(yaml.safe_dump(report, sort_keys=False))
+    print(yaml.safe_dump(report, sort_keys=False), end="")
     return 0 if report["status"] == "passed" else 1
 
 

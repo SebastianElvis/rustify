@@ -2,14 +2,13 @@
 
 ## Ledger sections
 
-The plan skill owns these sections of `recovered/model.json`.
+The plan skill owns these sections of `recovered/model.yaml`.
 The helper hashes them for the `plan` checkpoint.
 
 | Section | Record fields |
 | --- | --- |
 | `correspondences` | `original` component ID and `rust` source path under `implementation/src/`. |
 | `slices` | `id`, `kind` (`skeleton` or `slice`), `requirements`, `depends_on`, and `risk` (`high`, `medium`, or `low`). |
-| `exceptions` | `id`, `items`, the quoted `user_instruction`, and the `limit`. |
 
 The parity gate reports each slice as passed only when all its requirements pass.
 No plan record claims a measured result.

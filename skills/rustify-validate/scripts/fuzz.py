@@ -3,16 +3,18 @@
 
 import argparse
 import base64
+import copy
 import hashlib
-import json
 from pathlib import Path
 import random
+
+import yaml
 
 import compare
 
 
 def mutate(case, corpus, rng):
-    case = json.loads(json.dumps(case))
+    case = copy.deepcopy(case)
     data = bytearray(compare.decode(case.get("stdin_b64", "")))
     position = rng.randrange(len(data) + 1)
     choice = rng.randrange(5)
@@ -72,11 +74,11 @@ def main():
     parser.add_argument("--timeout", type=float, default=5)
     parser.add_argument("--name", default="program")
     args = parser.parse_args()
-    report = fuzz(args.reference, args.candidate, json.loads(Path(args.seeds).read_text()), args.iterations, args.seed, args.name, args.timeout)
+    report = fuzz(args.reference, args.candidate, yaml.safe_load(Path(args.seeds).read_text()), args.iterations, args.seed, args.name, args.timeout)
     destination = Path(args.report)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(report, indent=2) + "\n")
-    print(json.dumps({key: report[key] for key in ("status", "iterations", "behavior_classes")} | {"divergences": len(report["divergences"])}))
+    destination.write_text(yaml.safe_dump(report, sort_keys=False))
+    print(yaml.safe_dump({key: report[key] for key in ("status", "iterations", "behavior_classes")} | {"divergences": len(report["divergences"])}, sort_keys=False), end="")
     return 0 if report["status"] == "passed" else 1
 
 

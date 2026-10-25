@@ -31,7 +31,7 @@
  \node[heading,font=\sffamily\bfseries\large] at (5.3,18.3) {INSTALLED SKILL BUNDLE};
  \node[label,anchor=west] at (5.3,17.7) {Host-native agents execute these instructions and call the bundled helpers.};
  \node[heading] at (10.7,16.3) {Parallel discovery};
- \node[external,text width=32mm,minimum height=23mm] (input) at (2.0,13.6) {Original binary\\and resources\\[3pt]Scope contract};
+ \node[external,text width=32mm,minimum height=23mm] (input) at (2.0,13.6) {Original binary\\and resources};
  \node[component,text width=32mm] (main) at (7.9,13.6) {\texttt{rustify}\\Orchestrator};
  \node[label,text width=26mm] at (6.2,12.0) {Preparation and coordination};
  \node[component,text width=38mm] (product) at (14.6,15.25) {\texttt{rustify-product}};
@@ -78,14 +78,14 @@
  \node[label,text width=22mm,anchor=west] at (32.55,9.1) {\step{6} Deliver\\project};
  \node[heading,font=\sffamily\bfseries\large] at (5.3,5.8) {TARGET PROJECT \quad Generated reconstruction output};
  \node[heading,font=\ttfamily\bfseries] at (5.4,4.95) {recovered/};
- \node[files] at (5.4,4.6) {\quad contract.json\quad state.json\\\quad model.json\quad evidence.json\\\quad product.md\quad ux.md\\\quad architecture.md\\\quad evidence/\quad scenarios.json\\\quad tests.json\quad roadmap.md};
- \node[label,anchor=north west,text width=54mm,align=left,font=\sffamily\small] at (10.7,3.5) {\texttt{tests.json} contains declarative test specifications.\\[4pt]Each test has an observed, inferred, or proposed origin.};
+ \node[files] at (5.4,4.6) {\quad state.yaml\quad model.yaml\\\quad evidence.yaml\\\quad product.md\quad ux.md\\\quad architecture.md\\\quad evidence/\quad scenarios.yaml\\\quad tests.yaml\quad roadmap.md};
+ \node[label,anchor=north west,text width=54mm,align=left,font=\sffamily\small] at (10.7,3.5) {\texttt{tests.yaml} contains declarative test specifications.\\[4pt]Each test has an observed, inferred, or proposed origin.};
  \node[files,font=\ttfamily\scriptsize] at (10.7,1.65) {diagrams/ (when grounded)\\data-models/ (when present)};
  \node[heading,font=\ttfamily\bfseries] at (18.6,4.95) {implementation/};
  \node[files] at (18.6,4.6) {\quad Cargo.toml\\\quad Cargo.lock\\\quad src/\\\quad tests/\\\quad docs/design.md\\\quad docs/adr/};
  \node[label,anchor=north west,text width=50mm,align=left,font=\sffamily\scriptsize] at (18.6,1.6) {Unit tests can also reside in \texttt{src/}.\\ADRs record each design decision.};
  \node[heading,font=\ttfamily\bfseries] at (25.5,4.95) {verification/};
- \node[files] at (25.5,4.6) {\quad checks.json\\\quad comparison.json\\\quad fuzz.json\\\quad parity.json\\\quad compatibility.md\\\quad logs/};
+ \node[files] at (25.5,4.6) {\quad checks.yaml\\\quad comparison.yaml\\\quad fuzz.yaml\\\quad parity.yaml\\\quad compatibility.md\\\quad logs/};
  \node[label,anchor=west,font=\sffamily\small] at (.1,-.1) {Blue arrows show reconstruction. Orange arrows show refinement. Gray lines show tool and workspace relations.};
  \node[label,anchor=west,font=\sffamily\small] at (.1,-.65) {The host runs discovery sequentially when parallel agents are unavailable. REA remains an external investigation backend.};
 \end{tikzpicture}

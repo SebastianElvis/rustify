@@ -10,7 +10,7 @@ The installed skill bundle, temporary agent workspace, and generated target proj
 
 | Component | Responsibility | Evidence |
 | --- | --- | --- |
-| `rustify` | The orchestrator prepares the contract, dispatches work, merges findings, and routes repairs. | `skills/rustify/SKILL.md` |
+| `rustify` | The orchestrator records the target, dispatches work, merges findings, and routes repairs. | `skills/rustify/SKILL.md` |
 | `rustify-product` | The skill recovers capabilities and proposed maintenance work. | `skills/rustify-product/SKILL.md` |
 | `rustify-design` | The skill recovers interface behavior and design language. | `skills/rustify-design/SKILL.md` |
 | `rustify-architecture` | The skill recovers original components, boundaries, and workflow traces. | `skills/rustify-architecture/SKILL.md` |
@@ -27,7 +27,7 @@ The installed skill bundle, temporary agent workspace, and generated target proj
 
 ## Flow and boundaries
 
-1. The original binary, resources, and scope contract enter `rustify`.
+1. The original binary and resources enter `rustify`.
 2. The orchestrator captures the original outputs for the first scenarios.
 3. The orchestrator dispatches the three discovery skills in parallel when the host supports agents.
 4. The orchestrator merges their shards into the ledger and resolves contradictions.
@@ -44,15 +44,15 @@ The target project has three folders.
 
 | Folder | Contents |
 | --- | --- |
-| `recovered/` | `contract.json`, `state.json`, `model.json`, `product.md`, `ux.md`, `architecture.md`, `evidence.json`, `evidence/`, `scenarios.json`, `tests.json`, and `roadmap.md`. |
+| `recovered/` | `state.yaml`, `model.yaml`, `product.md`, `ux.md`, `architecture.md`, `evidence.yaml`, `evidence/`, `scenarios.yaml`, `tests.yaml`, and `roadmap.md`. |
 | `implementation/` | `Cargo.toml`, `Cargo.lock`, `src/`, `tests/`, `docs/design.md`, and `docs/adr/`. |
-| `verification/` | `checks.json`, `comparison.json`, `fuzz.json`, `parity.json`, `compatibility.md`, and `logs/`. |
+| `verification/` | `checks.yaml`, `comparison.yaml`, `fuzz.yaml`, `parity.yaml`, `compatibility.md`, and `logs/`. |
 
-`recovered/model.json` is the single traceability record.
+`recovered/model.yaml` is the single traceability record.
 Each phase owns its ledger sections. A section change reopens its owning phase.
 The parity gate derives each requirement result from evidence and captures.
 It also runs the reflexion check of the recovered component graph against the Rust module graph.
-The full faithful contract cannot complete while that gate reports errors or gaps.
+The full-product reconstruction cannot complete while that gate reports errors or gaps.
 The gate checks declared evidence consistency. The evaluator remains responsible for actual coverage.
 
 The project helper runs the Rust checks and binds their logs to the implementation bytes.

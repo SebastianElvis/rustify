@@ -25,41 +25,36 @@ The user controls publication of the resulting repository.
 | The user resumes work. | Rustify detects changed inputs and reopens affected phases. |
 | The user maintains the product. | Rustify supplies decisions, gaps, and proposed next steps. |
 
-## Contract
+## Fidelity
 
-The target project stores `recovered/contract.json`.
-The contract records these fields:
-
-- `target`: The executable, resources, version, and platform.
-- `scope`: The supported workflows and interfaces.
-- `compatibility`: The required output, file, protocol, visual, and performance dimensions.
-- `environment`: The locale, clock, randomness, persistence, and service assumptions.
-- `exclusions`: The explicit unsupported capabilities.
-- `budget`: The investigation limits and stopping conditions.
+Rustify always reconstructs the full product with one-to-one compatibility.
+`recovered/state.yaml` records the target path and SHA-256.
+`recovered/product.md` records the resources, version, platform, environment, and compatibility constraints.
+`recovered/roadmap.md` records the investigation limits and stopping conditions.
 
 Rustify supports CLI, desktop, local service, and game investigation profiles.
 The evaluation dataset covers a CLI, cryptographic hashing, an HTTP client, and native desktop dialogs.
-Each track has a finite contract and a source audit.
+Each track has finite scored cases and a source audit.
 The desktop track records five native GUI workflows.
 The automated desktop runner verifies those captures and runs fresh unit tests.
 The runner does not claim a fresh GUI replay.
 
 ## Target project
 
-- `recovered/` contains the ledger, product, UX, architecture, contract, state, evidence, declarative tests, and a parity backlog.
+- `recovered/` contains the ledger, product, UX, architecture, state, evidence, declarative tests, and a parity backlog.
 - `implementation/` contains the Rust crate, source, Rust tests, the Rust design, and decision records.
 - `verification/` contains executed check results, comparison and fuzz reports, the gate result, the assurance case, and logs.
 
-The ledger `recovered/model.json` links requirements, components, Rust modules, slices, exceptions, and gaps.
+The ledger `recovered/model.yaml` links requirements, components, Rust modules, slices, and gaps.
 The agent workspace holds only temporary worker shards and progress notes.
 The declarative tests state observable requirements before the Rust tests implement them.
 Each test records its observed, inferred, or proposed origin.
 
 ## Acceptance
 
-- Every scoped requirement is one EARS statement that links to evidence, tests, and a slice.
+- Every requirement is one EARS statement that links to evidence, tests, and a slice.
 - Every original component maps to one Rust module, and every original edge converges.
-- Every known mismatch remains open until a repair or an explicit user exception resolves it.
+- Every known mismatch remains open until a repair resolves it.
 - The recovered architecture distinguishes facts from hypotheses.
 - The Rust design and its decision records explain dependency and architecture choices.
 - Unit tests verify internal logic.

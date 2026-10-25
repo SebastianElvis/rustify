@@ -2,10 +2,11 @@
 """Score a b3sum reconstruction against the pinned reference."""
 
 import base64
-import json
 from pathlib import Path
 import sys
 import tempfile
+
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import harness
@@ -15,7 +16,7 @@ PIN = {"url": "https://github.com/BLAKE3-team/BLAKE3/releases/download/1.8.7/b3s
 
 
 def vectors():
-    data = json.loads((ROOT / "upstream-vectors.json").read_text())
+    data = yaml.safe_load((ROOT / "upstream-vectors.yaml").read_text())
     cases, expected = [], {}
     encode = lambda value: base64.b64encode(value).decode("ascii")
     for vector in data["cases"]:
@@ -38,7 +39,7 @@ def vectors():
 
 
 def score(reference, candidate, project):
-    runtime = json.loads((ROOT / "cases.json").read_text())
+    runtime = yaml.safe_load((ROOT / "cases.yaml").read_text())
     upstream, expected = vectors()
     reports = {
         "repeatability": harness.compare.compare(reference, reference, runtime, name="b3sum"),

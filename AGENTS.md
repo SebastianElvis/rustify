@@ -12,7 +12,7 @@
 - The target project contains `recovered/`, `implementation/`, and `verification/`.
 - The target project keeps the Rust design and its decision records in `implementation/docs/`.
 - The agent keeps only temporary worker shards and progress notes outside the target project.
-- The ledger `recovered/model.json` is the single record for each original-to-Rust mapping.
+- The ledger `recovered/model.yaml` is the single record for each original-to-Rust mapping.
 - Every skill follows `skills/rustify/references/standards.md`.
 - Each recovered requirement uses one EARS pattern and one "shall".
 - The agent evaluation runs the current skills on held-out tracks.

@@ -2,9 +2,8 @@
 
 ## Establish the boundary
 
-The agent records the binary hash, resources, platform, and investigation scope.
-The default scope covers the full product.
-The agent narrows that scope only when the user requests it.
+The agent records the binary hash, resources, and platform.
+The investigation covers the full product.
 The agent identifies entry points, processes, libraries, plugins, and external services.
 The agent assigns stable component, edge, and interface identifiers.
 A component represents an evidenced responsibility and boundary.
@@ -33,7 +32,7 @@ The agent builds the views that [the standards guide](../../rustify/references/s
 | Runtime | The trigger, ordered calls, decisions, data transfers, failures, and outcome of each workflow. |
 | State and data | The observed states, events, guards, and transitions; the stored entities and formats. |
 
-The agent supplies context, container, component, and runtime views for scoped workflows.
+The agent supplies context, container, component, and runtime views for all workflows.
 The agent adds a state machine when behavior depends on persistent or protocol state.
 The agent keeps the recovered model separate from Rust implementation choices.
 

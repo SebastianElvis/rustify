@@ -1,8 +1,8 @@
 # {{PRODUCT_NAME}} parity backlog
 
-The baseline is {{ORIGINAL_VERSION_AND_CONTRACTED_SCOPE}}.
+The baseline is {{ORIGINAL_VERSION}}.
 The latest parity assessment is {{PARITY_ASSESSMENT}}.
-The backlog lists every open gap in `model.json`.
+The backlog lists every open gap in `model.yaml`.
 
 | Gap | Items | Kind | Original expectation and evidence | Current difference or missing evidence | Next probe or repair | Closure check | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -10,7 +10,8 @@ The backlog lists every open gap in `model.json`.
 
 ## Coverage limits
 
-The unexamined contracted surface is {{UNEXAMINED_SURFACE}}.
+The unexamined surface is {{UNEXAMINED_SURFACE}}.
+The investigation limits and stopping conditions are {{USER_LIMIT_OR_UNBOUNDED}}.
 The evidence needed for completion is {{MISSING_EVIDENCE_AND_CHECKS}}.
 
 ## Original future plans

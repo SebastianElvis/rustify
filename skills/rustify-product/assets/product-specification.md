@@ -3,8 +3,6 @@
 The original version is {{ORIGINAL_VERSION}}.
 The binary hash is {{ORIGINAL_SHA256}}.
 The environment is {{PLATFORM_LOCALE_AND_DEPENDENCIES}}.
-The contracted scope is {{FULL_PRODUCT_OR_SUBSET_WITH_USER_INSTRUCTION}}.
-The exclusions are {{EXPLICIT_CONTRACT_EXCLUSIONS}}.
 
 ## Inventory
 

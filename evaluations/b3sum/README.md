@@ -24,8 +24,11 @@ The BLAKE3 team develops it in Rust.
 - Byte-exact runtime comparison for 226 cases.
 - After the source reveal: 315 official vector cases with 630 expected-output checks.
 
-## Scope and limits
+## Scope
 
-- The scope covers hashing, keyed hashing, key derivation, extended output, and checksum verification.
+- The scope is the full product. Rustify always targets a complete one-to-one reconstruction.
+- The scorer measures the features that its cases cover. A feature without a case stays in scope.
+- A failed or missing feature is a skill defect. The fix goes into the skills, not into a narrower scope.
+- The full product covers every option of `b3sum`, including hashing, keyed hashing, key derivation, extended output, checksum checking, and the threading options.
 - The first evaluation run needed source-assisted repairs. The Git history before commit `ce882f1` keeps that run.
 - `run.py` scores a project in `work/projects/b3sum` and writes reports to `work/evaluation/b3sum/`.

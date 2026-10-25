@@ -9,7 +9,9 @@ The goal is software that you can inspect, build, and maintain without the origi
 
 ## Installation
 
-The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3, and Rust with Cargo.
+The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3 with PyYAML, and Rust with Cargo.
+The Rustify helpers read and write YAML with PyYAML.
+You install it with `python3 -m pip install pyyaml`.
 
 ### 1. Set up REA
 
@@ -84,8 +86,8 @@ Run unit tests and E2E comparisons against the original.
 Keep every known mismatch open until a repair resolves it.
 ```
 
-The default contract covers the full product.
-You can request a bounded evaluation in your prompt.
+Rustify always reconstructs the full product.
+A missing feature stays an open gap until the agent completes it.
 The agent saves checkpoints and reopens affected phases when inputs change.
 
 ### Output
@@ -94,20 +96,20 @@ The target project contains three folders:
 
 | Folder | Contents |
 | --- | --- |
-| `recovered/` | The traceability ledger, product and UX specifications, architecture, diagrams, data models, contract, state, evidence, declarative tests, and a parity backlog. |
+| `recovered/` | The traceability ledger, product and UX specifications, architecture, diagrams, data models, state, evidence, declarative tests, and a parity backlog. |
 | `implementation/` | The Rust project, dependencies, source, executable tests, the Rust design, and decision records. |
 | `verification/` | Executed check results, original-to-Rust comparisons, fuzz reports, the parity gate result, the assurance case, and logs. |
 
-The ledger `recovered/model.json` links each EARS requirement to evidence, tests, components, Rust modules, slices, and gaps.
+The ledger `recovered/model.yaml` links each EARS requirement to evidence, tests, components, Rust modules, slices, and gaps.
 The agent produces diagrams and data models when the evidence supports them.
-The [project contract](skills/rustify/references/project.md) defines the output formats.
+The [project format](skills/rustify/references/project.md) defines the output formats.
 The [standards guide](skills/rustify/references/standards.md) defines the writing rules, the terminology, and the requirement and architecture forms.
 
 ## Workflow
 
 ![Rustify architecture](docs/architecture.svg)
 
-1. **Preparation:** `rustify` records the target, environment, and compatibility contract.
+1. **Preparation:** `rustify` records the target identity and the checkpoint state.
 2. **Characterization:** `rustify` captures the original outputs for the first scenarios.
 3. **Discovery:** `rustify-product`, `rustify-design`, and `rustify-architecture` write EARS requirements, C4 components, and evidence in parallel when the agent supports parallel work.
 4. **Planning:** `rustify-plan` maps each original component to one Rust module and plans a walking skeleton and risk-ordered slices.
@@ -122,7 +124,7 @@ The [architecture guide](docs/architecture.md) includes the diagram's editable L
 - **We strive for one-to-one mapping.** Rustify maps the original product, UX, behavior, data, and architecture to the Rust implementation. Known differences remain open until a repair resolves them.
 - **Evidence and user experience guide reconstruction.** Observed workflows, interface states, binary evidence, and tests support each mapping. Unit tests, E2E comparisons, independent expectations, and available upstream vectors challenge the result.
 - **Rust code follows Rust conventions.** The implementation preserves original responsibilities and execution boundaries. The [stack guide](skills/rustify-plan/references/rust-stack.md) ties dependencies to those requirements.
-- **Reports keep gaps visible.** A passing subset does not establish full-product parity. Changed evidence invalidates stale results.
+- **Reports keep gaps visible.** Only a full-product pass establishes parity. Changed evidence invalidates stale results.
 - **Standards keep agents consistent.** Requirements follow ISO/IEC/IEEE 29148 and EARS. Architecture follows ISO/IEC/IEEE 42010, C4, and arc42. Prose follows ASD-STE100.
 
 ## Development and evaluation
@@ -158,7 +160,7 @@ Private held-out tracks can live outside the repository and use `--track /path/t
 
 The evaluation references require macOS.
 These requirements do not restrict the skill bundle to macOS.
-The [evaluation guide](docs/evaluation.md) records the scopes, the scorer steps, and the reproduction details.
+The [evaluation guide](docs/evaluation.md) records the tracks, the scorer steps, and the reproduction details.
 
 Contributors rebuild the architecture figure with `make diagram`.
 The build needs LaTeX, latexmk, and Poppler.
@@ -169,7 +171,7 @@ Each skill keeps its main instructions short and stores supporting methods, temp
 - [Product and vision](docs/product.md)
 - [Architecture and diagram source](docs/architecture.md)
 - [Evaluation method and dataset](docs/evaluation.md)
-- [Target-project contract](skills/rustify/references/project.md)
+- [Target-project format](skills/rustify/references/project.md)
 - [Standards and terminology](skills/rustify/references/standards.md)
 - [Rust stack guide](skills/rustify-plan/references/rust-stack.md)
 

@@ -9,7 +9,7 @@ metadata:
 
 # Recover the interaction specification
 
-The agent reads `recovered/contract.json` and [the project contract](../rustify/references/project.md).
+The agent reads `recovered/state.yaml` and [the project format](../rustify/references/project.md).
 The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent preserves original appearance and behavior without aesthetic improvements.
 

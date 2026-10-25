@@ -1,12 +1,13 @@
 import copy
 import hashlib
 import importlib.util
-import json
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+
+import yaml
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "skills/rustify-validate/scripts/parity.py"
@@ -22,19 +23,19 @@ class ParityTests(unittest.TestCase):
         self.root = Path(self.directory.name)
         self.write("implementation/src/main.rs", "mod codec;\nfn main() { codec::run(); }\n")
         self.write("implementation/src/codec.rs", "pub fn run() {}\n")
-        self.write("recovered/evidence/original.json", {"returncode": 0})
+        self.write("recovered/evidence/original.yaml", {"returncode": 0})
         self.write("recovered/product.md", "REQ-1\n")
         self.write("recovered/ux.md", "No visual surface.\n")
         self.write("recovered/architecture.md", "C-1 C-2\n")
         self.write("implementation/docs/design.md", "C-1 C-2\n")
         self.write("recovered/roadmap.md", "No open gaps.\n")
-        self.contract = {"target": {"sha256": "a" * 64}, "scope": {"mode": "full_product", "user_instruction": None}}
-        self.evidence = [{"id": "E1", "classification": "observed", "path": "recovered/evidence/original.json", "sha256": self.sha("recovered/evidence/original.json")}]
+        self.state = {"target": {"sha256": "a" * 64}}
+        self.evidence = [{"id": "E1", "classification": "observed", "path": "recovered/evidence/original.yaml", "sha256": self.sha("recovered/evidence/original.yaml")}]
         self.tests = [{"id": "T1", "origin": "observed", "evidence": ["E1"], "scenarios": ["S1"], "expect": {"returncode": 0, "stdout_b64": "YQ=="}}]
         result = {"returncode": 0, "stdout_b64": "YQ==", "stderr_b64": "", "error": None}
         self.report = {"status": "passed", "passed": 1, "failed": 0, "executables": {"reference": {"sha256": "a" * 64}}, "cases": [{"input": {"id": "S1"}, "reference": result.copy(), "candidate": result.copy(), "passed": True, "differences": []}]}
         self.model = {
-            "inventory": {"complete": True, "basis": ["E1"]},
+            "inventory": {"complete": True},
             "requirements": [{
                 "id": "REQ-1", "dimension": "behavior", "pattern": "event",
                 "statement": "When the user supplies input, the demo shall write the encoded result.",
@@ -47,19 +48,19 @@ class ParityTests(unittest.TestCase):
             "edges": [{"id": "EDGE-1", "source": "C-1", "target": "C-2", "kind": "control", "classification": "observed", "evidence": ["E1"]}],
             "correspondences": [{"original": "C-1", "rust": "implementation/src/main.rs"}, {"original": "C-2", "rust": "implementation/src/codec.rs"}],
             "slices": [{"id": "SLICE-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "high"}],
-            "exceptions": [], "gaps": [],
+            "gaps": [],
         }
 
     def write(self, name, value):
         path = self.root / name
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(value if isinstance(value, str) else json.dumps(value))
+        path.write_text(value if isinstance(value, str) else yaml.safe_dump(value))
 
     def sha(self, name):
         return hashlib.sha256((self.root / name).read_bytes()).hexdigest()
 
     def run_check(self, partial=False):
-        for name, value in (("recovered/contract.json", self.contract), ("recovered/model.json", self.model), ("recovered/evidence.json", self.evidence), ("recovered/tests.json", self.tests), ("verification/comparison.json", self.report)):
+        for name, value in (("recovered/state.yaml", self.state), ("recovered/model.yaml", self.model), ("recovered/evidence.yaml", self.evidence), ("recovered/tests.yaml", self.tests), ("verification/comparison.yaml", self.report)):
             self.write(name, value)
         return parity.check(self.root, allow_partial=partial)
 
@@ -99,28 +100,17 @@ class ParityTests(unittest.TestCase):
         self.model["correspondences"].pop()
         self.assertEqual(self.run_check()["reflexion"]["unmapped"], ["C-3"])
 
-    def test_exceptions_permit_a_scoped_pass_but_never_a_full_pass(self):
+    def test_extra_module_and_unfinished_requirement_block_the_full_pass(self):
         self.write("implementation/src/extra.rs", "pub fn extra() {}\n")
-        self.model["exceptions"] = [{"id": "EXC-1", "items": ["implementation/src/extra.rs"], "user_instruction": "Keep the helper module.", "limit": "One helper."}]
         result = self.run_check()
-        self.assertEqual(result["exceptions_used"], ["implementation/src/extra.rs"])
+        self.assertIn("implementation/src/extra.rs: The reflexion check reports extra modules.", result["gaps"])
         self.assertEqual(result["assessment"], "incomplete")
-        self.contract["scope"].update(mode="subset", user_instruction="Evaluate REQ-1 only.")
-        self.assertEqual(self.run_check()["assessment"], "scoped_pass")
-        self.model["exceptions"][0]["user_instruction"] = None
-        self.assertEqual(self.run_check()["assessment"], "incomplete")
-
-    def test_subset_needs_a_user_instruction_and_keeps_full_gaps_visible(self):
-        self.model["requirements"].append({**copy.deepcopy(self.model["requirements"][0]), "id": "REQ-2", "in_scope": False, "tests": [], "classification": "unknown"})
+        (self.root / "implementation/src/extra.rs").unlink()
+        self.model["requirements"].append({**copy.deepcopy(self.model["requirements"][0]), "id": "REQ-2", "tests": [], "classification": "unknown"})
         self.write("recovered/product.md", "REQ-1 REQ-2\n")
-        self.contract["scope"]["mode"] = "subset"
-        self.assertEqual(self.run_check()["assessment"], "incomplete")
-        self.contract["scope"]["user_instruction"] = "Evaluate REQ-1 only."
         result = self.run_check()
-        self.assertEqual(result["assessment"], "scoped_pass")
+        self.assertEqual(result["assessment"], "incomplete")
         self.assertTrue(any(gap.startswith("REQ-2:") for gap in result["gaps"]))
-        self.contract["scope"]["mode"] = "full_product"
-        self.assertIn("The full-product contract cannot exclude a requirement.", self.run_check()["gaps"])
 
     def test_uncertain_inventory_and_claims_remain_gaps(self):
         self.model["inventory"]["complete"] = False
@@ -174,22 +164,22 @@ class ParityTests(unittest.TestCase):
             lambda: self.model["correspondences"][0].update(rust="implementation/src/missing.rs"),
             lambda: self.tests[0].update(expect={}),
             lambda: self.report.update(passed=2),
-            lambda: self.contract["target"].update(sha256="unknown"),
+            lambda: self.state["target"].update(sha256="unknown"),
         ):
             with self.subTest(change=change):
-                saved = copy.deepcopy((self.model, self.tests, self.report, self.contract))
+                saved = copy.deepcopy((self.model, self.tests, self.report, self.state))
                 change()
                 self.assertTrue(self.run_check(True)["errors"])
-                self.model, self.tests, self.report, self.contract = saved
+                self.model, self.tests, self.report, self.state = saved
 
     def test_changed_evidence_and_path_escape_fail(self):
-        self.write("recovered/evidence/original.json", {"returncode": 1})
+        self.write("recovered/evidence/original.yaml", {"returncode": 1})
         self.assertTrue(self.run_check(True)["errors"])
-        self.evidence[0]["path"] = "../outside.json"
+        self.evidence[0]["path"] = "../outside.yaml"
         self.assertTrue(self.run_check(True)["errors"])
 
     def test_operational_state_and_gate_output_cannot_be_inputs(self):
-        for name in ("recovered/state.json", "verification/parity.json"):
+        for name in ("recovered/state.yaml", "verification/parity.yaml"):
             with self.subTest(name=name):
                 self.write(name, {"state": "operational"})
                 self.evidence[0].update(path=name, sha256=self.sha(name))
@@ -202,10 +192,10 @@ class ParityTests(unittest.TestCase):
         self.assertTrue(any("no executed capture" in gap for gap in result["gaps"]))
 
     def test_copyable_ledger_stays_incomplete_until_verified(self):
-        text = (SCRIPT.parents[2] / "rustify/assets/model.json").read_text()
-        for name, value in {"INVENTORY_EVIDENCE_ID": "E1", "TRIGGER": "the user supplies input", "SYSTEM": "demo", "RESPONSE": "write the encoded result", "EVIDENCE_ID": "E1", "TEST_ID": "T1", "COMPONENT_NAME": "Entry", "RESPONSIBILITY": "Parse input.", "CLOSURE_CHECK": "T1"}.items():
+        text = (SCRIPT.parents[2] / "rustify/assets/model.yaml").read_text()
+        for name, value in {"TRIGGER": "the user supplies input", "SYSTEM": "demo", "RESPONSE": "write the encoded result", "EVIDENCE_ID": "E1", "TEST_ID": "T1", "COMPONENT_NAME": "Entry", "RESPONSIBILITY": "Parse input."}.items():
             text = text.replace("{{" + name + "}}", value)
-        self.model = json.loads(text)
+        self.model = yaml.safe_load(text)
         self.write("recovered/product.md", "REQ-001\n")
         self.write("recovered/architecture.md", "C-001\n")
         self.write("implementation/docs/design.md", "C-001\n")
@@ -226,11 +216,11 @@ class ParityTests(unittest.TestCase):
     def test_cli_partial_mode_returns_gaps_without_a_full_pass(self):
         self.model["inventory"]["complete"] = False
         self.run_check()
-        report = self.root / "verification/parity.json"
+        report = self.root / "verification/parity.yaml"
         command = [sys.executable, str(SCRIPT), "--project", str(self.root), "--report", str(report)]
         self.assertEqual(subprocess.run(command, capture_output=True).returncode, 1)
         self.assertEqual(subprocess.run(command + ["--allow-partial"], capture_output=True).returncode, 0)
-        self.assertEqual(json.loads(report.read_text())["status"], "partial")
+        self.assertEqual(yaml.safe_load(report.read_text())["status"], "partial")
 
 
 if __name__ == "__main__":

@@ -23,9 +23,12 @@ It follows the interface of HTTPie and is written in Rust.
 - Byte-exact process output and recorded requests for 26 local cases.
 - After the source reveal: 13 independent vectors from the upstream tests.
 
-## Scope and limits
+## Scope
 
-- The scope covers finite HTTP requests on `127.0.0.1`.
-- The scope excludes TLS and wider xh features.
+- The scope is the full product. Rustify always targets a complete one-to-one reconstruction.
+- The scorer measures the features that its cases cover. A feature without a case stays in scope.
+- A failed or missing feature is a skill defect. The fix goes into the skills, not into a narrower scope.
+- The full product covers every `xh` feature, including TLS, sessions, authentication, downloads, streaming, HTTP/2, and output formatting.
+- The current cases use loopback HTTP. TLS and remote features need new cases.
 - The first evaluation run needed source-assisted repairs. The Git history before commit `ce882f1` keeps that run.
 - `run.py` scores a project in `work/projects/xh` and writes reports to `work/evaluation/xh/`.

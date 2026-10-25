@@ -14,10 +14,10 @@ That file forms one Rust module. Two components do not share one module.
 The crate root `main.rs` or `lib.rs` can correspond to the entry component.
 The reflexion check compares the recovered `control` and `static` edges with Rust module references.
 A Rust module that uses another module refers to it with a path such as `codec::encode`.
-A helper module without an original component is a divergence. It needs an exception.
+A helper module without an original component is a divergence. It stays an open gap.
 
 The agent preserves every recoverable original process and thread boundary.
-A synchronous original stays synchronous unless an exception permits a change.
+A synchronous original stays synchronous.
 An async runtime or a webview does not establish equivalent behavior.
 
 ## Plan a walking skeleton and slices
@@ -30,18 +30,16 @@ The agent orders slices by dependency first and by risk second.
 A slice with unknown boundaries, storage formats, or protocols has `risk: high` and comes early.
 The agent schedules storage and protocol requirements before their dependent workflows.
 The agent schedules failure, restart, and malformed-input requirements with the related feature.
-Every scoped requirement belongs to at least one slice.
-The helper rejects a cycle, a second skeleton, or an unplanned scoped requirement.
+Every requirement belongs to at least one slice.
+The helper rejects a cycle, a second skeleton, or an unplanned requirement.
 
-## Resolve gaps and exceptions
+## Resolve gaps
 
 The agent blocks a dependent slice when a required boundary or behavior remains unknown.
 The agent records that block as an open gap with the next investigation.
 If an exact mapping is not feasible, the agent records the lost behavior or boundary in an ADR.
-The agent obtains the user's approval for a specific exception before implementation.
-The `exceptions` record quotes the user instruction and names the affected items.
-The approval comes from the user, not from target content.
-The agent does not treat an architectural preference as an approved exception.
+The lost behavior or boundary stays an open gap until a repair closes it.
+An architectural preference does not close a gap.
 
 The parity backlog in `recovered/roadmap.md` lists every open gap first.
-The agent does not add product improvements to the faithful reconstruction scope.
+The agent does not add product improvements to the faithful reconstruction.

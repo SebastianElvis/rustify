@@ -1,10 +1,11 @@
 import base64
 import hashlib
 import importlib.util
-import json
 from pathlib import Path
 import tempfile
 import unittest
+
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,7 +20,7 @@ class CaptureTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.directory = Path(temporary.name)
-        cases = json.loads((ROOT / "evaluations/zenity/cases.json").read_text())
+        cases = yaml.safe_load((ROOT / "evaluations/zenity/cases.yaml").read_text())
         review = {"capture_method": "host-native CUA", "cases": {}}
         for case in cases:
             args = case["args"]
@@ -31,15 +32,15 @@ class CaptureTests(unittest.TestCase):
                 for field, (name, data) in files.items():
                     (self.directory / name).write_bytes(data)
                     result.update({field + "_file": name, field + "_sha256": hashlib.sha256(data).hexdigest()})
-                self.write(f"{case['id']}-{role}.json", result)
+                self.write(f"{case['id']}-{role}.yaml", result)
             review["cases"][case["id"]] = dict.fromkeys(("status", "focus", "title", "icon", "family", "controls"), "passed")
-        self.write("visual-review.json", review)
+        self.write("visual-review.yaml", review)
 
     def write(self, name, value):
-        (self.directory / name).write_text(json.dumps(value))
+        (self.directory / name).write_text(yaml.safe_dump(value))
 
     def change(self, name, update):
-        value = json.loads((self.directory / name).read_text())
+        value = yaml.safe_load((self.directory / name).read_text())
         update(value)
         self.write(name, value)
 
@@ -51,7 +52,7 @@ class CaptureTests(unittest.TestCase):
             zenity.verify(self.directory, {**HASHES, "candidate": "c" * 64})
 
     def test_changed_process_result_fails(self):
-        self.change("entry-accept-candidate.json", lambda item: item.update(stdout_b64=base64.b64encode(b"other\n").decode()))
+        self.change("entry-accept-candidate.yaml", lambda item: item.update(stdout_b64=base64.b64encode(b"other\n").decode()))
         with self.assertRaisesRegex(ValueError, "process result"):
             zenity.verify(self.directory, HASHES)
 
@@ -62,13 +63,13 @@ class CaptureTests(unittest.TestCase):
             zenity.verify(self.directory, HASHES)
 
     def test_failed_visual_review_fails(self):
-        self.change("visual-review.json", lambda item: item["cases"]["info-accept"].update(focus="failed"))
+        self.change("visual-review.yaml", lambda item: item["cases"]["info-accept"].update(focus="failed"))
         with self.assertRaisesRegex(ValueError, "visual parity"):
             zenity.verify(self.directory, HASHES)
 
     def test_unexplained_screenshot_difference_fails(self):
         (self.directory / "question-accept-candidate.png").write_bytes(b"\x89PNG\r\n\x1a\nother")
-        self.change("question-accept-candidate.json", lambda item: item.update(screenshot_sha256=hashlib.sha256(b"\x89PNG\r\n\x1a\nother").hexdigest()))
+        self.change("question-accept-candidate.yaml", lambda item: item.update(screenshot_sha256=hashlib.sha256(b"\x89PNG\r\n\x1a\nother").hexdigest()))
         with self.assertRaisesRegex(ValueError, "no reviewed explanation"):
             zenity.verify(self.directory, HASHES)
 

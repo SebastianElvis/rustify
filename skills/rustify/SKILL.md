@@ -7,8 +7,9 @@ description: Reconstruct local software from a binary or package in idiomatic Ru
 
 Rustify reconstructs the original product faithfully in Rust.
 The original application is the test oracle.
-The default contract requires one-to-one feature, behavior, UX, data, and component mappings where evidence permits them.
-The agent keeps every known mismatch open until a repair or an explicit user exception resolves it.
+Rustify always reconstructs the full product. It requires one-to-one feature, behavior, UX, data, and component mappings where evidence permits them.
+The agent keeps every known mismatch open until a repair resolves it.
+A missing feature is an open gap. The agent keeps working on it.
 
 ## Required peer skills
 
@@ -22,14 +23,12 @@ The agent reports missing peers before dependent work.
 Every skill writes every artifact with [the standards guide](references/standards.md).
 The guide sets the writing rules, the glossary, the EARS requirement form, and the architecture viewpoints.
 
-## Prepare and resume
+## Start and resume
 
-- The agent reads [the project contract and state format](references/project.md).
-- The agent fills [the contract asset](assets/contract.json) from the target and request.
+- The agent reads [the project format and state](references/project.md).
 - The agent reads [the REA connection guide](references/rea.md) when discovery needs its tools.
 - The agent runs `python3 <rustify>/scripts/project.py init PROJECT --target BINARY --profile cli`.
 - The agent selects `cli`, `desktop`, `service`, or `game` for the actual target.
-- The agent writes `recovered/contract.json` and completes the `prepare` checkpoint.
 - The agent preserves user data and uses separate experiment data.
 - The agent runs the helper with `status PROJECT` after an interruption and resumes the first incomplete or stale phase.
 
@@ -43,9 +42,9 @@ The agent workspace in `work_dir` holds only temporary worker shards and progres
    These captures are characterization tests. They become the first evidence.
 2. **Discover.** The agent invokes `rustify-product`, `rustify-design`, and `rustify-architecture` **in parallel** when parallel agents are available.
    The agent otherwise runs these skills in sequence.
-   Each worker receives the contract, the project path, and a separate shard path in `work_dir`.
+   Each worker receives the project path and a separate shard path in `work_dir`.
    The agent coordinates exclusive access to shared REA sessions or application state.
-3. **Merge.** The agent merges the shards into `recovered/model.json`, `evidence.json`, `scenarios.json`, and `tests.json`.
+3. **Merge.** The agent merges the shards into `recovered/model.yaml`, `evidence.yaml`, `scenarios.yaml`, and `tests.yaml`.
    The agent resolves contradictions and duplicate requirements.
    The agent completes the `discover` checkpoint.
 4. **Plan.** The agent invokes `rustify-plan`.

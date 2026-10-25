@@ -9,7 +9,7 @@ metadata:
 
 # Recover the original architecture
 
-The agent reads `recovered/contract.json` and [the project contract](../rustify/references/project.md).
+The agent reads `recovered/state.yaml` and [the project format](../rustify/references/project.md).
 The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent does not redesign the original system.
 

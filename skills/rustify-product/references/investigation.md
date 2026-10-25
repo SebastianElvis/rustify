@@ -2,12 +2,12 @@
 
 ## Establish the original surface
 
-The agent records the original version, binary hash, resources, platform, locale, and launch conditions.
-The agent inventories every reachable entry point within the contract.
+The agent records the original version, binary hash, resources, platform, locale, and launch conditions in `recovered/product.md`.
+The agent inventories every reachable entry point.
 The inventory includes commands, options, menus, document types, settings, integrations, and persisted data.
-The agent records the inventory basis in `model.json` `inventory.basis`, for example the help output or a resource table.
+The agent names the inventory basis in `recovered/product.md`, for example the help output or a resource table.
 The agent sets `inventory.complete` only when the evidence covers every entry point.
-A time limit does not convert an unexamined surface into an exclusion.
+A time limit does not remove an unexamined surface from the product.
 
 The agent identifies participants from observed roles, permissions, and interfaces.
 The agent does not invent personas, business goals, or creator intent.
@@ -36,7 +36,7 @@ The agent organizes each feature with Example Mapping (Wynne).
 
 | Card | Rustify record |
 | --- | --- |
-| Rule | One EARS requirement in `model.json`. |
+| Rule | One EARS requirement in `model.yaml`. |
 | Example | One scenario and one declarative test with an exact expectation. |
 | Question | One `unknown` evidence record and one open gap with a next probe. |
 

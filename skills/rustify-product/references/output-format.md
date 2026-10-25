@@ -2,7 +2,7 @@
 
 The product specification describes what the original does.
 The parity backlog describes what remains to reproduce.
-The ledger `recovered/model.json` holds the requirement records.
+The ledger `recovered/model.yaml` holds the requirement records.
 The documents name each ledger identifier and explain it.
 
 ## Requirement records
@@ -17,12 +17,12 @@ The parity gate rejects a statement that does not match its pattern or that cont
 
 | Section | Required content |
 | --- | --- |
-| Identity and scope | The original identity, environment, contracted scope, and exclusions. |
+| Identity | The original identity, resources, platform, and environment. |
 | Inventory | The entry points and the inventory basis. |
 | Requirements | Each requirement ID, EARS statement, classification, verification method, and evidence. |
 | Use cases | Each main success scenario and its numbered extensions. |
 | Errors | Each trigger, exact diagnostic, status, partial result, and recovery rule. |
-| Compatibility constraints | Each file, protocol, environment, version, unit, and limit requirement. |
+| Compatibility constraints | Each file, protocol, environment, version, unit, limit, and tolerance requirement. |
 | Open questions | Each `unknown` record, contradiction, and next probe. |
 
 A section can be inapplicable only with an evidence-based reason.

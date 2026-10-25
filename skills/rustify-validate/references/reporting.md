@@ -2,9 +2,9 @@
 
 | Output | Required content |
 | --- | --- |
-| `verification/comparison.json` | Executed cases with exact results, executable identities, and failures. |
-| `verification/fuzz.json` | The fuzz search, its seed, and each divergence. |
-| `verification/parity.json` | The gate result, the per-requirement and per-slice results, the reflexion check, and input hashes. |
+| `verification/comparison.yaml` | Executed cases with exact results, executable identities, and failures. |
+| `verification/fuzz.yaml` | The fuzz search, its seed, and each divergence. |
+| `verification/parity.yaml` | The gate result, the per-requirement and per-slice results, the reflexion check, and input hashes. |
 | `verification/compatibility.md` | The assurance case for the parity claim. |
 
 The agent preserves current captures in `verification/raw/` and logs in `verification/logs/`.
@@ -12,10 +12,11 @@ The agent preserves current captures in `verification/raw/` and logs in `verific
 ## Deterministic gate
 
 ```sh
-python3 <rustify-validate>/scripts/parity.py --project PROJECT --report PROJECT/verification/parity.json [--allow-partial] [--comparison verification/other.json]
+python3 <rustify-validate>/scripts/parity.py --project PROJECT --report PROJECT/verification/parity.yaml [--allow-partial] [--comparison verification/other.yaml]
 ```
 
-The gate reads `contract.json`, `model.json`, `evidence.json`, `tests.json`, the comparison reports, and the documents.
+The gate reads the target hash from `state.yaml`.
+It also reads `model.yaml`, `evidence.yaml`, `tests.yaml`, the comparison reports, and the documents.
 It computes each requirement result from evidence and captures. It does not read a status label.
 
 - A requirement passes when its claim and evidence are `observed`, its verification records pass, and no open gap names it.
@@ -30,8 +31,7 @@ It computes each requirement result from evidence and captures. It does not read
 | --- | --- |
 | `incomplete` | Required coverage, evidence, mapping, or verification remains missing. |
 | `failed` | A requirement has a known mismatch. |
-| `scoped_pass` | All requirements in an authorized subset pass, possibly with exceptions. |
-| `full_parity_pass` | The full inventory passes with no gap and no exception. |
+| `full_parity_pass` | The full inventory passes with no gap. |
 
 The gate fails malformed records, missing files, and integrity differences in every mode.
 `--allow-partial` returns success with gaps for slice checks. It never turns a gap into a pass.
@@ -47,7 +47,7 @@ The structure follows the GSN Community Standard and ISO/IEC/IEEE 15026-2.
 | Goal | A claim, for example "The Rust implementation reproduces REQ-004." |
 | Strategy | The argument, for example "Argue over each requirement in the slice." |
 | Solution | Evidence: a comparison case, a gate result, a fuzz report, or a capture. |
-| Context | The contract, the target hash, and the environment. |
+| Context | The target hash and the environment. |
 | Assumption | A condition that the evidence does not check. |
 | Undeveloped goal | A claim without evidence. Each open gap is an undeveloped goal. |
 

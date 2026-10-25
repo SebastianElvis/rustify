@@ -1,0 +1,38 @@
+features:
+- id: get
+  pattern: \bGET\b
+- id: head
+  pattern: \bHEAD\b
+- id: post
+  pattern: \bPOST\b
+- id: json-fields
+  pattern: (?i)json
+- id: typed-json
+  pattern: :=
+- id: raw-body
+  pattern: --raw
+- id: headers
+  pattern: (?i)header
+- id: follow
+  pattern: --follow
+- id: status-exit
+  pattern: (?i)exit (status|code)
+- id: check-status
+  pattern: --(no-)?check-status
+- id: print
+  pattern: --print|--body|--headers
+- id: pretty
+  pattern: --pretty
+components:
+- id: cli
+  pattern: (?i)\bcli\b|argument|clap
+- id: request-items
+  pattern: (?i)request item
+- id: client
+  pattern: (?i)client|transport
+- id: redirect
+  pattern: (?i)redirect
+- id: printer
+  pattern: (?i)printer|output
+- id: status
+  pattern: (?i)status

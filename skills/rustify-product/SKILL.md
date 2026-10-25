@@ -9,7 +9,7 @@ metadata:
 
 # Recover the product specification
 
-The agent reads `recovered/contract.json` and [the project contract](../rustify/references/project.md).
+The agent reads `recovered/state.yaml` and [the project format](../rustify/references/project.md).
 The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent reconstructs original behavior without product improvements.
 
@@ -24,4 +24,4 @@ The agent reconstructs original behavior without product improvements.
 
 Every requirement is one EARS statement with evidence and a verification method.
 An unknown result stays an `unknown` record and an open gap.
-The agent declares completeness only for the contracted scope.
+The agent declares completeness only for the full product.

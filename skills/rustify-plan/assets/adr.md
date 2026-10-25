@@ -20,4 +20,4 @@
 
 ## Consequences
 
-{{The preserved semantics, the lost semantics, and the gap or exception ID for each loss.}}
+{{The preserved semantics, the lost semantics, and the gap ID for each loss.}}

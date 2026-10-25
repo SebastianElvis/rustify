@@ -14,11 +14,13 @@ import subprocess
 import sys
 import time
 
+import yaml
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PROMPT = """Use the rustify skill to reconstruct {binary} in Rust.
 Write the target project to {project}.
-The user limits the contract to this subset: {scope}.
+Reconstruct the complete product.
 Work only from the binary, its resources, and its observable behavior.
 Do not download, search for, or read the source code, tests, or documentation of this program.
 Complete every phase, run the parity gate, and report the remaining gaps.
@@ -40,7 +42,7 @@ parity = load("rustify_parity", ROOT / "skills/rustify-validate/scripts/parity.p
 
 def save(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2) + "\n")
+    path.write_text(yaml.safe_dump(value, sort_keys=False))
 
 
 def freeze(project):
@@ -55,9 +57,8 @@ def reference(directory):
 
 def run(directories, agent, trials, output, timeout):
     stamp = output / time.strftime("%Y%m%d-%H%M%S")
-    save(stamp / "tracks.json", [str(directory) for directory in directories])
+    save(stamp / "tracks.yaml", [str(directory) for directory in directories])
     for directory in directories:
-        grading = json.loads((directory / "grading.json").read_text())
         source = reference(directory)
         for trial in range(1, trials + 1):
             workspace = stamp / directory.name / f"trial-{trial}"
@@ -66,7 +67,7 @@ def run(directories, agent, trials, output, timeout):
             binary = workspace / "input" / directory.name
             binary.parent.mkdir(parents=True)
             shutil.copy2(source, binary)
-            prompt = PROMPT.format(binary=binary, project=workspace / "project", scope=grading["scope"])
+            prompt = PROMPT.format(binary=binary, project=workspace / "project")
             start = time.monotonic()
             try:
                 process = subprocess.run(shlex.split(agent), cwd=workspace, input=prompt, capture_output=True, text=True, timeout=timeout)
@@ -82,7 +83,7 @@ def run(directories, agent, trials, output, timeout):
                 pass
             project = workspace / "project"
             record["freeze"] = freeze(project) if project.is_dir() else {}
-            save(workspace / "run.json", record)
+            save(workspace / "run.yaml", record)
     return stamp
 
 
@@ -94,20 +95,20 @@ def recall(patterns, text):
 def text(project, documents, key, fields):
     parts = [(project / name).read_text(errors="replace") for name in documents if (project / name).is_file()]
     try:
-        parts += [str(item.get(field, "")) for item in json.loads((project / "recovered/model.json").read_text()).get(key, []) for field in fields]
-    except (OSError, json.JSONDecodeError, AttributeError):
+        parts += [str(item.get(field, "")) for item in yaml.safe_load((project / "recovered/model.yaml").read_text()).get(key, []) for field in fields]
+    except (OSError, yaml.YAMLError, AttributeError):
         pass
     return "\n".join(parts)
 
 
 def grade_trial(workspace, directory, grading):
-    record = json.loads((workspace / "run.json").read_text())
+    record = yaml.safe_load((workspace / "run.yaml").read_text())
     project = workspace / "project"
     result = {"track": directory.name, "trial": record["trial"], "seconds": record["seconds"], "cost_usd": record.get("cost_usd"), "agent_returncode": record["returncode"], "success": False}
     if not project.is_dir() or freeze(project) != record["freeze"]:
         return {**result, "error": "The project is missing or changed after the freeze."}
     subprocess.run([sys.executable, str(directory / "run.py"), "--project", str(project), "--output", str(workspace / "score")], capture_output=True)
-    score = json.loads((workspace / "score/report.json").read_text())
+    score = yaml.safe_load((workspace / "score/report.yaml").read_text())
     reports = [value for name, value in score.get("reports", {}).items() if name != "repeatability"]
     total = sum(value["passed"] + value["failed"] for value in reports)
     result.update(success=score["status"] == "passed", scorer_error=score.get("error"), expected_failures=len(score.get("failures", [])))
@@ -119,13 +120,13 @@ def grade_trial(workspace, directory, grading):
     result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"])}
     result["structural_fidelity"] = result["edge_convergence"] = None
     if structure:
-        model = json.loads((project / "recovered/model.json").read_text())
+        model = yaml.safe_load((project / "recovered/model.yaml").read_text())
         merged = sum(item["rust"] in structure["merged"] for item in model["correspondences"])
         components, edges = len(model["components"]), len(structure["convergences"]) + len(structure["absences"])
         result["structural_fidelity"] = round((components - len(structure["unmapped"]) - merged) / components, 3) if components else None
         result["edge_convergence"] = round(len(structure["convergences"]) / edges, 3) if edges else None
-    checks = project / "verification/checks.json"
-    mutation = [item["mutation"] for item in json.loads(checks.read_text()).get("commands", []) if "mutation" in item] if checks.is_file() else []
+    checks = project / "verification/checks.yaml"
+    mutation = [item["mutation"] for item in yaml.safe_load(checks.read_text()).get("commands", []) if "mutation" in item] if checks.is_file() else []
     result["mutation_score"] = mutation[-1]["score"] if mutation else None
     if (project / "implementation/Cargo.toml").is_file():
         lint = subprocess.run(["cargo", "clippy", "--locked", "--", "-W", "clippy::pedantic"], cwd=project / "implementation", env={**os.environ, "CARGO_TARGET_DIR": str(workspace / "build")}, capture_output=True, text=True)
@@ -136,8 +137,8 @@ def grade_trial(workspace, directory, grading):
 
 def grade(stamp):
     rows, summary = [], {}
-    for directory in map(Path, json.loads((stamp / "tracks.json").read_text())):
-        grading = json.loads((directory / "grading.json").read_text())
+    for directory in map(Path, yaml.safe_load((stamp / "tracks.yaml").read_text())):
+        grading = yaml.safe_load((directory / "grading.yaml").read_text())
         trials = [grade_trial(path, directory, grading) for path in sorted((stamp / directory.name).glob("trial-*"))]
         rows += trials
         rates = [item["blind_pass_rate"] for item in trials if item.get("blind_pass_rate") is not None]
@@ -147,7 +148,7 @@ def grade(stamp):
             "mean_seconds": round(sum(item["seconds"] for item in trials) / len(trials), 1) if trials else None,
         }
     report = {"summary": summary, "trials": rows}
-    save(stamp / "grades.json", report)
+    save(stamp / "grades.yaml", report)
     return report
 
 
@@ -156,7 +157,7 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     start = commands.add_parser("run")
     start.add_argument("--agent", required=True, help="The agent command. The harness sends the prompt on standard input.")
-    start.add_argument("--track", action="append", type=Path, help="A track folder with run.py and grading.json. Private tracks can live outside the repository.")
+    start.add_argument("--track", action="append", type=Path, help="A track folder with run.py and grading.yaml. Private tracks can live outside the repository.")
     start.add_argument("--trials", type=int, default=3)
     start.add_argument("--output", type=Path, default=ROOT / "work/agent-eval")
     start.add_argument("--timeout", type=float, default=4 * 3600)
@@ -172,7 +173,7 @@ def main():
             print(stamp)
             return 0
     report = grade(stamp)
-    print(json.dumps(report["summary"], indent=2))
+    print(yaml.safe_dump(report["summary"], sort_keys=False), end="")
     return 0 if all(item["pass_hat_k"] for item in report["summary"].values()) else 1
 
 

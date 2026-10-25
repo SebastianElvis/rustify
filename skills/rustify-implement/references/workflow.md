@@ -2,9 +2,9 @@
 
 ## Inputs
 
-The agent reads the contract, the ledger, the recovered documents, the evidence, and the tests.
+The agent reads the ledger, the recovered documents, the evidence, and the tests.
 `implementation/docs/design.md` and its ADRs supply the design.
-Only an explicit user instruction can authorize a reduced scope or a product difference.
+Rustify always implements the full product without a product difference.
 
 ## Slice loop
 
@@ -12,7 +12,7 @@ The agent implements the walking skeleton first and then each slice in plan orde
 For each slice, the agent follows the outer and inner loops of Freeman and Pryce.
 
 1. **Outer loop.** The agent writes the process or application acceptance test for each slice requirement.
-   The test uses the declarative expectation from `recovered/tests.json`.
+   The test uses the declarative expectation from `recovered/tests.yaml`.
    The agent runs it and confirms that it fails.
 2. **Inner loop.** The agent writes a failing unit test, makes it pass, and refactors (Beck).
    The agent repeats this loop until the acceptance test passes.
@@ -28,12 +28,12 @@ The agent never edits a recovered expectation to make a test pass.
 
 Each original component has its planned Rust module.
 A module that depends on another module uses an explicit path, such as `codec::encode`.
-The agent adds no module without an original component or an approved exception.
+The agent adds no module without an original component.
 The agent puts file, clock, network, and terminal access in the modules that own those boundaries in the original.
 
 The agent preserves persistence formats, protocols, execution order, and failure behavior.
 The agent preserves concurrency and resource-lifetime semantics where they affect the product.
-The agent preserves original quirks unless the user explicitly changes the contract.
+The agent preserves original quirks.
 The agent does not replace blocking execution with async execution for convenience.
 The agent does not replace an OS script boundary or a native interface for convenience.
 
@@ -50,7 +50,7 @@ A language adaptation needs an ADR and compatibility evidence.
 ## Repairs
 
 The agent preserves each failing comparison before a repair.
-The agent repairs the cause without widening the product contract.
+The agent repairs the cause without a product change.
 A fix or refactor adds no more code than it removes.
 
 ## Checks

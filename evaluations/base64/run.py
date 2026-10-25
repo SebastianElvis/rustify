@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Score a GNU base64 reconstruction against the pinned reference."""
 
-import json
 from pathlib import Path
 import sys
+
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import harness
@@ -21,7 +22,7 @@ PIN = {
 
 def score(reference, candidate, project):
     challenge = cases()
-    upstream = json.loads((ROOT / "upstream-vectors.json").read_text())
+    upstream = yaml.safe_load((ROOT / "upstream-vectors.yaml").read_text())
     runs = (("repeatability", challenge + upstream["cases"], reference), ("challenge", challenge, candidate), ("upstream", upstream["cases"], candidate))
     reports = {name: harness.compare.compare(reference, executable, items, name="base64") for name, items, executable in runs}
     failures = [f"{case['input']['id']}/{side}" for case in reports["upstream"]["cases"] for side in ("reference", "candidate") if case[side]["error"] or any(case[side][key] != value for key, value in upstream["expected"][case["input"]["id"]].items())]

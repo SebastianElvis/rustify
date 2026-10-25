@@ -24,8 +24,11 @@ It belongs to GNU coreutils, the standard user-space utilities of most Linux sys
 - Byte-exact stdout, stderr, exit status, and files for challenge cases.
 - After the source reveal: 201 upstream coreutils vectors run against both executables.
 
-## Scope and limits
+## Scope
 
-- The scope covers encoding, decoding, wrapping, files, options, and error behavior.
+- The scope is the full product. Rustify always targets a complete one-to-one reconstruction.
+- The scorer measures the features that its cases cover. A feature without a case stays in scope.
+- A failed or missing feature is a skill defect. The fix goes into the skills, not into a narrower scope.
+- The full product covers every option, input mode, error message, and exit status of `base64`.
 - The track needs no source-assisted repair.
 - `run.py` scores a project in `work/projects/base64` and writes reports to `work/evaluation/base64/`.

@@ -2,10 +2,11 @@
 """Score a zenity reconstruction from host-native GUI captures without opening a dialog."""
 
 import base64
-import json
 from pathlib import Path
 import re
 import sys
+
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import harness
@@ -20,8 +21,8 @@ PIN = {
 
 
 def verify(directory, hashes):
-    cases = json.loads((ROOT / "cases.json").read_text())
-    review = json.loads((directory / "visual-review.json").read_text())
+    cases = yaml.safe_load((ROOT / "cases.yaml").read_text())
+    review = yaml.safe_load((directory / "visual-review.yaml").read_text())
     if review["capture_method"] != "host-native CUA" or set(review["cases"]) != {case["id"] for case in cases}:
         raise ValueError("The visual review does not identify the five cases.")
     rows = []
@@ -31,7 +32,7 @@ def verify(directory, hashes):
             raise ValueError(f"The visual parity review fails: {identity}")
         results = {}
         for role, binary_hash in hashes.items():
-            result = json.loads((directory / f"{identity}-{role}.json").read_text())
+            result = yaml.safe_load((directory / f"{identity}-{role}.yaml").read_text())
             if result["case"]["args"] != case["args"] or result["executable_sha256"] != binary_hash or result["capture_method"] != "host-native CUA":
                 raise ValueError(f"The capture has different inputs or a different executable: {identity}/{role}")
             if result["returncode"] != expected["returncode"] or any(base64.b64decode(result[field]) != base64.b64decode(expected[field]) for field in ("stdout_b64", "stderr_b64")):
@@ -56,7 +57,7 @@ def verify(directory, hashes):
 def score(reference, candidate, project):
     directory = project / "verification/gui-captures"
     hashes = {"reference": PIN["sha256"], "candidate": harness.digest(candidate.read_bytes())}
-    if not (directory / "visual-review.json").is_file():
+    if not (directory / "visual-review.yaml").is_file():
         return {}, [f"The project has no GUI captures in {directory}."]
     return {"gui": verify(directory, hashes)}, []
 

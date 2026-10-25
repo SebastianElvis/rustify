@@ -11,6 +11,8 @@ import subprocess
 import tarfile
 import zipfile
 
+import yaml
+
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 
@@ -32,7 +34,7 @@ project_helper = load("rustify_project", REPOSITORY / "skills/rustify/scripts/pr
 
 def save(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2) + "\n")
+    path.write_text(yaml.safe_dump(value, sort_keys=False))
 
 
 def extract(data, member):
@@ -50,6 +52,13 @@ def extract(data, member):
 
 
 def reference(track, pin):
+    if "build" in pin:
+        path = REPOSITORY / "work/references" / track / Path(pin["binary"]).name
+        if not path.is_file() or digest(path.read_bytes()) != pin["sha256"]:
+            load("build_reference", REPOSITORY / "scripts/build_reference.py").build(track)
+        if digest(path.read_bytes()) != pin["sha256"]:
+            raise ValueError(f"The hardened build differs from the pin. Use {pin['compiler']}.")
+        return path
     path = REPOSITORY / "work/downloads" / track
     if path.is_file() and not path.is_symlink() and digest(path.read_bytes()) == pin["sha256"]:
         return path
@@ -112,12 +121,12 @@ def run(track, pin, score):
         report["candidate_sha256"] = digest(candidate.read_bytes())
         reports, failures = score(executable, candidate, project)
         for name, value in reports.items():
-            save(output / f"{name}.json", value)
+            save(output / f"{name}.yaml", value)
         report["reports"] = {name: {key: value[key] for key in ("status", "passed", "failed")} for name, value in reports.items()}
         report["failures"] = failures
         report["status"] = "passed" if reports and all(value["status"] == "passed" for value in reports.values()) and not failures else "failed"
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
         report["error"] = str(error)
-    save(output / "report.json", report)
-    print(json.dumps({key: value for key, value in report.items() if key != "freeze"}, indent=2))
+    save(output / "report.yaml", report)
+    print(yaml.safe_dump({key: value for key, value in report.items() if key != "freeze"}, sort_keys=False), end="")
     return 0 if report["status"] == "passed" else 1

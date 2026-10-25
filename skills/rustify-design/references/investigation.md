@@ -36,7 +36,7 @@ For a CLI, the agent captures exact syntax, option grouping, defaults, operands,
 The agent captures help and version output and preserves byte-level diagnostics.
 The agent tests terminal-dependent behavior only under recorded terminal conditions.
 For a service, the agent captures request, response, sequencing, cancellation, and observable state.
-For a game, the agent captures controls, modes, feedback, saves, and the contracted motion or frame behavior.
+For a game, the agent captures controls, modes, feedback, saves, and the original motion or frame behavior.
 The agent marks visual tokens inapplicable only when the interface has no visual surface.
 
 ## Use REA and preserve provenance
