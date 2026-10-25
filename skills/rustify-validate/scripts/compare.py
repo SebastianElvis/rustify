@@ -112,7 +112,7 @@ def run(executable, name, case, timeout):
             if process is not None:
                 try:
                     os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
+                except (ProcessLookupError, PermissionError):
                     pass
         try:
             result["files"] = capture_files(root)
