@@ -133,16 +133,18 @@ python3 scripts/check_install.py
 ```
 
 The compact dataset covers GNU base64, BLAKE3 hashing, an HTTP client, and native desktop dialogs.
-The default evaluation runs the first three tracks.
-The desktop option verifies saved GUI captures and runs fresh Rust tests:
+The repository stores the pinned references, cases, and scorers, not agent outputs.
+You reconstruct each reference into `work/projects/<track>` with your agent.
+`make evaluate` scores the first three tracks.
+The `--desktop` option also scores saved GUI captures:
 
 ```sh
-python3 scripts/evaluate.py --recorded-desktop
+python3 scripts/evaluate.py --desktop
 ```
 
-The evaluation fixtures require macOS.
-These fixture requirements do not restrict the skill bundle to macOS.
-The [evaluation guide](docs/evaluation.md) records scopes, source-assisted repairs, and reproduction details.
+The evaluation references require macOS.
+These requirements do not restrict the skill bundle to macOS.
+The [evaluation guide](docs/evaluation.md) records the scopes, the scorer steps, and the reproduction details.
 
 Contributors rebuild the architecture figure with `make diagram`.
 The build needs LaTeX, latexmk, and Poppler.

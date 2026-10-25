@@ -1,9 +1,0 @@
-{
-  "url": "https://github.com/BLAKE3-team/BLAKE3/releases/download/1.8.7/b3sum_macos_x64_bin",
-  "sha256": "97017f4477d872b24752a9bdbe48a6e0296fe1a66fc4787906c20c040b15c299",
-  "bytes": 1361016,
-  "platform": "macOS x86_64",
-  "version": "1.8.7",
-  "execution": "Rosetta on arm64",
-  "upstream_vector_sha256": "dcb91ea8accc77e6d6e632af7cdc1a99a9f3ae78cf648da595c7d064db32f624"
-}

@@ -1,6 +1,0 @@
-{
-  "url": "https://github.com/BLAKE3-team/BLAKE3/archive/refs/tags/1.8.7.tar.gz",
-  "sha256": "c6782a28842b1c0478524ac06a4f2ede784038ee298d6e2162c0b089c4306a3c",
-  "reveal_utc": "2026-10-24T14:07:27.343795+00:00",
-  "freeze": "runtime-freeze.json"
-}
