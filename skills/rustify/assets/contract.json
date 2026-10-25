@@ -9,7 +9,8 @@
   "scope": {
     "mode": "full_product",
     "features": [],
-    "unexplored": []
+    "unexplored": [],
+    "user_instruction": null
   },
   "compatibility": {
     "mode": "faithful",
@@ -18,8 +19,7 @@
     "ux": "original appearance and interaction",
     "data": "original formats and invariants",
     "interfaces": "original CLI, API, protocol, and errors",
-    "architecture": "traceable original-to-Rust components where recoverable",
-    "exceptions": []
+    "architecture": "one Rust module for each recovered component"
   },
   "environment": {
     "locale": "{{reference_locale}}",

@@ -94,23 +94,25 @@ The target project contains three folders:
 
 | Folder | Contents |
 | --- | --- |
-| `recovered/` | Product and UX specifications, architecture, diagrams, data models, contract, state, evidence, declarative tests, and a parity backlog. |
-| `implementation/` | The Rust project, dependencies, source, and executable tests. |
-| `verification/` | Check results, original-to-Rust comparisons, parity assessments, reports, and logs. |
+| `recovered/` | The traceability ledger, product and UX specifications, architecture, diagrams, data models, contract, state, evidence, declarative tests, and a parity backlog. |
+| `implementation/` | The Rust project, dependencies, source, executable tests, the Rust design, and decision records. |
+| `verification/` | Executed check results, original-to-Rust comparisons, fuzz reports, the parity gate result, the assurance case, and logs. |
 
+The ledger `recovered/model.json` links each EARS requirement to evidence, tests, components, Rust modules, slices, and gaps.
 The agent produces diagrams and data models when the evidence supports them.
-Temporary Rust design and task plans stay in a separate agent workspace.
 The [project contract](skills/rustify/references/project.md) defines the output formats.
+The [standards guide](skills/rustify/references/standards.md) defines the writing rules, the terminology, and the requirement and architecture forms.
 
 ## Workflow
 
 ![Rustify architecture](docs/architecture.svg)
 
 1. **Preparation:** `rustify` records the target, environment, and compatibility contract.
-2. **Discovery:** `rustify-product`, `rustify-design`, and `rustify-architecture` collect evidence in parallel when the agent supports parallel work.
-3. **Planning:** `rustify-plan` maps original components to Rust components and defines acceptance checks.
-4. **Implementation:** `rustify-implement` builds complete workflows and runs Rust quality checks.
-5. **Validation:** `rustify-validate` compares both versions and returns defects to the affected phase.
+2. **Characterization:** `rustify` captures the original outputs for the first scenarios.
+3. **Discovery:** `rustify-product`, `rustify-design`, and `rustify-architecture` write EARS requirements, C4 components, and evidence in parallel when the agent supports parallel work.
+4. **Planning:** `rustify-plan` maps each original component to one Rust module and plans a walking skeleton and risk-ordered slices.
+5. **Slices:** `rustify-implement` builds one slice at a time with acceptance tests first. `rustify-validate` checks each slice before the next one.
+6. **Acceptance:** `rustify-validate` runs comparisons, differential fuzzing, the reflexion check, and the parity gate, and writes an assurance case.
 
 The agent runs discovery tasks sequentially when parallel execution is unavailable.
 The [architecture guide](docs/architecture.md) includes the diagram's editable LaTeX source.
@@ -121,6 +123,7 @@ The [architecture guide](docs/architecture.md) includes the diagram's editable L
 - **Evidence and user experience guide reconstruction.** Observed workflows, interface states, binary evidence, and tests support each mapping. Unit tests, E2E comparisons, independent expectations, and available upstream vectors challenge the result.
 - **Rust code follows Rust conventions.** The implementation preserves original responsibilities and execution boundaries. The [stack guide](skills/rustify-plan/references/rust-stack.md) ties dependencies to those requirements.
 - **Reports keep gaps visible.** A passing subset does not establish full-product parity. Changed evidence invalidates stale results.
+- **Standards keep agents consistent.** Requirements follow ISO/IEC/IEEE 29148 and EARS. Architecture follows ISO/IEC/IEEE 42010, C4, and arc42. Prose follows ASD-STE100.
 
 ## Development and evaluation
 
@@ -142,6 +145,15 @@ The `--desktop` option also scores saved GUI captures:
 python3 scripts/evaluate.py --desktop
 ```
 
+The agent evaluation runs the current skills itself.
+It runs each track three times, freezes each project, and grades it with the track scorer:
+
+```sh
+python3 scripts/agent_eval.py run --agent "claude -p --output-format json --dangerously-skip-permissions"
+```
+
+Private held-out tracks can live outside the repository and use `--track /path/to/track`.
+
 The evaluation references require macOS.
 These requirements do not restrict the skill bundle to macOS.
 The [evaluation guide](docs/evaluation.md) records the scopes, the scorer steps, and the reproduction details.
@@ -156,6 +168,7 @@ Each skill keeps its main instructions short and stores supporting methods, temp
 - [Architecture and diagram source](docs/architecture.md)
 - [Evaluation method and dataset](docs/evaluation.md)
 - [Target-project contract](skills/rustify/references/project.md)
+- [Standards and terminology](skills/rustify/references/standards.md)
 - [Rust stack guide](skills/rustify-plan/references/rust-stack.md)
 
 ## License

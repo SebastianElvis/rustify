@@ -113,6 +113,13 @@ def run(executable, name, case, timeout):
     return result
 
 
+def differ(results):
+    differences = [field for field in ("returncode", "stdout_b64", "stderr_b64", "files") if results["reference"][field] != results["candidate"][field]]
+    if any(result["error"] is not None for result in results.values()):
+        differences.append("execution_error")
+    return differences
+
+
 def compare(reference, candidate, cases, timeout=5, name="base64"):
     validate(cases)
     if not math.isfinite(timeout) or timeout <= 0:
@@ -129,9 +136,7 @@ def compare(reference, candidate, cases, timeout=5, name="base64"):
         report["executables"][label] = {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
     for case in cases:
         results = {label: run(path, name, case, timeout) for label, path in paths.items()}
-        differences = [field for field in ("returncode", "stdout_b64", "stderr_b64", "files") if results["reference"][field] != results["candidate"][field]]
-        if any(result["error"] is not None for result in results.values()):
-            differences.append("execution_error")
+        differences = differ(results)
         passed = not differences
         report["passed" if passed else "failed"] += 1
         report["cases"].append({"input": case, **results, "differences": differences, "passed": passed})

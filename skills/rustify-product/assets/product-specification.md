@@ -3,64 +3,56 @@
 The original version is {{ORIGINAL_VERSION}}.
 The binary hash is {{ORIGINAL_SHA256}}.
 The environment is {{PLATFORM_LOCALE_AND_DEPENDENCIES}}.
-The contracted scope is {{FULL_PRODUCT_OR_EXPLICIT_PARTIAL_EVALUATION}}.
+The contracted scope is {{FULL_PRODUCT_OR_SUBSET_WITH_USER_INSTRUCTION}}.
 The exclusions are {{EXPLICIT_CONTRACT_EXCLUSIONS}}.
-The evidence baseline is {{CAPTURE_SET_AND_REA_EXPORT}}.
 
-## Features
+## Inventory
 
-| Feature | Entry point | Original behavior and defaults | Inputs and outputs | State effects | Evidence | Confidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| {{FEATURE_ID_AND_NAME}} | {{ENTRY_POINT}} | {{OBSERVED_BEHAVIOR}} | {{INPUT_OUTPUT_CONTRACT}} | {{STATE_EFFECTS}} | {{EVIDENCE_IDS}} | {{OBSERVED_INFERRED_OR_UNKNOWN}} |
+The inventory basis is {{INVENTORY_EVIDENCE_IDS}}.
+The inventory is {{COMPLETE_OR_INCOMPLETE_WITH_REASON}}.
 
-## User stories
+| Entry point | Kind | Requirements | Evidence |
+| --- | --- | --- | --- |
+| {{ENTRY_POINT}} | {{COMMAND_OPTION_MENU_DOCUMENT_OR_SETTING}} | {{REQUIREMENT_IDS}} | {{EVIDENCE_IDS}} |
 
-| Story | Participant | Trigger and preconditions | Original outcome | Workflow |
+## Requirements
+
+| ID | EARS statement | Classification | Verification | Evidence |
 | --- | --- | --- | --- | --- |
-| {{STORY_ID}} | {{OBSERVED_PARTICIPANT}} | {{TRIGGER_AND_PRECONDITIONS}} | {{COMPLETE_OUTCOME}} | {{WORKFLOW_ID}} |
+| {{REQUIREMENT_ID}} | {{EARS_STATEMENT}} | {{OBSERVED_INFERRED_OR_UNKNOWN}} | {{TEST_INSPECTION_ANALYSIS_OR_DEMONSTRATION}} | {{EVIDENCE_IDS}} |
 
-## Business and behavior rules
+## {{USE_CASE_ID}}: {{USE_CASE_NAME}}
 
-| Rule | Condition | Original result or invariant | Boundary and exceptions | Evidence | Confidence |
-| --- | --- | --- | --- | --- | --- |
-| {{RULE_ID}} | {{RULE_CONDITION}} | {{ORIGINAL_RESULT}} | {{BOUNDARY_AND_EXCEPTIONS}} | {{EVIDENCE_IDS}} | {{OBSERVED_INFERRED_OR_UNKNOWN}} |
+The participant is {{OBSERVED_PARTICIPANT}}.
+The trigger and preconditions are {{TRIGGER_AND_PRECONDITIONS}}.
 
-## {{WORKFLOW_ID}}: {{WORKFLOW_NAME}}
+Main success scenario:
 
-The entry point is {{ENTRY_POINT}}.
-The preconditions are {{PRECONDITIONS}}.
-The input and initial state are {{EXACT_INPUT_AND_STATE}}.
+1. {{STEP}} ({{REQUIREMENT_ID}}, {{SCENARIO_ID}})
 
-| Step | Participant action | Original response | State change | Capture or scenario |
-| --- | --- | --- | --- | --- |
-| {{STEP_NUMBER}} | {{ACTION}} | {{ORIGINAL_RESPONSE}} | {{STATE_CHANGE}} | {{CAPTURE_OR_SCENARIO_ID}} |
+Extensions:
 
-The successful final state is {{SUCCESS_STATE}}.
-The alternatives are {{ALTERNATIVE_PATHS_AND_RULE_IDS}}.
-The error, cancellation, and retry paths are {{FAILURE_AND_RECOVERY_PATHS}}.
-The persistence and side effects are {{PERSISTENCE_AND_SIDE_EFFECTS}}.
+- 1a. {{CONDITION}}: {{ORIGINAL_RESPONSE}} ({{REQUIREMENT_ID}}, {{SCENARIO_ID}})
+
+The success state is {{SUCCESS_STATE}}.
 
 ## Errors
 
-| Error | Trigger | Exact diagnostic or capture | Status and partial result | Recovery | Evidence |
-| --- | --- | --- | --- | --- | --- |
-| {{ERROR_ID}} | {{FAILURE_TRIGGER}} | {{EXACT_DIAGNOSTIC_OR_CAPTURE}} | {{STATUS_AND_PARTIAL_RESULT}} | {{ORIGINAL_RECOVERY}} | {{EVIDENCE_IDS}} |
+| Trigger | Exact diagnostic or capture | Status and partial result | Recovery | Requirement |
+| --- | --- | --- | --- | --- |
+| {{FAILURE_TRIGGER}} | {{EXACT_DIAGNOSTIC_OR_CAPTURE}} | {{STATUS_AND_PARTIAL_RESULT}} | {{ORIGINAL_RECOVERY}} | {{REQUIREMENT_ID}} |
 
 ## Compatibility constraints
 
-| Constraint | Original format, limit, or environment rule | Required parity | Evidence |
+| Constraint | Original format, limit, or environment rule | Requirement | Evidence |
 | --- | --- | --- | --- |
-| {{CONSTRAINT_ID}} | {{ORIGINAL_CONSTRAINT}} | {{PARITY_CHECK}} | {{EVIDENCE_IDS}} |
+| {{CONSTRAINT}} | {{ORIGINAL_CONSTRAINT}} | {{REQUIREMENT_ID}} | {{EVIDENCE_IDS}} |
 
-## Original-to-Rust traceability
+## Open questions
 
-| Original feature or rule | Evidence | Scenarios | Declarative tests and origins | Rust entry point | Replay result | Open gap |
-| --- | --- | --- | --- | --- | --- | --- |
-| {{FEATURE_OR_RULE_ID}} | {{EVIDENCE_IDS}} | {{SCENARIO_IDS}} | {{TEST_IDS_AND_ORIGINS}} | {{RUST_ENTRY_POINT_OR_PENDING}} | {{MEASURED_RESULT_OR_UNTESTED}} | {{GAP_ID_OR_VERIFIED_NONE}} |
-
-## Coverage and unknowns
+| Question | Unknown evidence | Gap | Next probe |
+| --- | --- | --- | --- |
+| {{QUESTION}} | {{UNKNOWN_EVIDENCE_ID}} | {{GAP_ID}} | {{NEXT_PROBE}} |
 
 The examined surface is {{EXAMINED_SURFACE}}.
 The unexamined surface is {{UNEXAMINED_SURFACE}}.
-The unresolved rules and contradictions are {{OPEN_QUESTIONS_AND_GAP_IDS}}.
-The completion claim is limited to {{EXPLICIT_CONTRACTED_SCOPE_AND_CHECKS}}.

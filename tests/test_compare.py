@@ -15,6 +15,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("compare", ROOT / "skills/rustify-validate/scripts/compare.py")
 compare = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(compare)
+sys.modules["compare"] = compare
+FUZZ = importlib.util.spec_from_file_location("fuzz", ROOT / "skills/rustify-validate/scripts/fuzz.py")
+fuzz = importlib.util.module_from_spec(FUZZ)
+FUZZ.loader.exec_module(fuzz)
 
 
 def encoded(value):
@@ -108,6 +112,15 @@ class CompareTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-validate/scripts/compare.py"), "--reference", str(self.reference), "--candidate", str(self.reference), "--cases", str(cases), "--report", str(report)], capture_output=True)
         self.assertEqual(result.returncode, 1)
         self.assertEqual(json.loads(report.read_text())["status"], "error")
+
+    def test_fuzz_finds_divergence_and_keeps_reproducer(self):
+        candidate = self.program("candidate", "import sys\ndata = sys.stdin.buffer.read()\nsys.stdout.buffer.write(data + (b'!' if len(data) > 4 else b''))\n")
+        seeds = [{"id": "seed", "args": [], "stdin_b64": encoded(b"ab")}]
+        report = fuzz.fuzz(self.reference, candidate, seeds, iterations=40, seed=1)
+        self.assertEqual(report["status"], "failed")
+        self.assertIn("stdout_b64", report["divergences"][0]["differences"])
+        self.assertEqual(compare.compare(self.reference, candidate, [report["divergences"][0]["input"]])["failed"], 1)
+        self.assertEqual(fuzz.fuzz(self.reference, self.reference, seeds, iterations=10)["status"], "passed")
 
 
 if __name__ == "__main__":

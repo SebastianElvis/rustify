@@ -6,7 +6,7 @@ The agent records the binary hash, resources, platform, and investigation scope.
 The default scope covers the full product.
 The agent narrows that scope only when the user requests it.
 The agent identifies entry points, processes, libraries, plugins, and external services.
-The agent assigns stable component and interface identifiers.
+The agent assigns stable component, edge, and interface identifiers.
 A component represents an evidenced responsibility and boundary.
 A source filename or compiler symbol alone does not establish that boundary.
 
@@ -23,18 +23,19 @@ A successful scenario does not prove that all paths succeed.
 
 ## Build separate views
 
-| View | Required content |
-| --- | --- |
-| Components | The view shows original responsibilities, boundaries, interfaces, and dependencies. |
-| Control flow | The view shows the trigger, ordered calls, decisions, failures, and outcome. |
-| Data flow | The view shows producers, consumers, payloads, transformations, ownership, and persistence. |
-| State machine | The view shows observed states, events, guards, transitions, effects, and terminal states. |
-| Data model | The view shows observed records, relationships, constraints, and serialized forms. |
+The agent builds the views that [the standards guide](../../rustify/references/standards.md) defines.
 
-The agent supplies component, control-flow, and data-flow views for scoped workflows.
+| Viewpoint | Required content |
+| --- | --- |
+| Context | The original system, its users, and its external systems and services. |
+| Containers | The processes, executables, libraries, plugins, and stores, with their technology when evidence shows it. |
+| Components | The responsibilities, interfaces, and dependencies inside each container. |
+| Runtime | The trigger, ordered calls, decisions, data transfers, failures, and outcome of each workflow. |
+| State and data | The observed states, events, guards, and transitions; the stored entities and formats. |
+
+The agent supplies context, container, component, and runtime views for scoped workflows.
 The agent adds a state machine when behavior depends on persistent or protocol state.
 The agent keeps the recovered model separate from Rust implementation choices.
-The agent uses [the output schema](outputs.md) to connect diagrams to evidence.
 
 ## Recover storage only when it exists
 

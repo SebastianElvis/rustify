@@ -1,7 +1,9 @@
 # Interaction specification output rules
 
-The specification describes the original interface and its one-to-one Rust mapping.
-The specification uses stable screen, state, component, token, asset, transition, and gap identifiers.
+The specification describes the original interface.
+The specification uses stable screen, state, component, token, asset, transition, requirement, and gap identifiers.
+Each observable interaction rule is a `ux` requirement in `recovered/model.json`.
+Each requirement follows the EARS patterns in [the standards guide](../../rustify/references/standards.md).
 
 ## Visual and stateful interfaces
 
@@ -14,8 +16,8 @@ Each interaction records the trigger, original response, state change, focus res
 The document includes keyboard, pointer, drag, resize, scroll, and accessibility behavior when applicable.
 A missing applicable surface remains an open investigation gap.
 
-The parity table links each original state or rule to captures, scenarios, declarative tests, a Rust component, a replay result, and an open gap.
-A pending Rust component does not establish parity.
+The requirements table links each state, transition, or token to its requirement IDs and captures.
+The ledger and the parity gate own the Rust mapping and the replay result.
 The replay uses the contract's explicit visual or timing tolerances.
 The agent does not introduce a tolerance to hide a known mismatch.
 
@@ -42,11 +44,9 @@ The implementation owns executable replay and test code.
 
 ## Scope and completion
 
-The document labels full-product coverage or the explicit partial-evaluation scope.
 The coverage table lists unvisited screens, states, devices, terminal conditions, and transitions.
-The agent keeps every known mismatch open in the parity backlog.
 The agent distinguishes observed design values from inferred rationale.
-The agent proposes no aesthetic or behavioral improvement by default.
+The agent proposes no aesthetic or behavioral improvement.
 
 ## Template substitution
 

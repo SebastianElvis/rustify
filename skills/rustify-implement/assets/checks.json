@@ -1,8 +1,0 @@
-{
-  "status": "not_run",
-  "commands": [
-    {"command": ["cargo", "fmt", "--check"], "returncode": null, "log": "verification/logs/fmt.log"},
-    {"command": ["cargo", "clippy", "--locked", "--all-targets", "--", "-D", "warnings"], "returncode": null, "log": "verification/logs/clippy.log"},
-    {"command": ["cargo", "test", "--locked"], "returncode": null, "log": "verification/logs/test.log"}
-  ]
-}

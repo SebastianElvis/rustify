@@ -10,7 +10,13 @@
 - The main skill coordinates focused sibling skills.
 - The skills use host-native invocation and task tools.
 - The target project contains `recovered/`, `implementation/`, and `verification/`.
-- The agent keeps temporary design and task plans outside the target project.
+- The target project keeps the Rust design and its decision records in `implementation/docs/`.
+- The agent keeps only temporary worker shards and progress notes outside the target project.
+- The ledger `recovered/model.json` is the single record for each original-to-Rust mapping.
+- Every skill follows `skills/rustify/references/standards.md`.
+- Each recovered requirement uses one EARS pattern and one "shall".
+- The agent evaluation runs the current skills on held-out tracks.
+- Private evaluation tracks stay outside the repository.
 - The recovered test specifications record their origin and expected behavior.
 - An evaluation freezes source and recovered models before original-source review.
 - Every source-assisted repair remains explicit in its report.

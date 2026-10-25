@@ -2,8 +2,10 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import os
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 SPEC = importlib.util.spec_from_file_location("project", Path(__file__).parents[1] / "skills/rustify/scripts/project.py")
@@ -22,22 +24,41 @@ class ProjectTests(unittest.TestCase):
         self.workspace = Path(project.init(self.root, self.target, "cli")["work_dir"])
 
     def write(self, name, data):
-        path = (self.workspace if name in project.REQUIRED["plan"] else self.root) / name
+        path = self.root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(data)
 
+    def model(self, **changes):
+        model = {
+            "inventory": {"complete": True, "basis": ["E-1"]},
+            "requirements": [{"id": "REQ-1", "components": ["C-1"]}],
+            "components": [{"id": "C-1"}], "edges": [],
+            "correspondences": [{"original": "C-1", "rust": "implementation/src/main.rs"}],
+            "slices": [{"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "high"}],
+            "exceptions": [], "gaps": [],
+        }
+        model.update(changes)
+        self.write("recovered/model.json", json.dumps(model))
+
+    def checks(self, returncode=0):
+        records = []
+        for name in ("fmt", "clippy", "test"):
+            self.write(f"verification/logs/{name}.log", "log\n")
+            records.append({"name": name, "returncode": returncode, "log": f"verification/logs/{name}.log", "log_sha256": project.digest(self.root / f"verification/logs/{name}.log")})
+        self.write("verification/checks.json", json.dumps({"status": "passed", "inputs_sha256": project.combined(project.tree(self.root, "implementation")), "commands": records}))
+
     def artifacts(self, phase):
         for name in project.REQUIRED[phase]:
-            data = {"compatibility": [], "scope": []} if name == "recovered/contract.json" else {"content": True}
-            self.write(name, json.dumps(data) if name.endswith(".json") else "content\n")
+            name = name.partition("#")[0]
+            if name == "recovered/model.json":
+                self.model()
+            elif name == "recovered/contract.json":
+                self.write(name, json.dumps({"scope": {"mode": "full_product"}, "compatibility": {"mode": "faithful"}}))
+            elif name != "verification/parity.json":
+                self.write(name, json.dumps({"content": True}) if name.endswith(".json") else "content\n")
         if phase == "implement":
             self.write("implementation/src/main.rs", "fn main() {}\n")
-            self.write("verification/checks.json", json.dumps({
-                "status": "passed", "commands": [
-                    {"command": ["cargo", name], "returncode": 0}
-                    for name in ("fmt", "clippy", "test")
-                ],
-            }))
+            self.checks()
         if phase == "validate":
             self.write("implementation/target/release/base64", "candidate binary")
             candidate = self.root / "implementation/target/release/base64"
@@ -49,6 +70,11 @@ class ProjectTests(unittest.TestCase):
                     "candidate": {"path": str(candidate), "sha256": project.digest(candidate)},
                 },
             }))
+            self.parity()
+
+    def parity(self, **changes):
+        valid = {"assessment": "full_parity_pass", "errors": [], "gaps": [], "target_sha256": project.digest(self.target), "inputs": {name: project.digest(self.root / name) for name in ("recovered/product.md", "recovered/model.json")}}
+        self.write("verification/parity.json", json.dumps({**valid, **changes}))
 
     def through(self, last):
         for phase in project.PHASES:
@@ -102,6 +128,7 @@ class ProjectTests(unittest.TestCase):
         self.through("validate")
         self.write("implementation/src/main.rs", "fn main() { println!(\"change\"); }\n")
         self.assertEqual(project.status(self.root)["stale"], "implement")
+        self.checks()
         project.checkpoint(self.root, "implement")
         self.write("implementation/src/new.rs", "pub fn new() {}\n")
         self.assertEqual(project.status(self.root)["stale"], "implement")
@@ -116,13 +143,16 @@ class ProjectTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.write("implementation/" + name, content)
                 self.assertEqual(project.status(self.root)["stale"], "implement")
+                self.checks()
                 project.checkpoint(self.root, "implement")
                 path = self.root / "implementation" / name
                 path.write_text(content + "changed")
                 self.assertEqual(project.status(self.root)["stale"], "implement")
+                self.checks()
                 project.checkpoint(self.root, "implement")
                 path.unlink()
                 self.assertEqual(project.status(self.root)["stale"], "implement")
+                self.checks()
                 project.checkpoint(self.root, "implement")
         self.write("implementation/target/build-output", "ignored")
         self.write("implementation/.git/index", "ignored")
@@ -133,31 +163,88 @@ class ProjectTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "symlink"):
             project.checkpoint(self.root, "implement")
 
-    def test_required_checks_use_the_latest_successful_result(self):
+    def test_required_checks_bind_to_the_current_implementation(self):
         self.through("plan")
         self.artifacts("implement")
         path = self.root / "verification/checks.json"
         valid = json.loads(path.read_text())
         for invalid in (
-            {"status": "not-run", "commands": []},
-            {"status": "passed", "commands": []},
-            {"status": "failed", "commands": valid["commands"]},
-            {"status": "passed", "commands": valid["commands"][:-1]},
-            {"status": "passed", "commands": valid["commands"] + [
-                {"args": ["cargo", "test"], "returncode": 101},
-            ]},
+            {**valid, "status": "failed"},
+            {**valid, "commands": valid["commands"][:-1]},
+            {**valid, "inputs_sha256": "stale"},
+            {**valid, "commands": valid["commands"] + [{**valid["commands"][-1], "returncode": 101}]},
+            {**valid, "commands": valid["commands"][:-1] + [{**valid["commands"][-1], "log_sha256": "forged"}]},
         ):
             with self.subTest(invalid=invalid):
                 path.write_text(json.dumps(invalid))
                 with self.assertRaises(ValueError):
                     project.checkpoint(self.root, "implement")
-        valid["commands"] += [
-            {"args": ["cargo", "test"], "returncode": 101},
-            {"args": ["cargo", "test"], "returncode": 0},
-        ]
-        path.write_text(json.dumps(valid))
+        self.checks()
         project.checkpoint(self.root, "implement")
-        self.assertEqual(project.status(self.root)["next"], "validate")
+        self.write("implementation/src/main.rs", "fn main() { println!(); }\n")
+        with self.assertRaisesRegex(ValueError, "current implementation"):
+            project.checkpoint(self.root, "implement")
+
+    def test_check_command_runs_cargo_and_records_mutation_score(self):
+        self.through("plan")
+        self.artifacts("implement")
+        tools = self.base / "tools"
+        tools.mkdir()
+        cargo = tools / "cargo"
+        cargo.write_text("#!/bin/sh\n"
+            "if [ \"$1\" = mutants ]; then mkdir -p \"$3/mutants.out\"; echo '{\"caught\": 3, \"missed\": 1, \"timeout\": 0, \"unviable\": 2}' > \"$3/mutants.out/outcomes.json\"; exit 2; fi\n"
+            "echo \"ran $1\"; exit ${FAKE_STATUS:-0}\n")
+        cargo.chmod(0o755)
+        environment = {"PATH": f"{tools}:{os.environ['PATH']}"}
+        with patch.dict(os.environ, environment):
+            result = project.check(self.root, ["mutants"])
+        self.assertEqual(result["status"], "passed")
+        checks = json.loads((self.root / "verification/checks.json").read_text())
+        self.assertEqual(checks["commands"][-1]["mutation"], {"caught": 3, "missed": 1, "timeout": 0, "unviable": 2, "score": 0.75})
+        project.checkpoint(self.root, "implement")
+        with patch.dict(os.environ, {**environment, "FAKE_STATUS": "1"}):
+            self.assertEqual(project.check(self.root)["status"], "failed")
+        self.assertEqual(project.status(self.root)["stale"], "implement")
+
+    def test_plan_needs_one_skeleton_an_acyclic_graph_and_full_coverage(self):
+        self.through("discover")
+        self.artifacts("plan")
+        skeleton = {"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "high"}
+        for slices in (
+            [],
+            [{**skeleton, "kind": "slice"}],
+            [skeleton, {**skeleton, "id": "S-2"}],
+            [skeleton, {"id": "S-2", "kind": "slice", "requirements": ["REQ-1"], "depends_on": [], "risk": "low"}],
+            [skeleton, {"id": "S-2", "kind": "slice", "requirements": ["REQ-1"], "depends_on": ["S-3"], "risk": "low"}, {"id": "S-3", "kind": "slice", "requirements": ["REQ-1"], "depends_on": ["S-2"], "risk": "low"}],
+            [{**skeleton, "requirements": ["REQ-2"]}],
+            [{**skeleton, "risk": "unknown"}],
+        ):
+            with self.subTest(slices=slices):
+                self.model(slices=slices)
+                with self.assertRaises((ValueError, KeyError)):
+                    project.checkpoint(self.root, "plan")
+        self.model(requirements=[{"id": "REQ-1", "components": ["C-1"]}, {"id": "REQ-2", "components": ["C-1"]}])
+        project.checkpoint(self.root, "discover")
+        with self.assertRaisesRegex(ValueError, "scoped requirement"):
+            project.checkpoint(self.root, "plan")
+        self.model(correspondences=[{"original": "C-9", "rust": "implementation/src/main.rs"}])
+        project.checkpoint(self.root, "discover")
+        with self.assertRaisesRegex(ValueError, "unknown original"):
+            project.checkpoint(self.root, "plan")
+        self.model()
+        project.checkpoint(self.root, "plan")
+
+    def test_ledger_sections_reopen_only_their_owning_phase(self):
+        self.through("validate")
+        self.model(gaps=[{"id": "GAP-1", "items": ["REQ-1"], "kind": "difference", "status": "open"}])
+        self.assertEqual(project.status(self.root)["stale"], "validate")
+        self.model(slices=[{"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "low"}])
+        self.assertEqual(project.status(self.root)["stale"], "plan")
+        self.model(requirements=[{"id": "REQ-1", "components": ["C-1"], "statement": "changed"}])
+        self.assertEqual(project.status(self.root)["stale"], "discover")
+        self.write("recovered/model.json", json.dumps({"requirements": []}))
+        with self.assertRaisesRegex(ValueError, "section"):
+            project.checkpoint(self.root, "discover")
 
     def test_failed_or_empty_comparison_cannot_complete(self):
         self.through("implement")
@@ -209,19 +296,17 @@ class ProjectTests(unittest.TestCase):
     def test_workspace_stays_outside_the_three_project_directories(self):
         self.assertEqual({p.name for p in self.root.iterdir()}, {"recovered", "implementation", "verification"})
         self.assertEqual(self.workspace, self.base / ".target-rustify")
-        self.assertFalse((self.root / "state.json").exists())
         self.assertTrue((self.root / "recovered/state.json").is_file())
         self.through("plan")
-        self.assertTrue((self.workspace / "plan.json").is_file())
-        self.assertTrue((self.workspace / "rust-design.md").is_file())
-        self.assertFalse((self.root / "plan.json").exists())
+        self.assertTrue((self.root / "implementation/docs/design.md").is_file())
+        self.assertEqual(list(self.workspace.iterdir()), [])
 
     def test_custom_workspace_and_separation_guards(self):
         other = self.base / "other"
         custom = self.base / "agent"
         state = project.init(other, self.target, "cli", custom)
         self.assertEqual(state["work_dir"], str(custom))
-        self.assertEqual(state["version"], 2)
+        self.assertEqual(state["version"], 3)
         for workspace in (self.base / "unused", self.base / "unused/agent"):
             with self.subTest(workspace=workspace), self.assertRaisesRegex(ValueError, "outside"):
                 project.init(self.base / "unused", self.target, "cli", workspace)
@@ -232,7 +317,7 @@ class ProjectTests(unittest.TestCase):
 
     def test_plan_edits_reopen_planning(self):
         self.through("validate")
-        self.write("plan.json", '{"tasks": ["changed"]}')
+        self.write("implementation/docs/design.md", "The design changes.\n")
         self.assertEqual(project.status(self.root), {"completed": ["prepare", "discover"], "next": "plan", "stale": "plan"})
         with self.assertRaises(ValueError):
             project.checkpoint(self.root, "implement")
@@ -260,20 +345,18 @@ class ProjectTests(unittest.TestCase):
         project.checkpoint(self.root, "discover")
         self.assertEqual(project.status(self.root)["next"], "plan")
 
-    def test_full_faithful_contract_requires_a_passing_parity_gate(self):
+    def test_validation_requires_the_assessment_that_matches_the_scope(self):
         self.through("implement")
-        self.write("recovered/contract.json", json.dumps({"scope": {"mode": "full_product"}, "compatibility": {"mode": "faithful"}}))
+        self.artifacts("validate")
+        for changes in ({"assessment": "scoped_pass"}, {"assessment": "incomplete"}, {"gaps": ["unknown feature"]}, {"errors": ["mismatch"]}, {"target_sha256": "wrong"}, {"inputs": {"recovered/product.md": "stale"}}, {"inputs": {}}):
+            with self.subTest(changes=changes):
+                self.parity(**changes)
+                with self.assertRaises(ValueError):
+                    project.checkpoint(self.root, "validate")
+        self.write("recovered/contract.json", json.dumps({"scope": {"mode": "subset"}}))
         for phase in project.PHASES[:4]:
             project.checkpoint(self.root, phase)
-        self.artifacts("validate")
-        with self.assertRaises((ValueError, OSError)):
-            project.checkpoint(self.root, "validate")
-        valid = {"status": "passed", "full_parity_gate_pass": True, "errors": [], "gaps": [], "target_sha256": project.digest(self.target), "inputs": {"recovered/product.md": project.digest(self.root / "recovered/product.md")}}
-        for changes in ({"status": "partial"}, {"full_parity_gate_pass": False}, {"gaps": ["unknown feature"]}, {"errors": ["mismatch"]}, {"target_sha256": "wrong"}, {"inputs": {"recovered/product.md": "stale"}}):
-            self.write("verification/parity.json", json.dumps({**valid, **changes}))
-            with self.assertRaises(ValueError):
-                project.checkpoint(self.root, "validate")
-        self.write("verification/parity.json", json.dumps(valid))
+        self.parity(assessment="scoped_pass", gaps=["REQ-2: outside the subset"])
         project.checkpoint(self.root, "validate")
         self.assertIsNone(project.status(self.root)["next"])
 

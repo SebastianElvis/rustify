@@ -46,21 +46,22 @@ The runner does not claim a fresh GUI replay.
 
 ## Target project
 
-- `recovered/` contains product, UX, architecture, contract, state, evidence, declarative tests, and a proposed roadmap.
-- `implementation/` contains the Rust crate, source, and Rust tests.
-- `verification/` contains check results, comparison reports, and logs.
+- `recovered/` contains the ledger, product, UX, architecture, contract, state, evidence, declarative tests, and a parity backlog.
+- `implementation/` contains the Rust crate, source, Rust tests, the Rust design, and decision records.
+- `verification/` contains executed check results, comparison and fuzz reports, the gate result, the assurance case, and logs.
 
-The agent workspace holds temporary Rust design and implementation plans outside the target project.
+The ledger `recovered/model.json` links requirements, components, Rust modules, slices, exceptions, and gaps.
+The agent workspace holds only temporary worker shards and progress notes.
 The declarative tests state observable requirements before the Rust tests implement them.
 Each test records its observed, inferred, or proposed origin.
 
 ## Acceptance
 
-- Every scoped feature links to evidence, scenarios, and tasks.
-- Every original feature, state, interface, and recoverable component maps to the implementation.
+- Every scoped requirement is one EARS statement that links to evidence, tests, and a slice.
+- Every original component maps to one Rust module, and every original edge converges.
 - Every known mismatch remains open until a repair or an explicit user exception resolves it.
 - The recovered architecture distinguishes facts from hypotheses.
-- The Rust design explains dependency and architecture choices.
+- The Rust design and its decision records explain dependency and architecture choices.
 - Unit tests verify internal logic.
 - E2E tests verify user workflows against the reference.
 - Separate evaluation cases challenge the implementation.

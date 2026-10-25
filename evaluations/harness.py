@@ -93,8 +93,9 @@ def rust(project, logs):
 def run(track, pin, score):
     parser = argparse.ArgumentParser(description=f"Score a {track} reconstruction against the pinned reference.")
     parser.add_argument("--project", type=Path, default=REPOSITORY / "work/projects" / track)
-    project = parser.parse_args().project.resolve()
-    output = REPOSITORY / "work/evaluation" / track
+    parser.add_argument("--output", type=Path, default=REPOSITORY / "work/evaluation" / track)
+    args = parser.parse_args()
+    project, output = args.project.resolve(), args.output.resolve()
     report = {"track": track, "project": str(project), "status": "failed"}
     try:
         executable = reference(track, pin)
