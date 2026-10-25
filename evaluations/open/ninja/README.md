@@ -16,7 +16,7 @@ Many large C and C++ projects build with it.
 
 ## Reference build
 
-- Source: Ninja 1.13.2 from GitHub. The SHA-256 is in `reference.yaml`.
+- Source: Ninja 1.13.2 from GitHub. The SHA-256 is in `reference.yaml`. The source uses the Apache-2.0 license.
 - Build: `scripts/build_reference.py ninja` runs CMake in `Release` mode with interprocedural optimization and the hardened flags, then runs `strip`.
 
 ## Oracle

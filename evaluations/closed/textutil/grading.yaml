@@ -1,8 +1,3 @@
-# Confidence: these grades are lower than source-based grades. No source exists.
-# The feature patterns come from the manual page, the help text, and observed behavior.
-# The component patterns come from the evaluator's own reverse engineering of /usr/bin/textutil:
-# the Objective-C class, selector, and string names that `strings` and `otool -ov` show.
-scope: the complete textutil command on macOS 26.7.2 (25G325) in the C locale, every command, option, and format
 features:
 - id: help
   pattern: (?i)-help|usage

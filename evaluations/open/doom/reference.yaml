@@ -1,7 +1,3 @@
-product: 'doomgeneric (Doom engine, SDL front end) with Freedoom: Phase 1'
-version: doomgeneric e257a09527062bfb986b6e5e0780839b6cbd5b71; Freedoom 0.13.0
-license: GPL-2.0 (engine); BSD-3-Clause (Freedoom)
-homepage: https://github.com/ozkl/doomgeneric
 sources:
 - name: doomgeneric-e257a09.tar.gz
   url: https://codeload.github.com/ozkl/doomgeneric/tar.gz/e257a09527062bfb986b6e5e0780839b6cbd5b71

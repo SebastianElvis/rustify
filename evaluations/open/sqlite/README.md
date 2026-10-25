@@ -40,7 +40,7 @@ The `sqlite3` program is the command-line shell with the engine linked in.
 | `upstream-<file>` | `D-upstream` | The converted probes of one upstream test file. |
 
 - Each case id is `<feature-id>/<name>`. The feature ids come from `grading.yaml`.
-- Byte-identical database files are a separate metric (`identical_databases`). A different file with the same content does not fail a report.
+- Every database, journal, WAL, and SHM file must match byte for byte. Logical equivalence does not close a byte mismatch.
 - The negative control replaces the candidate with a wrapper that changes the reference output to upper case. The control must fail.
 
 ## Upstream conversion

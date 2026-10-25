@@ -12,7 +12,7 @@ Apple ships it with every Mac. Apple does not publish its source.
 - Users want an open version. No Linux tool reproduces its exact conversions.
 - The binary is a thin front end. The closed AppKit text system does most of the work.
   The track therefore tests framework closure at a large scale: the Rust program must implement the format readers and writers.
-- The output formats are text-based for the core scope. Exact comparison is possible.
+- The scorer compares document bytes after its declared variable-field rules.
 
 ## Reference
 

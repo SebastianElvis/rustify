@@ -1,8 +1,3 @@
-# Confidence: lower than source-based grades. No source exists.
-# The features come from the manual page, the usage text, the binary strings, and observed behavior.
-# The components come from the evaluator's own reverse engineering: Objective-C class and selector names
-# that `strings`, `nm`, and `otool -ov` show in /usr/bin/iconutil (macOS build 25G325).
-scope: the complete iconutil command on macOS arm64 in the C locale
 features:
 - id: usage
   pattern: (?i)usage|--help|-h\b
@@ -38,19 +33,19 @@ components:
 - id: command-line
   pattern: (?i)getopt|option pars|argument pars|command line
 - id: icns-container
-  pattern: ISIcns|icnsWithType|writeAsICNSToURL|(?i)icns (writer|encoder|container)
+  pattern: (?i)ISIcns|icnsWithType|writeAsICNSToURL|icns (writer|encoder|container)
 - id: iconset-reader
-  pattern: ISIconset|iconsetWithURL|(?i)iconset (reader|loader|parser)
+  pattern: (?i)ISIconset|iconsetWithURL|iconset (reader|loader|parser)
 - id: iconset-writer
-  pattern: writeAsIconsetToURL|(?i)iconset writer
+  pattern: (?i)writeAsIconsetToURL|iconset writer
 - id: asset-catalog-reader
-  pattern: ISAssetCatalogResource|assetCatalogResourceWithURL|(?i)(asset catalog|car) (reader|parser|resource)
+  pattern: (?i)ISAssetCatalogResource|assetCatalogResourceWithURL|(asset catalog|car) (reader|parser|resource)
 - id: compositor
-  pattern: ISCompositor|(?i)composit|render
+  pattern: (?i)ISCompositor|composit|render
 - id: recipe
-  pattern: ISGenericRecipe|ISiOSMacAppRecipe|addElementWithRecipe|(?i)recipe
+  pattern: (?i)ISGenericRecipe|ISiOSMacAppRecipe|addElementWithRecipe|recipe
 - id: icon-specification
-  pattern: IFIconSpecification|macosIconSpecification|allImageSpecifications|(?i)icon specification|size table
+  pattern: (?i)IFIconSpecification|macosIconSpecification|allImageSpecifications|icon specification|size table
 - id: image-codec
   pattern: (?i)png (encoder|decoder|codec)|ImageIO|deflate|zlib
 - id: run-length-codec
@@ -60,4 +55,4 @@ components:
 - id: environment-flags
   pattern: getenv|ICONCOMPILER_
 - id: file-system
-  pattern: NSFileManager|fileExistsAtPath|(?i)file system|file manager
+  pattern: (?i)NSFileManager|fileExistsAtPath|file system|file manager

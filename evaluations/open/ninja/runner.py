@@ -73,10 +73,10 @@ def snapshot(root, window):
         if path.is_symlink() or not (path.is_file() or path.is_dir()):
             raise ValueError(f"The build produced a special file: {name}")
         if path.is_dir():
-            files[name + "/"] = None
+            files[name + "/"] = (path.stat().st_mode & 0o7777, None)
             continue
         data = path.read_bytes()
-        files[name] = build_log(data, window) if path.name == ".ninja_log" else deps_log(data, window) if path.name == ".ninja_deps" else rooted(decode(data), root)
+        files[name] = (path.stat().st_mode & 0o7777, build_log(data, window) if path.name == ".ninja_log" else deps_log(data, window) if path.name == ".ninja_deps" else rooted(decode(data), root))
     return files
 
 

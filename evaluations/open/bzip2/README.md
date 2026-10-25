@@ -17,7 +17,7 @@ The `.bz2` format uses the Burrows-Wheeler transform, move-to-front coding, run-
 
 ## Reference build
 
-- Source: bzip2 1.0.8 from `sourceware.org`. The SHA-256 is in `reference.yaml`.
+- Source: bzip2 1.0.8 from `sourceware.org`. The SHA-256 is in `reference.yaml`. The source uses the bzip2-1.0.6 (BSD-style) license.
 - Build: `scripts/build_reference.py bzip2` compiles the eight C files with the hardened profile and runs `strip`.
 - The build log and metadata audit go to `work/references/bzip2/build.yaml`.
 

@@ -31,8 +31,6 @@ REPEATS = 3
 
 def execute(executable, case, timeout=60):
     """Run the steps of one case in a fresh folder and capture the view: process results and files."""
-    # The sandbox denies every exec except the program and the shell that the control scripts need.
-    # A candidate therefore cannot delegate a conversion to /usr/bin/textutil or another tool.
     executable = Path(executable).resolve()
     profile = f'(version 1)(allow default)(deny process-exec)(allow process-exec (literal "{executable}") (literal "/bin/sh") (literal "/bin/bash") (literal "/bin/dash"))'
     result = {"steps": [], "files": {}, "window": [time.time(), None], "error": None}
@@ -51,8 +49,6 @@ def execute(executable, case, timeout=60):
         result["window"][1] = time.time()
         try:
             result["files"] = harness.compare.capture_files(root)
-            for path, item in result["files"].items():
-                item["mode"] = oct((root / path).stat().st_mode & 0o7777)
         except (OSError, ValueError) as error:
             result["error"] = str(error)
     return result

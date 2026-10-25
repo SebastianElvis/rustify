@@ -48,9 +48,9 @@ That probe is a **witness**.
 A witness gives a distinguisher advantage `1`, so the scorer never averages it away.
 
 - The scorer replays each witness on both programs and keeps only confirmed witnesses.
-- The scorer minimizes each witness to the smallest probe that still distinguishes.
+- The evaluator minimizes each witness before it adds the witness to a regression suite.
 - The scorer maps each witness to a feature and to a channel.
-- The scorer classifies each witness: missing feature, wrong behavior, wrong error, wrong data format, wrong interface state, or environment dependence.
+- The evaluator classifies each witness: missing feature, wrong behavior, wrong error, wrong data format, wrong interface state, or environment dependence.
 - The skill evaluation turns each class into skill feedback. A missing feature points to discovery. A wrong behavior with correct evidence points to implementation.
 
 A program with variable output (time, randomness, process identifiers) cannot be compared byte by byte.
@@ -70,6 +70,8 @@ The scorer never ignores an unexplained difference.
 
 A claim holds only for the probes that the scorer ran.
 It never proves equivalence for all inputs.
+A passing automatic case report does not close a manual coverage gap. The full scorer fails while the gap stays open.
+The Doom renderer and interface checks need separate operator evidence.
 
 ## Distinguisher classes
 
@@ -93,6 +95,7 @@ Stronger classes find witnesses that weaker classes miss.
 - The harness hides the two programs behind a probe tool. The agent sees only the labels `A` and `B` and the views.
 - The harness assigns the labels at random and does not tell the agent which program is the original.
 - The agent gets a probe budget and writes candidate witnesses as cases.
+- A failed, empty, unpaired, or path-leaking session has status `invalid`. The evaluator makes no zero-witness claim from it.
 - The harness replays each candidate witness on both programs and keeps the confirmed witnesses.
 - The prompt forbids reading the executables. The harness checks the agent log for the executable paths.
 
@@ -106,11 +109,12 @@ They differ in the knowledge that the evaluator has.
 The evaluator has the source. The agent never sees it.
 
 - The reference is the upstream release or a hardened build from pinned source.
-- The scorer runs all classes, including `D-upstream` and source-guided `D-coverage`.
-- The evaluator builds an instrumented copy of the original from the same source.
-  A coverage-guided fuzzer finds inputs on that copy. The scorer replays the inputs on the hardened reference and on the Rust program.
+- Each track README lists the classes that its scorer runs.
+- Track scorers run replay, generated, metamorphic, and upstream checks where the track implements them.
+- The evaluator runs `D-adaptive` separately with `scripts/distinguish.py`.
+- Source-guided `D-coverage` remains planned. The scorers do not build an instrumented original or run a coverage-guided fuzzer.
 - Architecture grading uses components from the source.
-- The memorization checks apply: a source-free probe before discovery and an n-gram overlap check after the freeze.
+- Automated memorization checks remain planned: a source-free probe before discovery and an n-gram overlap check after the freeze.
 
 | Track | Type | Source language | Binary | Memorization risk |
 | --- | --- | --- | --- | --- |
@@ -126,12 +130,13 @@ The evaluator has the source. The agent never sees it.
 
 ### Closed-source tier (`closed/`)
 
-No source exists. The evaluator observes only the user-facing behavior.
+The evaluator has no public source. The evaluator observes only the user-facing behavior.
 This tier tests the main use case: an open version of a program without public source.
 
 - The reference is a lawful copy, pinned by path or download, SHA-256, and platform build.
-- The scorer runs only black-box classes: `D-replay`, `D-surface`, `D-generate`, `D-metamorphic`, `D-adaptive`, and binary-guided `D-coverage`.
-- Binary-guided coverage traces the original binary at run time and keeps inputs that reach new functions.
+- Track scorers run black-box classes: `D-replay`, `D-surface`, `D-generate`, and `D-metamorphic`.
+- The evaluator runs `D-adaptive` separately.
+- Binary-guided `D-coverage` remains planned. The scorers do not trace binary coverage.
 - Independent parsers check output files. A third-party clone gives a second opinion. The original always decides.
 - Architecture grading uses the evaluator's own reverse engineering and has lower confidence.
 - The framework closure rule applies (see below).
@@ -179,7 +184,7 @@ A Rust program that calls the same closed framework is a wrapper, not an open ve
 
 ## Design principles
 
-The principles come from a review of 46 related works. The last section lists the most important ones.
+The principles come from the literature review. The last section lists the most important ones.
 
 1. **The unit is a whole product.**
    Decompilation benchmarks score single functions (LLM4Decompile, Decompile-Bench, DecompileBench, ExeBench).
@@ -187,11 +192,11 @@ The principles come from a review of 46 related works. The last section lists th
    Rustify gives the agent only the binary and asks for the whole product in another language.
 2. **Indistinguishability replaces test pass rate.**
    Re-executability (LLM4Decompile) and in-program differential replay (DecompileBench) compare outputs on fixed inputs.
-   The game adds generated and adaptive distinguishers, so the scorer also searches for differences that no fixed case covers.
+   Generated cases and the separate adaptive tool search for differences that no fixed case covers.
 3. **Hidden cases come from a separate evaluator.**
    The scorer reveals its cases only after the project freeze, as SWE-bench does with its hidden tests.
 4. **The build hides metadata.**
-   Prior work sweeps `-O0` to `-O3` and strips the result (BinMetric, Nova, DecompileBench). No prior work tests LTO.
+   Prior work sweeps `-O0` to `-O3` and strips the result (BinMetric, Nova, DecompileBench). The survey did not establish an LTO comparison.
    The hardened builds use `-O3`, LTO, hidden visibility, `-DNDEBUG`, and `strip`.
 5. **The dataset is diverse beyond Linux utilities.**
    Assemblage reports that half of the binary models use only coreutils-like packages.
@@ -228,19 +233,19 @@ evaluations/
 
 | Work | Venue | Practice that the dataset adopts or avoids |
 | --- | --- | --- |
-| LLM4Decompile | EMNLP 2024 | Re-executability oracle. Optimization sweep. Edit similarity is hard to interpret. |
-| Decompile-Bench | NeurIPS 2025 | Forced build flags. License filter. A post-cutoff evaluation split. |
-| DecompileBench | Findings of ACL 2025 | In-program differential replay with fuzz seeds. `-Os` axis. LLM judge with human agreement. |
-| BinMetric | IJCAI 2025 | Stripped real-project binaries. Web search for leaked text. |
-| Assemblage | NeurIPS 2024 D&B | Recorded build recipes. Critique of coreutils-only datasets. |
-| CRUST-Bench | COLM 2025 | C-to-Rust at repository scale with the source given. Excludes GUI projects. |
-| Commit0 | ICLR 2025 | Whole-library rebuild from a specification. N-gram memorization check. |
-| SWE-bench | ICLR 2024 | Hidden upstream tests as the oracle. |
-| The SWE-Bench Illusion | ICSE-SEIP 2026 | Source-free memorization probes for famous repositories. |
-| LiveCodeBench | ICLR 2025 | Post-cutoff data against contamination. |
-| Towards Translating Real-World Code to Rust (FLOURINE) | Preprint | Cross-language differential fuzzing without unit tests. |
-| Lost in Translation | ICSE 2024 | Taxonomy for translation mismatches. |
+| [LLM4Decompile](https://arxiv.org/abs/2403.05286) | EMNLP 2024 | Re-executability oracle. Optimization sweep. Edit similarity is hard to interpret. |
+| [Decompile-Bench](https://arxiv.org/abs/2505.12668) | NeurIPS 2025 | Forced build flags. License filter. A post-cutoff evaluation split. |
+| [DecompileBench](https://aclanthology.org/2025.findings-acl.1194/) | Findings of ACL 2025 | In-program differential replay with fuzz seeds. `-Os` axis. LLM judge with human agreement. |
+| [BinMetric](https://www.ijcai.org/proceedings/2025/858) | IJCAI 2025 | Stripped real-project binaries. Web search for leaked text. |
+| [Assemblage](https://arxiv.org/abs/2405.03991) | NeurIPS 2024 D&B | Recorded build recipes. Critique of coreutils-only datasets. |
+| [CRUST-Bench](https://arxiv.org/abs/2504.15254) | COLM 2025 | C-to-Rust at repository scale with the source given. Excludes GUI projects. |
+| [Commit0](https://arxiv.org/abs/2412.01769) | ICLR 2025 | Whole-library rebuild from a specification. N-gram memorization check. |
+| [SWE-bench](https://arxiv.org/abs/2310.06770) | ICLR 2024 | Hidden upstream tests as the oracle. |
+| [The SWE-Bench Illusion](https://arxiv.org/abs/2506.12286) | ICSE-SEIP 2026 | Source-free memorization probes for famous repositories. |
+| [LiveCodeBench](https://arxiv.org/abs/2403.07974) | ICLR 2025 | Post-cutoff data against contamination. |
+| [Towards Translating Real-World Code to Rust (FLOURINE)](https://arxiv.org/abs/2405.11514) | Preprint | Cross-language differential fuzzing without unit tests. |
+| [Lost in Translation](https://doi.org/10.1145/3597503.3639226) | ICSE 2024 | Taxonomy for translation mismatches. |
 
-No surveyed benchmark reconstructs a whole product from a binary alone into another language.
-No surveyed benchmark scores product coverage, UX, architecture mapping, or indistinguishability.
-These gaps define the scope of this dataset.
+The survey found function decompilation benchmarks and repository translation benchmarks with source access.
+Rustify combines binary-only input with whole-product Rust reconstruction.
+The dataset separately reports behavior, UX evidence, and component mappings.

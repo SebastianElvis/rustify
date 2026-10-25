@@ -1,4 +1,3 @@
-scope: the full Lua 5.5.1 standalone interpreter on macOS arm64 in the C locale
 features:
 - id: cli-options
   pattern: (?i)-e\b|-l\b|-v\b|-E\b|-W\b|command.?line option

@@ -1,8 +1,3 @@
-# The patterns come from shell.c, sqlite3.c, the `.help` text, the `-help` text, and
-# the SQL language documentation of SQLite 3.54.1. The scope is the full product.
-scope: the complete sqlite3 3.54.1 shell and SQL engine on macOS arm64 in the C locale,
-  with every statement, function, virtual table, shell extension, dot command, output
-  mode, command-line option, rollback journal, WAL mode, and the database file format
 features:
 - id: cli-options
   pattern: (?i)command[- ]line (option|argument)|-bail|-cmd|-batch|-init|-readonly

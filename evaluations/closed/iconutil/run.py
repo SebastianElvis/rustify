@@ -20,12 +20,7 @@ import cases
 PIN = yaml.safe_load((ROOT / "reference.yaml").read_text())
 TIMEOUT = 30
 PNG = b"\x89PNG\r\n\x1a\n"
-# Variable output. Each rule has evidence from repeated runs of the reference.
-# - NSLOG: Foundation's NSLog prefix holds the wall-clock time, the process identifier, and the thread identifier.
-#   The reference prints it when the default output name is empty, for example for an empty icon name.
-# - UNDEFINED: 12 runs of the reference give 12 different pixel sets for these files.
-#   The reference decodes PNG data in an ic05 entry (32x32) or an icp6 entry as raw pixels and reads past the entry data.
-#   Only the file name and the PNG header (IHDR) of these files are defined.
+# The README records the evidence for each variable-output rule.
 NSLOG = re.compile(rb"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{3} iconutil\[\d+:[0-9a-f]+\] ", re.M)
 UNDEFINED = {"icns-to-iconset/png-ic05": "a.iconset/icon_32x32.png", "icns-to-iconset/png-icp6": "a.iconset/icon_48x48.png", "image-validation/png-icp6-wrong-size": "a.iconset/icon_48x48.png"}
 KNOWN = {"info", "TOC ", "icnV", "name"} | set(cases.PNG_TYPES) | {"is32", "s8mk", "il32", "l8mk", "ih32", "h8mk", "it32", "t8mk", "ICN#", "ics#", "icl8", "icl4", "ics8", "ics4"}
@@ -85,11 +80,7 @@ def check_icns(data):
 
 
 def check_outputs(report):
-    """Run the independent parsers on each icns file and iconset image that the candidate writes.
-
-    A candidate file passes when the parsers accept it or when they find the same problems in the reference file.
-    The reference writes some invalid files, for example an empty ic07 entry for a corrupt 128x128 image.
-    """
+    """The check compares output formats with the reference parser results."""
     rows = []
     for row in report["cases"]:
         inputs = row["input"].get("files", {})
@@ -150,10 +141,6 @@ def metamorphic(reference, candidate):
     return rows
 
 
-def header(data):
-    return data[8:33] if data.startswith(PNG) else data
-
-
 def settle(report):
     """Apply the declared variable-output rules to the failed cases and count the cases again."""
     for row in report["cases"]:
@@ -161,9 +148,10 @@ def settle(report):
             continue
         views, path = [], UNDEFINED.get(row["input"]["id"])
         for side in ("reference", "candidate"):
-            files = {name: item["sha256"] for name, item in row[side]["files"].items()}
+            files = {name: {key: value for key, value in item.items() if key != "data_b64"} for name, item in row[side]["files"].items()}
             if path in files:
-                files[path] = header(base64.b64decode(row[side]["files"][path]["data_b64"]))
+                data = base64.b64decode(row[side]["files"][path]["data_b64"])
+                files[path]["sha256"] = data[8:33] if data.startswith(PNG) else data
             views.append((row[side]["returncode"], row[side]["stdout_b64"], NSLOG.sub(b"", base64.b64decode(row[side]["stderr_b64"])), files))
         if views[0] == views[1]:
             rules = ["undefined-pixels"] if "files" in row["differences"] else []
@@ -177,16 +165,6 @@ def settle(report):
 def summary(rows):
     passed = sum(row["passed"] for row in rows)
     return {"status": "passed" if rows and passed == len(rows) else "failed", "passed": passed, "failed": len(rows) - passed, "cases": rows}
-
-
-def slim(report):
-    """Keep only hashes for passing cases. A failed case keeps its full bytes as a witness."""
-    for row in report["cases"]:
-        if row["passed"]:
-            row["input"] = {**row["input"], "files": {name: harness.digest(base64.b64decode(data)) for name, data in row["input"].get("files", {}).items()}}
-            for side in ("reference", "candidate"):
-                row[side]["files"] = {name: item["sha256"] for name, item in row[side]["files"].items()}
-    return report
 
 
 def score(reference, candidate, project):
@@ -205,7 +183,7 @@ def score(reference, candidate, project):
         wrong.chmod(0o755)
         if harness.compare.compare(reference, wrong, groups["replay-core"], timeout=TIMEOUT, name="iconutil")["status"] != "failed":
             failures.append("The wrong-output control passes.")
-    return {name: slim(report) if name in groups or name == "repeatability" else report for name, report in reports.items()}, failures
+    return reports, failures
 
 
 if __name__ == "__main__":

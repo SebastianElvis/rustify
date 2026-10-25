@@ -1,4 +1,3 @@
-scope: the full Ninja 1.13.2 product on macOS arm64 in the C locale, including the manifest language, all flags, all -t tools including browse, the build log, and the deps log
 features:
 - id: incremental
   pattern: (?i)incremental|no-op|up to date|no work to do|dirty|mtime|timestamp

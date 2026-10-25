@@ -12,7 +12,7 @@ distinguish = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(distinguish)
 AGENT = """#!/bin/sh
 cat > /dev/null
-printf 'id: p\\nargs: ["x"]\\n' > case.yaml
+printf 'id: p\\nargs: ["x\\\\ny"]\\n' > case.yaml
 python3 probe.py A case.yaml > /dev/null
 python3 probe.py B case.yaml > /dev/null
 printf -- '- id: w\\n  args: ["y"]\\n' > witnesses.yaml
@@ -24,7 +24,6 @@ class DistinguishTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.agent = self.write("agent.sh", AGENT)
         self.echo = self.write("echo.sh", '#!/bin/sh\nprintf "%s\\n" "$1"\n')
         self.upper = self.write("upper.sh", '#!/bin/sh\nprintf "%s\\n" "$1" | tr a-z A-Z\n')
 
@@ -34,21 +33,24 @@ class DistinguishTests(unittest.TestCase):
         path.chmod(0o755)
         return path
 
-    def play(self, candidate, name):
-        return distinguish.play(self.echo, candidate, str(self.agent), 10, "tool", self.root / name, 5, 7)
-
-    def test_identical_programs_have_no_witness(self):
-        report = self.play(self.echo, "same")
-        self.assertEqual((report["status"], report["probes"], report["witnesses"]), ("passed", 2, 0))
-
-    def test_different_programs_give_confirmed_witnesses(self):
-        report = self.play(self.upper, "different")
-        self.assertEqual((report["status"], report["witnesses"], report["query_complexity"]), ("failed", 2, 1))
-        self.assertEqual(yaml.safe_load((self.root / "different/report.yaml").read_text())["witnesses"], 2)
-
-    def test_budget_stops_probes(self):
-        report = distinguish.play(self.echo, self.upper, str(self.agent), 1, "tool", self.root / "budget", 5, 7)
-        self.assertEqual(report["probes"], 1)
+    def test_game_results_require_blind_paired_observations(self):
+        for name, candidate, agent, budget, expected in [
+            ("same", self.echo, AGENT, 10, ("passed", 2, 0, None)),
+            ("different", self.upper, AGENT, 10, ("failed", 2, 2, 2)),
+            ("budget", self.upper, AGENT, 1, ("invalid", 1, 2, None)),
+            ("concurrent", self.write("slow.sh", '#!/bin/sh\nsleep 0.2\nprintf "%s\\n" "$1"\n'), AGENT.replace("case.yaml > /dev/null\n", "case.yaml > /dev/null &\n") + "wait\n", 1, ("invalid", 1, 0, None)),
+            ("timeout", self.write("sleep.sh", '#!/bin/sh\nsleep 1\n'), AGENT, 10, ("invalid", 2, 0, None)),
+            ("empty", self.echo, "#!/bin/sh\ncat > /dev/null\n", 10, ("invalid", 0, 0, None)),
+            ("crash", self.echo, "#!/bin/sh\nexit 1\n", 10, ("invalid", 0, 0, None)),
+            ("limited", self.echo, AGENT + "exit 1\n", 10, ("invalid", 2, 0, None)),
+            ("leak", self.echo, AGENT + f"echo '{self.echo.resolve()}' >&2\n", 10, ("invalid", 2, 0, None)),
+        ]:
+            with self.subTest(name=name):
+                report = distinguish.play(candidate if name in {"concurrent", "timeout"} else self.echo, candidate, str(self.write("agent.sh", agent)), budget, "tool", self.root / name, 0.01 if name == "timeout" else 5, 7)
+                self.assertEqual(tuple(report[field] for field in ("status", "probes", "witnesses", "query_complexity")), expected)
+                self.assertEqual(yaml.safe_load((self.root / name / "report.yaml").read_text()), report)
+                if report["probes"]:
+                    self.assertEqual(next(yaml.safe_load_all((self.root / name / "probes.log").read_text()))["case"]["args"], ["x\ny"])
 
 
 if __name__ == "__main__":

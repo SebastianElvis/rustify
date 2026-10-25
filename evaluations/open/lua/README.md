@@ -16,7 +16,7 @@ The `lua` program is the standalone interpreter.
 
 ## Reference build
 
-- Source: Lua 5.5.1 from `lua.org`. The SHA-256 is in `reference.yaml`.
+- Source: Lua 5.5.1 from `lua.org`. The SHA-256 is in `reference.yaml`. The source uses the MIT license.
 - Build: `scripts/build_reference.py lua` runs `make macosx` with the hardened flags and runs `strip`.
 - Hidden symbol visibility prevents dynamic C modules from linking against this interpreter. The reconstruction matches that binary, so it also rejects C modules in the same way.
 

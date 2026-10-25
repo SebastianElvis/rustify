@@ -82,19 +82,19 @@ def snapshot(root, wad):
         if path.is_symlink() or not (path.is_file() or path.is_dir()):
             raise ValueError(f"The run produced a special file: {name}")
         if path.is_dir():
-            files[name + "/"] = None
+            files[name + "/"] = (path.stat().st_mode & 0o7777, None)
             continue
         data = path.read_bytes()
         if path.suffix == ".dsg":
             try:
                 data = savegame(data, wad)
             except (ValueError, IndexError, struct.error) as error:
-                files[name] = f"invalid savegame: {error}"
+                files[name] = (path.stat().st_mode & 0o7777, f"invalid savegame: {error}")
                 continue
         if path.suffix in (".cfg", ".txt"):
-            files[name] = data.decode("utf-8", "surrogateescape")
+            files[name] = (path.stat().st_mode & 0o7777, data.decode("utf-8", "surrogateescape"))
         else:
-            files[name] = f"sha256:{hashlib.sha256(data).hexdigest()} size:{len(data)}"
+            files[name] = (path.stat().st_mode & 0o7777, f"sha256:{hashlib.sha256(data).hexdigest()} size:{len(data)}")
     return files
 
 

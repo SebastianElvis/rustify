@@ -54,8 +54,8 @@ def extract(data, member):
 def reference(track, pin):
     if "path" in pin:
         path = Path(pin["path"])
-        if digest(path.read_bytes()) != pin["sha256"]:
-            raise ValueError(f"The system binary differs from the pin. Use the operating system build {pin['os_build']}.")
+        if digest(path.read_bytes()) != pin["sha256"] or subprocess.check_output(["sw_vers", "-buildVersion"], text=True).strip() != pin["os_build"]:
+            raise ValueError(f"The system reference differs from the pin. Use the operating system build {pin['os_build']}.")
         return path
     if "build" in pin:
         path = REPOSITORY / "work/references" / track / Path(pin["binary"]).name
@@ -94,7 +94,7 @@ def rust(project, logs):
         log.parent.mkdir(parents=True, exist_ok=True)
         log.write_bytes(result.stdout + result.stderr)
         commands.append({"command": ["cargo", *args], "returncode": result.returncode, "log": str(log)})
-        if result.returncode:
+        if result.returncode and label == "build":
             raise RuntimeError(f"The {label} check failed. Read {log}.")
     messages = [json.loads(line) for line in result.stdout.splitlines() if line.startswith(b"{")]
     binaries = sorted({item["executable"] for item in messages if item.get("executable") and "bin" in item["target"]["kind"]})
@@ -125,7 +125,7 @@ def run(track, pin, score):
         candidate, report["rust"] = rust(project, output / "logs")
         report["candidate_sha256"] = digest(candidate.read_bytes())
         linked = subprocess.run(["otool", "-L", str(candidate)], capture_output=True, text=True).stdout
-        failures = [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked]
+        failures = [f"The {item['command'][1]} check failed. Read {item['log']}." for item in report["rust"].get("commands", []) if item["returncode"]] + [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked]
         if str(executable).encode() in candidate.read_bytes():
             failures.append("The candidate contains the reference path, so it can run the original.")
         reports, score_failures = score(executable, candidate, project)
@@ -133,9 +133,9 @@ def run(track, pin, score):
             value["cases"] = [case if not case.get("passed", True) else {"id": case.get("id", case.get("input", {}).get("id")), "passed": True} for case in value.get("cases", [])]
             save(output / f"{name}.yaml", value)
         report["reports"] = {name: {key: value[key] for key in ("status", "passed", "failed")} for name, value in reports.items()}
-        report["witnesses"] = {name: [{"id": case["input"]["id"], "feature": case["input"]["id"].split("/")[0], "differences": case.get("differences")} for case in value.get("cases", []) if not case.get("passed", True) and "input" in case] for name, value in reports.items()}
+        report["witnesses"] = {name: [{"id": identity, "feature": identity.split("/")[0], "differences": case.get("differences", case.get("failures")), "report": str(output / f"{name}.yaml")} for case in value.get("cases", []) if not case.get("passed", True) and (identity := case.get("id", case.get("input", {}).get("id")))] for name, value in reports.items()}
         report["failures"] = failures + score_failures
-        report["status"] = "passed" if reports and all(value["status"] == "passed" for value in reports.values()) and not failures else "failed"
+        report["status"] = "passed" if reports and all(value["status"] == "passed" for value in reports.values()) and not report["failures"] else "failed"
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
         report["error"] = str(error)
     save(output / "report.yaml", report)

@@ -2,8 +2,11 @@ import base64
 import hashlib
 import importlib.util
 from pathlib import Path
+import re
+import sys
 import tempfile
 import unittest
+from unittest import mock
 
 import yaml
 
@@ -72,6 +75,81 @@ class CaptureTests(unittest.TestCase):
         self.change("question-accept-candidate.yaml", lambda item: item.update(screenshot_sha256=hashlib.sha256(b"\x89PNG\r\n\x1a\nother").hexdigest()))
         with self.assertRaisesRegex(ValueError, "no reviewed explanation"):
             zenity.verify(self.directory, HASHES)
+
+
+class HarnessTests(unittest.TestCase):
+    def test_system_reference_rejects_a_different_os_build(self):
+        harness = zenity.harness
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(harness.subprocess, "check_output", return_value="new\n"):
+            binary = Path(directory) / "reference"
+            binary.write_bytes(b"unchanged")
+            with self.assertRaisesRegex(ValueError, "operating system build"):
+                harness.reference("system", {"path": str(binary), "sha256": harness.digest(binary.read_bytes()), "os_build": "old"})
+
+    def test_quality_controls_and_witness_reports(self):
+        harness = zenity.harness
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "implementation").mkdir()
+            binary = root / "implementation/Cargo.toml"
+            binary.write_bytes(b"binary")
+            for quality, controls in (({}, ["The negative control passes."]), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, []), ({}, [])):
+                reports = {"replay": {"status": "passed" if quality or controls else "failed", "passed": int(bool(quality or controls)), "failed": 0 if quality or controls else 2, "cases": [] if quality or controls else [{"input": {"id": "shared/case"}, "passed": False}, {"id": "custom/case", "passed": False}]}}
+                with mock.patch.multiple(harness, reference=lambda *args: binary, rust=lambda *args: (binary, quality)), mock.patch.object(harness.project_helper, "status", return_value={}), mock.patch.object(harness.subprocess, "run", return_value=mock.Mock(stdout="")), mock.patch.object(sys, "argv", ["score", "--project", directory, "--output", str(root / "score")]), mock.patch("builtins.print"):
+                    self.assertEqual(harness.run("control", {"sha256": "pin"}, lambda *args: (reports, controls)), 1)
+                result = yaml.safe_load((root / "score/report.yaml").read_text())
+                self.assertEqual((result["status"], result["reports"]["replay"]["passed"]), ("failed", int(bool(quality or controls))))
+                self.assertEqual([(item["id"], Path(item["report"]).name, Path(item["report"]).is_file()) for item in result["witnesses"]["replay"]], [] if quality or controls else [("shared/case", "replay.yaml", True), ("custom/case", "replay.yaml", True)])
+
+    def test_quality_failure_does_not_block_release_build(self):
+        harness = zenity.harness
+        messages = b'{"executable": "candidate", "target": {"kind": ["bin"]}}\n'
+        runs = [mock.Mock(returncode=code, stdout=output, stderr=b"") for code, output in ((1, b""), (0, b""), (0, b"test result: ok. 2 passed"), (0, messages))]
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(harness.subprocess, "run", side_effect=runs):
+            binary, checks = harness.rust(Path(directory), Path(directory) / "logs")
+        self.assertEqual((binary, checks["rust_tests"], [item["returncode"] for item in checks["commands"]]), (Path("candidate"), 2, [1, 0, 0, 0]))
+
+    def test_doom_rejects_a_changed_resource(self):
+        scorer = zenity.harness.load("doom_score", ROOT / "evaluations/open/doom/run.py")
+        with tempfile.TemporaryDirectory() as directory, self.assertRaisesRegex(ValueError, "resource hash"):
+            reference = Path(directory) / "doomgeneric"
+            (reference.parent / "freedoom1.wad").write_bytes(b"changed")
+            scorer.score(reference, reference, Path(directory))
+
+    def test_doom_manual_gaps_block_full_score(self):
+        scorer = zenity.harness.load("doom_score", ROOT / "evaluations/open/doom/run.py")
+        groups = {"replay-core": [], "replay-complete": []}
+        with mock.patch.object(scorer, "PIN", {}), mock.patch.multiple(scorer, milestones=lambda: groups, generate=lambda: [], upstream=lambda wad: {}), mock.patch.multiple(scorer.runner, Wad=lambda path: None, compare=lambda *args: {"status": "failed" if args[1].name.startswith("wrong-") else "passed", "passed": 1, "failed": 0}):
+            reports, failures = scorer.score(Path("reference"), Path("candidate"), Path("project"))
+        self.assertTrue(all(report["status"] == "passed" for report in reports.values()))
+        self.assertEqual(sum("no verified manual evidence" in failure for failure in failures), len(scorer.MANUAL))
+
+    def test_sqlite_rejects_different_database_bytes(self):
+        runner = zenity.harness.load("sqlite_runner", ROOT / "evaluations/open/sqlite/runner.py")
+        step = {"returncode": 0, "stdout": b"ok\n", "stderr": b"", "error": None}
+        files = [{"x.db": b"SQLite format 3\0" + suffix} for suffix in (b"one", b"two")]
+        with mock.patch.object(runner, "play", side_effect=[([step], data) for data in files]):
+            self.assertEqual(runner.sessions(None, None, [{"id": "bytes"}])["failed"], 1)
+        with mock.patch.multiple(runner, reset=lambda *args: None, invoke=lambda *args: step), mock.patch.object(runner, "snapshot", side_effect=files):
+            self.assertEqual(runner.crossread(None, None, [{"id": "bytes", "write": "", "read": ""}])["failed"], 1)
+
+    def test_grading_patterns_compile(self):
+        for path in (ROOT / "evaluations").rglob("grading.yaml"):
+            for rows in yaml.safe_load(path.read_text()).values():
+                for row in rows:
+                    with self.subTest(path=path, identifier=row["id"]):
+                        re.compile(row["pattern"])
+
+    def test_iconutil_normalization_keeps_file_metadata(self):
+        with mock.patch.dict(sys.modules, cases=zenity.harness.load("iconutil_cases", ROOT / "evaluations/closed/iconutil/cases.py")):
+            scorer = zenity.harness.load("iconutil_score", ROOT / "evaluations/closed/iconutil/run.py")
+        with tempfile.TemporaryDirectory() as directory:
+            binaries = [Path(directory) / name for name in ("reference", "candidate")]
+            for binary, mode in zip(binaries, ("644", "600")):
+                binary.write_text(f"#!/bin/sh\nprintf x > out\nchmod {mode} out\n")
+                binary.chmod(0o755)
+            report = scorer.harness.compare.compare(*binaries, [{"id": "usage/mode", "args": []}], name="iconutil")
+            self.assertEqual(scorer.settle(report)["failed"], 1)
 
 
 if __name__ == "__main__":

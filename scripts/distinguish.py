@@ -27,20 +27,19 @@ The program name (argument zero) is `{name}`. Start with `--help`, `--version`, 
 Do not read, copy, disassemble, or inspect the executables or the file `{config}`. Use only probe.py.
 When you stop, write `witnesses.yaml`: a YAML list of the cases that you believe distinguish A from B.
 """
-PROBE = """import os, sys, yaml
+PROBE = """import fcntl, os, sys, yaml
 sys.path.insert(0, {compare_dir!r})
 from compare import run, validate
 config = yaml.safe_load(open(os.environ["DISTINGUISH_CONFIG"]))
-log = config["log"]
-used = sum(1 for _ in open(log)) if os.path.exists(log) else 0
-if used >= config["budget"]:
-    sys.exit("The probe budget is spent.")
 label, case = sys.argv[1], yaml.safe_load(open(sys.argv[2]))
 validate([case])
-view = run(config["programs"][label], config["name"], case, config["timeout"])
-with open(log, "a") as stream:
-    stream.write(yaml.safe_dump({{"label": label, "case": case}}, default_flow_style=True, width=1 << 30))
-print(yaml.safe_dump(view, sort_keys=False))
+with open(config["log"], "a+") as stream:
+    fcntl.flock(stream, fcntl.LOCK_EX)
+    stream.seek(0)
+    if sum(1 for _ in yaml.safe_load_all(stream)) >= config["budget"]:
+        sys.exit("The probe budget is spent.")
+    stream.write(yaml.safe_dump({{"label": label, "case": case}}, explicit_start=True))
+print(yaml.safe_dump(run(config["programs"][label], config["name"], case, config["timeout"]), sort_keys=False))
 """
 
 
@@ -53,32 +52,31 @@ def load(name, path):
 
 def play(reference, candidate, agent, budget, name, output, timeout, seed):
     compare = load("rustify_compare", ROOT / "skills/rustify-validate/scripts/compare.py")
-    labels = ["A", "B"]
-    random.Random(seed).shuffle(labels)
+    labels = random.Random(seed).sample(("A", "B"), 2)
     secret = {labels[0]: str(Path(reference).resolve()), labels[1]: str(Path(candidate).resolve())}
     workspace, config = output / "workspace", output / "config.yaml"
-    workspace.mkdir(parents=True, exist_ok=True)
+    workspace.mkdir(parents=True)
     config.write_text(yaml.safe_dump({"programs": secret, "name": name, "budget": budget, "timeout": timeout, "log": str(output / "probes.log")}))
     (workspace / "probe.py").write_text(PROBE.format(compare_dir=str(ROOT / "skills/rustify-validate/scripts")))
     prompt = PROMPT.format(python=sys.executable, budget=budget, name=name, config=config)
-    environment = {**os.environ, "DISTINGUISH_CONFIG": str(config)}
-    result = subprocess.run(shlex.split(agent), cwd=workspace, input=prompt, env=environment, capture_output=True, text=True, timeout=4 * 3600)
+    result = subprocess.run(shlex.split(agent), cwd=workspace, input=prompt, env={**os.environ, "DISTINGUISH_CONFIG": str(config)}, capture_output=True, text=True, timeout=4 * 3600)
     (output / "agent.log").write_text(result.stdout + result.stderr)
-    probes = [yaml.safe_load(line) for line in (output / "probes.log").read_text().splitlines()] if (output / "probes.log").exists() else []
+    probes = list(yaml.safe_load_all((output / "probes.log").read_text())) if (output / "probes.log").exists() else []
     claimed = yaml.safe_load((workspace / "witnesses.yaml").read_text()) if (workspace / "witnesses.yaml").exists() else []
     key = lambda case: yaml.safe_dump({name: value for name, value in case.items() if name != "id"}, sort_keys=True)
     first, cases = {}, {}
     for index, case in enumerate([item["case"] for item in probes] + (claimed or [])):
-        first.setdefault(key(case), index + 1 if index < len(probes) else None)
+        if index < len(probes):
+            first.setdefault(key(case), {}).setdefault(probes[index]["label"], index + 1)
         cases.setdefault(key(case), {**case, "id": f"probe-{len(cases) + 1}"})
     report = compare.compare(reference, candidate, list(cases.values()), timeout, name) if cases else {"cases": []}
-    witnesses = [row["input"] for row in report["cases"] if not row["passed"]]
-    found = [first[key(case)] for case in witnesses if first[key(case)]]
+    witnesses = [row["input"] for row in report["cases"] if not row["passed"] and "execution_error" not in row["differences"]]
+    path_leak = any(path in result.stdout + result.stderr for path in secret.values())
     summary = {
         "class": "D-adaptive", "labels": {labels[0]: "original", labels[1]: "candidate"},
         "budget": budget, "probes": len(probes), "replayed_cases": len(cases), "witnesses": len(witnesses),
-        "query_complexity": min(found) if found else None, "path_leak": any(path in result.stdout for path in secret.values()),
-        "status": "passed" if not witnesses else "failed", "witness_cases": witnesses,
+        "query_complexity": min((max(first[key(case)].values()) for case in witnesses if set(first.get(key(case), {})) == {"A", "B"}), default=None), "path_leak": path_leak,
+        "status": "invalid" if result.returncode or path_leak or len(probes) > budget or any("execution_error" in row["differences"] for row in report["cases"]) or not any(set(pair) == {"A", "B"} for pair in first.values()) else "failed" if witnesses else "passed", "witness_cases": witnesses,
     }
     (output / "report.yaml").write_text(yaml.safe_dump(summary, sort_keys=False))
     return summary

@@ -21,25 +21,15 @@ PIN = yaml.safe_load((ROOT / "reference.yaml").read_text())
 TIMEOUT = 30
 
 
-def summary(rows, extra=None):
-    failed = sum(not row["passed"] for row in rows)
-    return {"status": "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, **(extra or {}), "cases": rows}
-
-
 def replay(reference, candidate, items):
     return harness.compare.compare(reference, candidate, items, TIMEOUT, "sqlite3")
 
 
-def fixture(reference):
-    """Let the reference write the database fixture of the deserialize case."""
-    runner.reset()
-    runner.invoke(reference, ["f.db", "CREATE TABLE t(a, b)", "INSERT INTO t VALUES(1, 'x'), (NULL, x'00')"])
-    return base64.b64encode((runner.SANDBOX / "f.db").read_bytes()).decode("ascii")
-
-
 def milestones(reference):
     groups = {"core": cases.core(), "extended": cases.extended(), "complete": cases.complete()}
-    data = fixture(reference)
+    runner.reset()
+    runner.invoke(reference, ["f.db", "CREATE TABLE t(a, b)", "INSERT INTO t VALUES(1, 'x'), (NULL, x'00')"])
+    data = base64.b64encode((runner.SANDBOX / "f.db").read_bytes()).decode("ascii")
     for item in groups["complete"]:
         if "fixture.db" in item["args"]:
             item["files"] = {"fixture.db": data}
@@ -48,7 +38,8 @@ def milestones(reference):
 
 def merge(*reports):
     rows = [row for report in reports for row in report["cases"]]
-    return summary(rows, {key: sum(report.get(key, 0) for report in reports) for key in ("databases", "identical_databases")})
+    failed = sum(not row["passed"] for row in rows)
+    return {"status": "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, "cases": rows}
 
 
 def score(reference, candidate, project):

@@ -26,6 +26,7 @@ Apple ships it with every Mac. Apple does not publish its source.
 - `cases.py` writes every input itself: PNG images in all color types, bit depths, and interlace methods, BMP and TIFF images, and `.icns` containers with PNG, ARGB, and legacy entries.
 - The `.car` inputs are four asset catalogs of the pinned macOS build. `cases.py` checks their SHA-256.
   `xcrun actool` cannot build a test catalog on the evaluation host: the Xcode first-launch step is missing.
+- The component patterns come from binary analysis. Their confidence is lower than source-based grades.
 - The case ids have the form `<feature-id>/<case-name>`. The feature ids come from `grading.yaml`.
 
 | Report | Class | Content |

@@ -1,5 +1,3 @@
-product: iconutil
-license: Apple macOS software license (closed source)
 path: /usr/bin/iconutil
 sha256: 723328988d58a9b76087fdc6635276e9f0fbdc83a33257e76c3fb3085feaf8de
 os_build: 25G325

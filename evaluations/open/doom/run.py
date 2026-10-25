@@ -28,12 +28,15 @@ MANUAL = [
 
 
 def score(reference, candidate, project):
+    for name, expected in PIN.get("resource_sha256", {}).items():
+        if harness.digest((reference.parent / name).read_bytes()) != expected:
+            raise ValueError(f"The resource hash differs from the pin: {name}")
     wad = runner.Wad(reference.parent / "freedoom1.wad")
     groups = {**milestones(), "generate-demos": generate(), **upstream(wad)}
     reports = {"repeatability": runner.compare(reference, reference, wad, [case for cases in groups.values() for case in cases])}
     reports.update({name: runner.compare(reference, candidate, wad, cases) for name, cases in groups.items()})
     reports["replay-complete"]["manual"] = MANUAL
-    failures = []
+    failures = [f"The {item['feature']} check has no verified manual evidence. {item['reason']}" for item in MANUAL]
     with tempfile.TemporaryDirectory() as directory:
         for label, body in (("wrong-output", 'printf "Doom\\n"'), ("wrong-version", f'exec "{reference}" "$@" -gameversion final')):
             wrong = Path(directory) / label

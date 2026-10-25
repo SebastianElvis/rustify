@@ -18,7 +18,7 @@ The game data is Freedoom: Phase 1, a free replacement for the original game dat
 
 ## Reference build
 
-- Source: doomgeneric commit `e257a09527062bfb986b6e5e0780839b6cbd5b71` and Freedoom 0.13.0. The SHA-256 values are in `reference.yaml`.
+- Source: doomgeneric commit `e257a09527062bfb986b6e5e0780839b6cbd5b71` and Freedoom 0.13.0. The SHA-256 values are in `reference.yaml`. The source uses the GPL-2.0 (engine) and BSD-3-Clause (Freedoom) license.
 - Build: `scripts/build_reference.py doom` builds the SDL front end with the hardened profile and runs `strip`.
 - The build removes the SDL_mixer music and sound objects. The reference binary has no sound.
 - The binary links the Homebrew `sdl2-compat` library dynamically.
@@ -26,7 +26,7 @@ The game data is Freedoom: Phase 1, a free replacement for the original game dat
 ## Oracle
 
 - Exact text output for startup and demo statistics.
-- Exact frames at selected demo tics, with a capture method recorded as evidence.
+- The operator must compare frames at selected demo tics. The automatic scorer does not capture frames.
 - After the source reveal: the source audit maps the simulation and renderer components to the engine modules.
 
 ## Scope
@@ -80,5 +80,5 @@ The SDL front end draws frames only to the window.
 The in-engine screenshot (`V_ScreenShot`) needs a key event, `key_menu_screenshot` is unbound by default, and `LoadDefaultCollection` is compiled out, so no configuration can bind it.
 Synthetic key events and screen capture need macOS Accessibility and Screen Recording permissions, which the scorer does not have.
 Frame parity, menus, the status bar, the HUD, the automap, cheats, keyboard play, and the window state therefore stay in scope as manual items.
-`replay-complete` lists them in its `manual` field.
+`replay-complete` lists them in its `manual` field. The full scorer fails because these items have no verified manual evidence.
 With these permissions, a demo can pause with `BTS_PAUSE` and the operator can capture the static window. The status bar face still changes during the pause, because `ST_Ticker` runs.
