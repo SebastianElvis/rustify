@@ -5,7 +5,7 @@ description: Implement one planned slice at a time in Rust with acceptance tests
 
 # Implement original-to-Rust parity
 
-The agent implements the planned slices under `implementation/`.
+The agent requires current `discover` and `plan` checkpoints before it writes product source under `implementation/`.
 The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent preserves behavior and the planned module structure.
 The agent does not select a different architecture for convenience.

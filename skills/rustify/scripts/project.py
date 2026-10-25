@@ -15,7 +15,7 @@ import yaml
 
 PHASES = ("discover", "plan", "implement", "validate")
 REQUIRED = {
-    "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.yaml", "recovered/scenarios.yaml", "recovered/tests.yaml", "recovered/roadmap.md", "recovered/model.yaml#inventory,requirements,components,edges"),
+    "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.yaml", "recovered/scenarios.yaml", "recovered/tests.yaml", "recovered/roadmap.md", "recovered/model.yaml#inventory,surface,requirements,components,edges"),
     "plan": ("recovered/model.yaml#correspondences,slices", "implementation/docs/design.md"),
     "implement": ("implementation/Cargo.toml", "implementation/Cargo.lock", "verification/checks.yaml"),
     "validate": ("verification/comparison.yaml", "verification/parity.yaml", "verification/compatibility.md"),

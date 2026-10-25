@@ -28,6 +28,9 @@ The agent workspace stays outside the project.
 A project named `app` uses the sibling workspace `.app-rustify` by default.
 The agent can select another external path with `init --work-dir WORK`.
 The helper rejects an internal workspace or a symlink.
+The agent uses YAML for authored structured records, captures, test fixtures, and freeze manifests.
+The agent keeps prose in Markdown.
+The agent preserves external formats, such as Cargo messages, REA exports, and original product files.
 
 ## Ledger
 

@@ -142,12 +142,16 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(self.run_check()["requirements"], {"REQ-1": "failed"})
 
     def test_open_gaps_block_and_must_appear_in_the_roadmap(self):
-        self.model["gaps"] = [{"id": "GAP-1", "items": ["REQ-1"], "kind": "difference", "status": "open"}]
-        result = self.run_check()
-        self.assertIn("REQ-1: The gap GAP-1 remains open.", result["gaps"])
-        self.assertIn("GAP-1: recovered/roadmap.md does not name this open gap.", result["gaps"])
-        self.model["gaps"][0]["status"] = "closed"
-        self.assertEqual(self.run_check()["status"], "passed")
+        for owner in ("REQ-1", "C-1", "EDGE-1", "SURF-1", None):
+            self.model["gaps"] = [{"id": "GAP-1", "items": [owner] if owner else [], "status": "open"}]
+            self.write("recovered/roadmap.md", "No open gaps.\n")
+            self.assertIn("GAP-1: recovered/roadmap.md does not name this open gap.", self.run_check()["gaps"])
+            self.write("recovered/roadmap.md", "GAP-1\n")
+            for partial, status in ((False, "failed"), (True, "partial")):
+                result = self.run_check(partial)
+                self.assertEqual((result["status"], result["assessment"], result["full_parity_gate_pass"]), (status, "incomplete", False))
+            self.model["gaps"][0]["status"] = "closed"
+            self.assertEqual(self.run_check()["status"], "passed")
 
     def test_documents_must_name_every_requirement_and_component(self):
         self.write("recovered/architecture.md", "C-1\n")

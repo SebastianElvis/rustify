@@ -21,6 +21,8 @@ For each slice, the agent follows the outer and inner loops of Freeman and Pryce
 5. **Gate.** The agent runs the parity gate with `--allow-partial` and confirms that the slice passes.
 
 The agent starts the next slice only after the current slice passes.
+Each implementation worker receives only the current slice requirements.
+The agent joins those workers before the slice comparison.
 A new original behavior returns to discovery and planning as a gap.
 The agent never edits a recovered expectation to make a test pass.
 

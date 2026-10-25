@@ -3,6 +3,10 @@
 The original execution and rendering models determine the stack.
 The agent preserves those models before selecting libraries.
 The agent records versions in `implementation/Cargo.lock` and enables only required features.
+The agent implements product behavior in Rust or open libraries.
+The agent can use generic OS services for files, memory, processes, clocks, sockets, and native rendering.
+The agent treats each closed feature library as part of the original product.
+The agent rebuilds those features instead of calling the closed libraries.
 
 | Original requirement | Conditional choice | Parity condition |
 | --- | --- | --- |

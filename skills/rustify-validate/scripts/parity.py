@@ -142,12 +142,8 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
             cases.update(rows)
         components = records(model["components"])
         requirements = records(model["requirements"])
-        gaps = []
-        open_gaps = {}
-        for gap in records(model["gaps"]).values():
-            if gap["status"] == "open":
-                for item in gap["items"]:
-                    open_gaps.setdefault(item, []).append(gap["id"])
+        open_gaps = {identity: gap for identity, gap in records(model["gaps"]).items() if gap["status"] == "open"}
+        gaps = [f"{identity}: The gap remains open." for identity in open_gaps]
 
         def bound(reference, owner):
             if reference not in evidence:
@@ -174,7 +170,7 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
             mismatch = False
             if item["classification"] != "observed" or not item["evidence"] or not all(bound(name, identity) for name in item["evidence"]):
                 reasons.append("The original behavior remains uncertain.")
-            reasons += [f"The gap {name} remains open." for name in open_gaps.get(identity, [])]
+            reasons += [f"The gap {name} remains open." for name, gap in open_gaps.items() if identity in gap["items"]]
             if item["verification"] != "test":
                 if not item["records"] or not all(bound(name, identity) for name in item["records"]):
                     reasons.append(f"The {item['verification']} record is missing or uncertain.")
@@ -214,7 +210,7 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
             text = "".join(read(root, name, inputs, False) for name in names)
             gaps += [f"{identity}: {' or '.join(names)} does not name this item." for identity in (requirements if kind == "requirements" else components) if not re.search(rf"\b{re.escape(identity)}\b", text)]
         roadmap = read(root, "recovered/roadmap.md", inputs, False)
-        gaps += [f"{name}: recovered/roadmap.md does not name this open gap." for names in open_gaps.values() for name in names if name not in roadmap]
+        gaps += [f"{name}: recovered/roadmap.md does not name this open gap." for name in open_gaps if name not in roadmap]
         if model["inventory"]["complete"] is not True:
             gaps.append("The original inventory remains incomplete.")
         result["gaps"] = sorted(set(gaps))

@@ -7,6 +7,7 @@ description: Reconstruct local software from a binary or package in idiomatic Ru
 
 Rustify reconstructs the original product faithfully in Rust.
 The original application is the test oracle.
+The agent does not forward product operations to the original executable or its closed feature libraries.
 Rustify always reconstructs the full product. It requires one-to-one feature, behavior, UX, data, and component mappings where evidence permits them.
 The agent keeps every known mismatch open until a repair resolves it.
 A missing feature is an open gap. The agent keeps working on it.
@@ -47,12 +48,14 @@ The agent workspace in `work_dir` holds only temporary worker shards and progres
 3. **Merge.** The agent merges the shards into `recovered/model.yaml`, `evidence.yaml`, `scenarios.yaml`, and `tests.yaml`.
    The agent resolves contradictions and duplicate requirements.
    The agent completes the `discover` checkpoint.
-4. **Plan.** The agent invokes `rustify-plan`.
+4. **Plan.** The agent invokes `rustify-plan` only after the `discover` checkpoint succeeds.
    The plan starts with a walking skeleton and orders later slices by dependency and risk.
-5. **Build in slices.** For each slice, the agent invokes `rustify-implement` and then `rustify-validate` in partial mode.
+5. **Build in slices.** The agent writes product source only after the `plan` checkpoint succeeds.
+   For each slice, the agent invokes `rustify-implement` and then `rustify-validate` in partial mode.
    The agent starts the next slice only after the current slice passes.
    The agent returns new original behavior to the affected discovery skill and to planning.
 6. **Accept.** The agent runs the full validation and completes the `implement` and `validate` checkpoints.
+   The agent joins all workers before the final checks.
    The agent reports measured coverage, artifact locations, source access, and remaining gaps.
    The agent does not claim equivalence for arbitrary inputs.
 

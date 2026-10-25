@@ -31,15 +31,14 @@ class ProjectTests(unittest.TestCase):
 
     def model(self, **changes):
         model = {
-            "inventory": {"complete": True},
+            "inventory": {"complete": True}, "surface": [],
             "requirements": [{"id": "REQ-1", "components": ["C-1"]}],
             "components": [{"id": "C-1"}], "edges": [],
             "correspondences": [{"original": "C-1", "rust": "implementation/src/main.rs"}],
             "slices": [{"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "high"}],
             "gaps": [],
         }
-        model.update(changes)
-        self.write("recovered/model.yaml", yaml.safe_dump(model))
+        self.write("recovered/model.yaml", yaml.safe_dump({**model, **changes}))
 
     def checks(self, returncode=0):
         records = []
@@ -237,12 +236,13 @@ class ProjectTests(unittest.TestCase):
 
     def test_ledger_sections_reopen_only_their_owning_phase(self):
         self.through("validate")
-        self.model(gaps=[{"id": "GAP-1", "items": ["REQ-1"], "kind": "difference", "status": "open"}])
-        self.assertEqual(project.status(self.root)["stale"], "validate")
-        self.model(slices=[{"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "low"}])
-        self.assertEqual(project.status(self.root)["stale"], "plan")
-        self.model(requirements=[{"id": "REQ-1", "components": ["C-1"], "statement": "changed"}])
-        self.assertEqual(project.status(self.root)["stale"], "discover")
+        for changes, phase in (
+            ({"gaps": [{"id": "GAP-1", "items": ["REQ-1"], "kind": "difference", "status": "open"}]}, "validate"),
+            ({"slices": [{"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "low"}]}, "plan"),
+            ({"requirements": [{"id": "REQ-1", "components": ["C-1"], "statement": "changed"}]}, "discover"), ({"surface": [{"id": "SURF-1", "requirements": []}]}, "discover"),
+        ):
+            self.model(**changes)
+            self.assertEqual(project.status(self.root)["stale"], phase)
         self.write("recovered/model.yaml", yaml.safe_dump({"requirements": []}))
         with self.assertRaisesRegex(ValueError, "section"):
             project.checkpoint(self.root, "discover")
