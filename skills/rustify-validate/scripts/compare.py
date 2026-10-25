@@ -15,6 +15,9 @@ import tempfile
 import yaml
 
 
+FIXTURE_TIME = 1_000_000_000
+
+
 def decode(value):
     if not isinstance(value, str):
         raise ValueError("A base64 value must be a string.")
@@ -67,10 +70,12 @@ def capture_files(root):
             continue
         if not stat.S_ISREG(mode):
             raise ValueError("A process produced a symlink or a special file.")
-        data = path.read_bytes()
+        data, status = path.read_bytes(), path.lstat()
         files[path.relative_to(root).as_posix()] = {
             "sha256": hashlib.sha256(data).hexdigest(),
             "data_b64": base64.b64encode(data).decode("ascii"),
+            "mode": format(stat.S_IMODE(status.st_mode), "o"),
+            "mtime": "fixture" if int(status.st_mtime) == FIXTURE_TIME else "new",
         }
     return files
 
@@ -83,6 +88,8 @@ def run(executable, name, case, timeout):
             path = root / filename
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(decode(data))
+            path.chmod(0o644)
+            os.utime(path, (FIXTURE_TIME, FIXTURE_TIME))
         env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": directory, "PATH": "/usr/bin:/bin"}
         env.update(case.get("env", {}))
         process = None

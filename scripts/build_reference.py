@@ -65,7 +65,7 @@ def audit(binary, build_dir):
 
 
 def build(track):
-    recipe = yaml.safe_load((ROOT / "evaluations" / track / "reference.yaml").read_text())
+    recipe = yaml.safe_load(next((ROOT / "evaluations").glob(f"*/{track}/reference.yaml"), ROOT / "evaluations" / track / "reference.yaml").read_text())
     work = ROOT / "work/references" / track
     downloads = ROOT / "work/downloads"
     build_dir = work / "build"

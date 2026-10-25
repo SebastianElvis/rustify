@@ -36,6 +36,15 @@ class CompareTests(unittest.TestCase):
     def tearDown(self):
         self.directory.cleanup()
 
+    def test_file_mode_and_kept_time_are_part_of_the_view(self):
+        keep = self.program("keep", "import shutil\nshutil.copy2('in', 'out')\n")
+        touch = self.program("touch", "import shutil\nshutil.copyfile('in', 'out')\n")
+        case = {"id": "copy", "args": [], "files": {"in": encoded(b"data")}}
+        report = compare.compare(keep, touch, [case], name="copy")
+        files = {label: report["cases"][0][label]["files"]["out"] for label in ("reference", "candidate")}
+        self.assertEqual((files["reference"]["mtime"], files["candidate"]["mtime"], files["reference"]["mode"]), ("fixture", "new", "644"))
+        self.assertIn("files", report["cases"][0]["differences"])
+
     def program(self, name, body):
         path = self.root / name
         path.write_text("#!" + sys.executable + "\n" + body)

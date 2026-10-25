@@ -52,6 +52,11 @@ def extract(data, member):
 
 
 def reference(track, pin):
+    if "path" in pin:
+        path = Path(pin["path"])
+        if digest(path.read_bytes()) != pin["sha256"]:
+            raise ValueError(f"The system binary differs from the pin. Use the operating system build {pin['os_build']}.")
+        return path
     if "build" in pin:
         path = REPOSITORY / "work/references" / track / Path(pin["binary"]).name
         if not path.is_file() or digest(path.read_bytes()) != pin["sha256"]:
@@ -119,11 +124,15 @@ def run(track, pin, score):
             report["checkpoints"] = {"error": str(error)}
         candidate, report["rust"] = rust(project, output / "logs")
         report["candidate_sha256"] = digest(candidate.read_bytes())
-        reports, failures = score(executable, candidate, project)
+        linked = subprocess.run(["otool", "-L", str(candidate)], capture_output=True, text=True).stdout
+        failures = [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked]
+        reports, score_failures = score(executable, candidate, project)
         for name, value in reports.items():
+            value["cases"] = [case if not case.get("passed", True) else {"id": case.get("id", case.get("input", {}).get("id")), "passed": True} for case in value.get("cases", [])]
             save(output / f"{name}.yaml", value)
         report["reports"] = {name: {key: value[key] for key in ("status", "passed", "failed")} for name, value in reports.items()}
-        report["failures"] = failures
+        report["witnesses"] = {name: [{"id": case["input"]["id"], "feature": case["input"]["id"].split("/")[0], "differences": case.get("differences")} for case in value.get("cases", []) if not case.get("passed", True) and "input" in case] for name, value in reports.items()}
+        report["failures"] = failures + score_failures
         report["status"] = "passed" if reports and all(value["status"] == "passed" for value in reports.values()) and not failures else "failed"
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
         report["error"] = str(error)

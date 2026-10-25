@@ -8,6 +8,8 @@ The inventory includes commands, options, menus, document types, settings, integ
 The agent names the inventory basis in `recovered/product.md`, for example the help output or a resource table.
 The agent sets `inventory.complete` only when the evidence covers every entry point.
 A time limit does not remove an unexamined surface from the product.
+The agent derives the inventory with the surface checklist in [the indistinguishability guide](../../rustify-validate/references/indistinguishability.md).
+The agent names the view channels of the target in `recovered/product.md`.
 
 The agent identifies participants from observed roles, permissions, and interfaces.
 The agent does not invent personas, business goals, or creator intent.

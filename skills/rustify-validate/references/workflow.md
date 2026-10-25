@@ -40,8 +40,10 @@ A failed slice returns to implementation. A new behavior returns to discovery.
 3. For variable output, the agent defines metamorphic relations (Chen et al.).
    For example, the decoded result of an encoded input equals the input.
    The agent tests each relation on both programs.
-4. The agent runs the implementation `check` command with `--mutants` when the tool is installed.
-5. The agent runs the parity gate and writes `verification/compatibility.md`.
+4. The agent runs the surface and adaptive distinguishers from [the indistinguishability guide](indistinguishability.md).
+   Each confirmed witness returns to discovery or implementation. Acceptance needs zero witnesses in every class.
+5. The agent runs the implementation `check` command with `--mutants` when the tool is installed.
+6. The agent runs the parity gate and writes `verification/compatibility.md`.
 
 The agent tests complete workflows through their real interfaces.
 The agent does not count process checks as UI checks.
