@@ -66,7 +66,8 @@ def run(directories, agent, trials, output, timeout):
                 shutil.copytree(ROOT / "skills", workspace / folder)
             binary = workspace / "input" / directory.name
             binary.parent.mkdir(parents=True)
-            shutil.copy2(source, binary)
+            shutil.copyfile(source, binary)
+            binary.chmod(0o755)
             prompt = PROMPT.format(binary=binary, project=workspace / "project")
             start = time.monotonic()
             try:
