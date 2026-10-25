@@ -1,42 +1,40 @@
 # {{target_name}}: faithful Rust design
 
-The design implements contract `{{contract_reference}}`.
-The original target hash is `{{target_sha256}}`.
-The default parity policy is strict.
+This design implements contract `recovered/contract.json` for target SHA-256 `{{target_sha256}}`.
+It follows arc42 sections. The ledger `recovered/model.json` holds the records.
 
-## Original-to-Rust component mapping
-
-| Original ID | Rust ID and location | Responsibility and boundary | Preserved state and execution model | Interfaces | Evidence | Exception |
-| --- | --- | --- | --- | --- | --- | --- |
-| {{original_component_id}} | {{rust_component_id}} at `implementation/{{module_path}}` | {{matching_responsibility}} | {{matching_state_and_execution}} | {{interface_ids}} | {{evidence_ids}} | {{approved_exception_or_none}} |
-
-## Product, interface, and data parity
-
-| Feature | Interface and UX components | Technical components | Data, format, and transaction invariants | Scenarios and tests | Evidence |
-| --- | --- | --- | --- | --- | --- |
-| {{feature_id}} | {{interface_and_ui_ids}} | {{original_and_rust_ids}} | {{preserved_invariants}} | {{scenario_and_test_ids}} | {{evidence_ids}} |
-
-## Execution and dependencies
+## Solution strategy
 
 The original execution model is {{original_execution_model}}.
 The Rust execution model is {{matching_execution_model}}.
 The design preserves {{ordering_blocking_cancellation_and_failure_rules}}.
 
-| Dependency | Required original capability | Preservation argument | Rejected alternative and mismatch | Evidence and test |
-| --- | --- | --- | --- | --- |
-| {{dependency_or_standard_library}} | {{original_capability}} | {{preservation_argument}} | {{rejected_alternative}} | {{evidence_and_test_ids}} |
+## Building blocks
 
-## Acceptance milestones
+| Original component | Rust module | Responsibility and boundary | Preserved state and interfaces |
+| --- | --- | --- | --- |
+| {{component_id}} | `{{rust_path}}` | {{matching_responsibility}} | {{preserved_state_and_interfaces}} |
 
-| Milestone | Required predecessors | Complete original workflow | Tasks | Acceptance tests |
-| --- | --- | --- | --- | --- |
-| {{milestone_id}} | {{predecessor_ids}} | {{original_workflow}} | {{task_ids}} | {{test_ids}} |
+## Runtime
 
-## Exceptions and blockers
+| Slice | Kind and risk | Requirements | Scenario that proves the slice |
+| --- | --- | --- | --- |
+| {{slice_id}} | {{skeleton_or_slice_and_risk}} | {{requirement_ids}} | {{scenario_id}} |
 
-The approved exceptions are {{contract_exception_links_or_none}}.
-Each exception identifies the lost semantics or structure and the user's approval.
-The blocked tasks are {{task_ids_and_missing_evidence_or_none}}.
-The next investigations are {{investigations_or_none}}.
-The parity backlog is `recovered/roadmap.md`.
-Original goals and future plans remain {{evidence_status}}.
+## Cross-cutting concepts
+
+The error model is {{typed_errors_and_original_diagnostics}}.
+The I/O boundaries are {{files_clock_network_terminal_and_their_modules}}.
+The data formats are {{preserved_formats_and_invariants}}.
+
+## Decisions
+
+| ADR | Decision | Status |
+| --- | --- | --- |
+| [{{adr_number}}](adr/{{adr_file}}) | {{decision}} | {{proposed_accepted_or_superseded}} |
+
+## Risks and gaps
+
+The open gaps are {{gap_ids_or_none}}.
+The approved exceptions are {{exception_ids_or_none}}.
+The blocked slices are {{slice_ids_and_missing_evidence_or_none}}.

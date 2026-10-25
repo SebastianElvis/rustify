@@ -1,6 +1,6 @@
 # Rustify architecture
 
-Rustify contains seven skills and three runtime Python helpers.
+Rustify contains seven skills, one shared standards guide, and four runtime Python helpers.
 Host-native agents execute the installed instructions.
 The installed skill bundle, temporary agent workspace, and generated target project have separate boundaries.
 
@@ -14,58 +14,51 @@ The installed skill bundle, temporary agent workspace, and generated target proj
 | `rustify-product` | The skill recovers capabilities and proposed maintenance work. | `skills/rustify-product/SKILL.md` |
 | `rustify-design` | The skill recovers interface behavior and design language. | `skills/rustify-design/SKILL.md` |
 | `rustify-architecture` | The skill recovers original components, boundaries, and workflow traces. | `skills/rustify-architecture/SKILL.md` |
-| `rustify-plan` | The skill writes the temporary Rust design, decisions, tasks, and acceptance checks. | `skills/rustify-plan/SKILL.md` |
-| `rustify-implement` | The skill implements complete workflows and runs Rust quality checks. | `skills/rustify-implement/SKILL.md` |
+| `rustify-plan` | The skill writes the correspondences, slices, Rust design, and decision records. | `skills/rustify-plan/SKILL.md` |
+| `rustify-implement` | The skill implements one slice at a time and records executed Rust checks. | `skills/rustify-implement/SKILL.md` |
 | `rustify-validate` | The skill compares behavior and reports measured compatibility. | `skills/rustify-validate/SKILL.md` |
-| `project.py` | The helper checks phase order, target identity, artifact hashes, and freshness. | `skills/rustify/scripts/project.py` |
+| `project.py` | The helper checks phase order, target identity, ledger sections, the slice plan, and freshness, and runs the Rust checks. | `skills/rustify/scripts/project.py` |
 | `compare.py` | The helper captures and compares deterministic CLI runs. | `skills/rustify-validate/scripts/compare.py` |
-| `parity.py` | The helper checks declared mappings, exact expectations, evidence hashes, and known gaps. | `skills/rustify-validate/scripts/parity.py` |
+| `parity.py` | The helper derives requirement results from the ledger, evidence, and captures, and runs the reflexion check. |
+| `fuzz.py` | The helper searches for inputs that make the original and the Rust implementation differ. | `skills/rustify-validate/scripts/fuzz.py` |
+| Standards guide | The guide sets the writing rules, glossary, EARS form, and architecture viewpoints. | `skills/rustify/references/standards.md` | `skills/rustify-validate/scripts/parity.py` |
 | REA | The external backend supplies investigation evidence for discovery. | `skills/rustify-architecture/SKILL.md` |
 | Target project | The directory contains recovered/, implementation/, and verification/. | `skills/rustify/references/project.md` |
 
 ## Flow and boundaries
 
 1. The original binary, resources, and scope contract enter `rustify`.
-2. The orchestrator dispatches the three discovery skills in parallel when the host supports agents.
-3. The orchestrator joins their findings and resolves contradictions before planning.
-4. The plan, implementation, and validation skills run in order.
-5. Validation differences reopen the affected discovery, planning, or implementation work.
-6. The target project contains the reconstruction outputs throughout the workflow.
+2. The orchestrator captures the original outputs for the first scenarios.
+3. The orchestrator dispatches the three discovery skills in parallel when the host supports agents.
+4. The orchestrator merges their shards into the ledger and resolves contradictions.
+5. The plan skill writes correspondences, a walking skeleton, risk-ordered slices, the design, and ADRs.
+6. The implementation and validation skills run once for each slice.
+7. Validation differences reopen the affected discovery, planning, or implementation work.
 
 The host runs discovery sequentially when parallel agents are unavailable.
-Workers have flexible task assignments and separate experiment data.
-Workers coordinate access to shared REA sessions and application state.
+Workers write shards in the agent workspace and coordinate access to shared REA sessions.
 Discovery exports required REA evidence into the target project.
 REA remains an external investigation backend.
-The host supplies agent execution and transport.
 
 The target project has three folders.
 
 | Folder | Contents |
 | --- | --- |
-| `recovered/` | `contract.json`, `state.json`, `product.md`, `ux.md`, `architecture.md`, `evidence.json`, `evidence/`, `scenarios.json`, `tests.json`, and `roadmap.md`. |
-| `implementation/` | `Cargo.toml`, `Cargo.lock`, `src/`, and optional separate Rust tests in `tests/`. |
-| `verification/` | `checks.json`, `comparison.json`, `compatibility.md`, and `logs/`. |
+| `recovered/` | `contract.json`, `state.json`, `model.json`, `product.md`, `ux.md`, `architecture.md`, `evidence.json`, `evidence/`, `scenarios.json`, `tests.json`, and `roadmap.md`. |
+| `implementation/` | `Cargo.toml`, `Cargo.lock`, `src/`, `tests/`, `docs/design.md`, and `docs/adr/`. |
+| `verification/` | `checks.json`, `comparison.json`, `fuzz.json`, `parity.json`, `compatibility.md`, and `logs/`. |
 
-The architecture skill also produces editable diagrams and data models when original evidence requires them.
-The validation skill records the original-to-Rust mapping in `verification/parity-matrix.json`.
-The strict evidence gate writes `verification/parity.json`.
-The full faithful contract cannot complete while that gate has errors or gaps.
+`recovered/model.json` is the single traceability record.
+Each phase owns its ledger sections. A section change reopens its owning phase.
+The parity gate derives each requirement result from evidence and captures.
+It also runs the reflexion check of the recovered component graph against the Rust module graph.
+The full faithful contract cannot complete while that gate reports errors or gaps.
 The gate checks declared evidence consistency. The evaluator remains responsible for actual coverage.
 
-The `recovered/tests.json` file stores declarative test specifications.
-Each specification records an observed, inferred, or proposed origin.
-The implementation contains executable code and tests.
-Unit tests can reside in `src/`, and process E2E tests can use external replay files.
-
-The agent workspace stores temporary `rust-design.md` and `plan.json` files outside the target project.
-The plan skill writes these files.
-The implementation skill reads the plan from that workspace.
-The installed bundle contains reusable instructions and helpers.
+The project helper runs the Rust checks and binds their logs to the implementation bytes.
 Each skill keeps its router short.
 References contain domain methods and output contracts.
-Assets contain copyable specifications, plans, diagrams, and report templates.
-The project helper checks structure and freshness.
+Assets contain copyable specifications, the ledger, diagrams, and report templates.
 The agent verifies evidence quality and semantic completeness.
 
 The CLI helper compares stdout, stderr, status, and regular files.

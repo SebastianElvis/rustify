@@ -1,0 +1,24 @@
+{
+  "scope": "encoding, decoding, wrapping, files, options, and error behavior on macOS arm64 in the C locale",
+  "features": [
+    {"id": "encode", "pattern": "(?i)encod"},
+    {"id": "decode", "pattern": "(?i)decod"},
+    {"id": "ignore-garbage", "pattern": "(?i)garbage"},
+    {"id": "wrap", "pattern": "(?i)wrap"},
+    {"id": "help", "pattern": "--help"},
+    {"id": "version", "pattern": "--version"},
+    {"id": "stdin", "pattern": "(?i)standard input|stdin"},
+    {"id": "file-operand", "pattern": "(?i)file operand|input file|one file"},
+    {"id": "padding", "pattern": "(?i)padding"},
+    {"id": "partial-output", "pattern": "(?i)partial"},
+    {"id": "invalid-input", "pattern": "(?i)invalid input"}
+  ],
+  "components": [
+    {"id": "main", "pattern": "(?i)\\bmain\\b|entry"},
+    {"id": "option-parser", "pattern": "(?i)getopt|option pars"},
+    {"id": "encoder", "pattern": "(?i)encoder|do_encode"},
+    {"id": "decoder", "pattern": "(?i)decoder|do_decode|decode_ctx"},
+    {"id": "wrapper", "pattern": "(?i)wrap_write|line wrap|wrapper"},
+    {"id": "output-close", "pattern": "(?i)close_stdout|finish_and_exit|close"}
+  ]
+}

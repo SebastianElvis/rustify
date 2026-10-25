@@ -1,75 +1,62 @@
 # Implementation workflow
 
-## Inputs and scope
+## Inputs
 
-The agent reads the recovered contract, product, UX, architecture, evidence, and tests.
-The external agent workspace supplies `rust-design.md` and `plan.json`.
-The full original product is the default scope.
+The agent reads the contract, the ledger, the recovered documents, the evidence, and the tests.
+`implementation/docs/design.md` and its ADRs supply the design.
 Only an explicit user instruction can authorize a reduced scope or a product difference.
-The agent does not infer authorization from a small example or a passing dataset.
 
-## Original-to-Rust mapping
+## Slice loop
 
-The agent maps every recovered component to its Rust counterpart before implementation.
-The mapping links features, interfaces, state models, data models, and tests.
-Each original claim keeps its evidence and classification.
-An inferred boundary does not become an observed source boundary.
+The agent implements the walking skeleton first and then each slice in plan order.
+For each slice, the agent follows the outer and inner loops of Freeman and Pryce.
 
-The agent preserves documented responsibilities and component relationships.
+1. **Outer loop.** The agent writes the process or application acceptance test for each slice requirement.
+   The test uses the declarative expectation from `recovered/tests.json`.
+   The agent runs it and confirms that it fails.
+2. **Inner loop.** The agent writes a failing unit test, makes it pass, and refactors (Beck).
+   The agent repeats this loop until the acceptance test passes.
+3. **Compare.** The agent runs the slice scenarios against the original and the Rust implementation.
+4. **Check.** The agent runs `python3 <rustify>/scripts/project.py check PROJECT`.
+5. **Gate.** The agent runs the parity gate with `--allow-partial` and confirms that the slice passes.
+
+The agent starts the next slice only after the current slice passes.
+A new original behavior returns to discovery and planning as a gap.
+The agent never edits a recovered expectation to make a test pass.
+
+## Structure
+
+Each original component has its planned Rust module.
+A module that depends on another module uses an explicit path, such as `codec::encode`.
+The agent adds no module without an original component or an approved exception.
+The agent puts file, clock, network, and terminal access in the modules that own those boundaries in the original.
+
 The agent preserves persistence formats, protocols, execution order, and failure behavior.
 The agent preserves concurrency and resource-lifetime semantics where they affect the product.
 The agent preserves original quirks unless the user explicitly changes the contract.
-
-Rust ownership can require a language adaptation.
-The agent records that adaptation and its compatibility evidence.
-An unproven adaptation remains unverified.
-The agent does not describe an unverified adaptation as an improvement.
-
-## Stack and structure
-
-The agent chooses dependencies after it maps the original boundaries.
 The agent does not replace blocking execution with async execution for convenience.
-The agent does not replace an OS script boundary with a direct native UI for convenience.
-The agent does not replace a native interface with a webview for convenience.
-A popular framework does not establish parity.
+The agent does not replace an OS script boundary or a native interface for convenience.
 
-The agent expresses recovered rules with idiomatic Rust ownership, enums, and typed errors.
+## Rust conventions
+
+The agent follows the [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/checklist.html).
+The agent expresses recovered rules with ownership, enums, and typed errors.
 The agent keeps compatibility diagnostics at the original interface boundary.
 The agent excludes compiler artifacts and decompiler register names from the Rust model.
 Each necessary `unsafe` block has a stated invariant and tests for its assumptions.
-The agent adds no abstraction without a concrete implementation need.
+The agent runs Miri on code with `unsafe` when the toolchain supports it.
+A language adaptation needs an ADR and compatibility evidence.
 
-## Complete workflows and tests
-
-The agent implements complete features in dependency order.
-Each feature includes normal, boundary, invalid, cancellation, and recovery behavior where applicable.
-Unit tests check internal rules. E2E tests check real process or application workflows.
-The tests exercise original failure paths and state transitions.
-Compilation alone does not establish successful integration.
-
-Each declarative test keeps an `origin` of `observed`, `inferred`, or `proposed`.
-The origin records how the case arose.
-Each exact expected assertion also cites original evidence.
-An inferred expectation remains uncertain until the original confirms it.
-A proposed test case grants no permission to add or change product behavior.
-The agent checks proposed expectations against the original before treating them as established.
-
-## Repairs and gate
+## Repairs
 
 The agent preserves each failing comparison before a repair.
 The agent repairs the cause without widening the product contract.
 A fix or refactor adds no more code than it removes.
-The agent returns missing requirements to discovery and planning.
-The agent records `Cargo.lock` before final checks.
-The agent runs these commands from `implementation/`:
 
-```sh
-cargo fmt --check
-cargo clippy --locked --all-targets -- -D warnings
-cargo test --locked
-```
+## Checks
 
-The agent records actual command results and logs.
-The agent preserves failed runs when later runs succeed.
+The `check` command runs `cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, and `cargo test --locked`.
+The agent adds `--deny` when `cargo-deny` is installed.
+The agent adds `--mutants` when `cargo-mutants` is installed. The mutation score shows test adequacy.
+A missed mutant in a requirement path needs a new test or a recorded gap.
 The implementation checkpoint requires current successful checks.
-The validation module assesses parity from original evidence and comparisons.
