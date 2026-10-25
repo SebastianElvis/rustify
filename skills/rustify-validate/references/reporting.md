@@ -26,6 +26,7 @@ It computes each requirement result from evidence and captures. It does not read
 - The reflexion check reports convergences, absences, divergences, merged modules, unmapped components, and extra modules.
 - Each requirement must appear in `product.md` or `ux.md`. Each component must appear in `architecture.md` and `implementation/docs/design.md`.
 - Each open gap must appear in `roadmap.md`.
+- Each surface item must name at least one requirement. An empty surface inventory is a gap.
 
 | Assessment | Meaning |
 | --- | --- |

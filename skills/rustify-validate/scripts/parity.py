@@ -11,6 +11,7 @@ import yaml
 
 
 DIMENSIONS = {"product", "ux", "data", "behavior"}
+SURFACE = {"option", "name", "environment", "diagnostic", "input", "condition", "state", "interface"}
 PATTERNS = {
     "ubiquitous": r"The .+ shall .+\.",
     "event": r"When .+, the .+ shall .+\.",
@@ -200,6 +201,15 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
                         mismatch = True
             statuses[identity] = "passed" if not reasons else "failed" if mismatch else "incomplete"
             gaps += [f"{identity}: {reason}" for reason in reasons]
+        surface = records(model["surface"])
+        for identity, item in surface.items():
+            if item["kind"] not in SURFACE or set(item["requirements"]) - set(requirements):
+                raise ValueError(f"{identity}: The surface item has an invalid kind or an unknown requirement.")
+            if not item["requirements"]:
+                gaps.append(f"{identity}: No requirement covers the surface item.")
+        if not surface:
+            gaps.append("The surface inventory is empty.")
+        result["surface"] = {kind: sum(item["kind"] == kind for item in surface.values()) for kind in sorted(SURFACE)}
         for kind, names in DOCUMENTS:
             text = "".join(read(root, name, inputs, False) for name in names)
             gaps += [f"{identity}: {' or '.join(names)} does not name this item." for identity in (requirements if kind == "requirements" else components) if not re.search(rf"\b{re.escape(identity)}\b", text)]

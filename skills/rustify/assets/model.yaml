@@ -14,6 +14,12 @@ requirements:
   records: []
   components:
   - C-001
+surface:
+- id: SURF-001
+  kind: diagnostic
+  text: '{{EXACT_TEXT_FROM_BINARY}}'
+  requirements:
+  - REQ-001
 components:
 - id: C-001
   name: '{{COMPONENT_NAME}}'

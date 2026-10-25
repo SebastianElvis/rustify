@@ -30,6 +30,7 @@ The agent orders slices by dependency first and by risk second.
 A slice with unknown boundaries, storage formats, or protocols has `risk: high` and comes early.
 The agent schedules storage and protocol requirements before their dependent workflows.
 The agent schedules failure, restart, and malformed-input requirements with the related feature.
+A slice includes the edge, diagnostic, and condition requirements of its features. A slice does not pass with only the frequent path.
 Every requirement belongs to at least one slice.
 The helper rejects a cycle, a second skeleton, or an unplanned requirement.
 

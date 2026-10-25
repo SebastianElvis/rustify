@@ -39,6 +39,7 @@ Documents describe the ledger items. They do not keep a second copy of a mapping
 | --- | --- | --- |
 | `inventory` | Discovery | The inventory completeness flag. `recovered/product.md` names its evidence basis. |
 | `requirements` | Discovery | EARS requirements with the attributes in [the standards guide](standards.md). |
+| `surface` | Discovery | Each user-visible option, program name, environment variable, diagnostic, input partition, condition, state, and interface item, with the requirements that cover it. |
 | `components` | Architecture discovery | C4 containers and components. |
 | `edges` | Architecture discovery | Control, data, and static relations between components. |
 | `correspondences` | Planning | One Rust source file for each original component. |

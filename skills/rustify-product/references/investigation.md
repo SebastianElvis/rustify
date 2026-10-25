@@ -32,6 +32,31 @@ The agent changes one input or state per probe when practical.
 
 The agent records timing or ordering guarantees only when repeated observations support them.
 
+## Inventory edge behavior
+
+Frequent workflows are not enough. Each rare path is part of the product.
+The agent records each user-visible surface item in the `surface` list of `model.yaml`.
+Each surface item links to the requirements that cover it. The gate fails an uncovered item.
+
+| Kind | Source of the items |
+| --- | --- |
+| `option` | Each option, alias, and argument form in the help text, the strings, and the parser tables. |
+| `name` | Each program name that the binary compares with argument zero. |
+| `environment` | Each environment variable in the strings or in calls to `getenv`. |
+| `diagnostic` | Each user-visible message, warning, and error string in the binary. |
+| `input` | Each input format, split into partitions: empty, minimal, typical, boundary, maximum, malformed, truncated, and invalid encoding. |
+| `condition` | Each item of the surface checklist in [the indistinguishability guide](../../rustify-validate/references/indistinguishability.md). |
+| `state` | Each file, setting, or log that a later run reads. |
+| `interface` | Each window, dialog, menu, control, and visible state. |
+
+The agent applies equivalence partitioning and boundary value analysis (ISO/IEC/IEEE 29119-4) to each option value and input.
+Each partition and each boundary gets a probe on the original.
+The agent provokes each diagnostic string. A diagnostic that no probe reaches stays an open gap with its next probe.
+
+The agent measures which functions of the original its scenarios execute when REA or a debugger supports a trace.
+Each function that no scenario reaches is a lead to an unexplored behavior.
+The agent investigates each lead until it maps to a surface item or the evidence shows that users cannot reach it.
+
 ## Map rules, examples, and questions
 
 The agent organizes each feature with Example Mapping (Wynne).

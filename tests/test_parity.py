@@ -41,6 +41,7 @@ class ParityTests(unittest.TestCase):
                 "statement": "When the user supplies input, the demo shall write the encoded result.",
                 "classification": "observed", "evidence": ["E1"], "verification": "test", "tests": ["T1"], "records": [], "components": ["C-1", "C-2"],
             }],
+            "surface": [{"id": "SURF-1", "kind": "diagnostic", "text": "invalid input", "requirements": ["REQ-1"]}],
             "components": [
                 {"id": "C-1", "name": "Entry", "level": "component", "responsibility": "Parse input.", "classification": "observed", "evidence": ["E1"]},
                 {"id": "C-2", "name": "Codec", "level": "component", "responsibility": "Encode bytes.", "classification": "observed", "evidence": ["E1"]},
@@ -72,6 +73,14 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(result["reflexion"]["convergences"], ["EDGE-1"])
         self.assertEqual(result["slices"], {"SLICE-1": True})
         self.assertEqual(result["inputs"]["implementation/src/main.rs"], self.sha("implementation/src/main.rs"))
+
+    def test_every_surface_item_needs_a_requirement(self):
+        self.model["surface"].append({"id": "SURF-2", "kind": "condition", "text": "closed standard output", "requirements": []})
+        self.assertIn("SURF-2: No requirement covers the surface item.", self.run_check(True)["gaps"])
+        self.model["surface"] = []
+        self.assertIn("The surface inventory is empty.", self.run_check(True)["gaps"])
+        self.model["surface"] = [{"id": "SURF-3", "kind": "rumor", "text": "x", "requirements": ["REQ-1"]}]
+        self.assertTrue(self.run_check(True)["errors"])
 
     def test_statements_must_follow_one_ears_pattern(self):
         for statement in ("The demo encodes input.", "When the user supplies input, the demo shall encode it and shall wrap it.", "the demo shall encode input.", "When {{TRIGGER}}, the demo shall respond."):
