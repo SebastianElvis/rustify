@@ -1,8 +1,10 @@
 use serde_json::{Value, json};
 use std::{
     error::Error,
-    io::{self, Write},
-    process::{Command, ExitCode, Stdio},
+    fs::File,
+    io::{self, Seek, Write},
+    os::unix::process::CommandExt,
+    process::{Command, Stdio},
 };
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -73,45 +75,45 @@ fn parse(args: &[String]) -> Result<Options, String> {
     Ok(options)
 }
 
-fn parameters(options: &Options) -> Value {
-    json!({"entry": options.mode == Mode::Entry, "question": options.mode == Mode::Question, "title": options.title, "text": options.text, "value": options.value, "ok": options.ok, "cancel": options.cancel})
-}
-
-fn outcome(mode: &Mode, bytes: &[u8]) -> Result<(u8, String), Box<dyn Error>> {
-    let (accepted, value): (bool, String) = serde_json::from_slice(bytes)?;
-    Ok(if !accepted {
-        (1, String::new())
-    } else if *mode == Mode::Entry {
-        (0, format!("{value}\n"))
-    } else {
-        (0, String::new())
-    })
-}
-
-fn show(options: Options) -> Result<(u8, String), Box<dyn Error>> {
-    let mut child = Command::new("/usr/bin/osascript")
-        .args(["-l", "JavaScript", "-", &parameters(&options).to_string()])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()?;
-    child
-        .stdin
-        .take()
-        .ok_or("The script input pipe is missing.")?
-        .write_all(include_bytes!("../assets/dialog.js"))?;
-    let result = child.wait_with_output()?;
-    if !result.status.success() {
-        return Err(String::from_utf8_lossy(&result.stderr).into_owned().into());
+fn parameters(o: &Options) -> Value {
+    match o.mode {
+        Mode::Entry => {
+            json!({"operation":"displayDialog","text":o.text,"options":{"withTitle":o.title,"defaultAnswer":o.value,"buttons":[o.cancel,o.ok],"defaultButton":2,"cancelButton":1}})
+        }
+        Mode::Question => {
+            json!({"operation":"displayAlert","text":o.title,"options":{"message":o.text,"buttons":[o.cancel,o.ok],"defaultButton":2,"cancelButton":1}})
+        }
+        Mode::Info => {
+            json!({"operation":"displayAlert","text":o.title,"options":{"message":o.text,"as":"informational","buttons":[o.ok],"defaultButton":1}})
+        }
+        Mode::Unselected => unreachable!("The parser requires a dialog mode."),
     }
-    outcome(&options.mode, &result.stdout)
 }
 
-fn main() -> Result<ExitCode, Box<dyn Error>> {
+fn program(options: &Options) -> String {
+    let data = parameters(options)
+        .to_string()
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029");
+    format!("var p = {data};\n{}", include_str!("../assets/dialog.js"))
+}
+
+fn script_file(options: &Options) -> io::Result<File> {
+    let mut file = tempfile::tempfile()?;
+    file.write_all(program(options).as_bytes())?;
+    file.rewind()?;
+    Ok(file)
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
     let options = parse(&std::env::args().skip(1).collect::<Vec<_>>())?;
-    let (status, output) = show(options)?;
-    io::stdout().lock().write_all(output.as_bytes())?;
-    Ok(ExitCode::from(status))
+    Err(Command::new("/usr/bin/osascript")
+        .args(["-l", "JavaScript"])
+        .env_clear()
+        .stdin(script_file(&options)?)
+        .stderr(Stdio::null())
+        .exec()
+        .into())
 }
 
 #[cfg(test)]
@@ -120,8 +122,7 @@ mod tests {
 
     #[test]
     fn question_defaults_match_the_observed_buttons() {
-        let args = vec!["--question".into(), "--text".into(), "A & B?".into()];
-        let options = parse(&args).unwrap();
+        let options = parse(&["--question".into(), "--text".into(), "A & B?".into()]).unwrap();
         assert_eq!(
             [options.ok, options.cancel, options.text],
             ["Yes", "No", "A & B?"]
@@ -135,15 +136,16 @@ mod tests {
     }
 
     #[test]
-    fn script_results_keep_text_status_and_cancel_semantics() {
-        for (mode, reply, expected) in [
-            (Mode::Entry, r#"[true,"caf\u00e9\n"]"#, (0, "caf\u{e9}\n\n")),
-            (Mode::Entry, r#"[false,"ignored"]"#, (1, "")),
-            (Mode::Question, r#"[true,""]"#, (0, "")),
-            (Mode::Question, r#"[false,""]"#, (1, "")),
+    fn parameters_preserve_the_original_dialog_protocol() {
+        for (flag, operation, buttons) in [
+            ("--entry", "displayDialog", vec!["Cancel", "OK"]),
+            ("--question", "displayAlert", vec!["No", "Yes"]),
+            ("--info", "displayAlert", vec!["OK"]),
         ] {
-            let (status, text) = outcome(&mode, reply.as_bytes()).unwrap();
-            assert_eq!((status, text.as_str()), expected);
+            let p = parameters(&parse(&[flag.into()]).unwrap());
+            assert_eq!(p["operation"], operation);
+            assert_eq!(p["options"]["buttons"], json!(buttons));
+            assert_eq!(p["options"]["defaultButton"], buttons.len());
         }
     }
 
@@ -151,14 +153,20 @@ mod tests {
     fn parameters_preserve_quotes_unicode_and_script_text() {
         let value = "\"\\\n\u{2028}caf\u{e9}'); throw Error('injected');";
         let options = parse(&["--entry".into(), "--entry-text".into(), value.into()]).unwrap();
-        let decoded: Value = serde_json::from_str(&parameters(&options).to_string()).unwrap();
-        assert_eq!(decoded["value"], value);
+        let script = program(&options);
+        let data = script.strip_prefix("var p = ").unwrap();
+        let (data, _) = data.split_once(";\n").unwrap();
+        let decoded: Value = serde_json::from_str(data).unwrap();
+        assert_eq!(decoded["options"]["defaultAnswer"], value);
+        assert!(!data.contains(['\u{2028}', '\u{2029}']));
     }
 
     #[test]
-    fn malformed_script_results_fail() {
-        for data in [b"not json".as_slice(), br#"["yes",""]"#, br#"[true]"#] {
-            assert!(outcome(&Mode::Info, data).is_err());
-        }
+    fn script_file_starts_at_the_complete_program() {
+        let options = parse(&["--info".into(), "--text".into(), "a\nb".into()]).unwrap();
+        assert_eq!(
+            io::read_to_string(script_file(&options).unwrap()).unwrap(),
+            program(&options)
+        );
     }
 }

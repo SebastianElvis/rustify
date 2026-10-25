@@ -1,0 +1,304 @@
+--- appkit/src/main.rs
++++ exec/src/main.rs
+@@ -1,19 +1,22 @@
+-use objc2::MainThreadMarker;
+-use objc2_app_kit::{NSAlert, NSAlertStyle, NSApplication, NSTextField};
+-use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
+-use std::io::{self, Write};
+-use std::process::ExitCode;
++use serde_json::{Value, json};
++use std::{
++    error::Error,
++    fs::File,
++    io::{self, Seek, Write},
++    os::unix::process::CommandExt,
++    process::{Command, Stdio},
++};
+ 
+-#[derive(Clone, Debug, PartialEq)]
++#[derive(Clone, Debug, Default, PartialEq)]
+ enum Mode {
++    #[default]
++    Unselected,
+     Entry,
+     Question,
+     Info,
+-    Warning,
+-    Error,
+ }
+ 
+-#[derive(Debug, PartialEq)]
++#[derive(Debug, Default, PartialEq)]
+ struct Options {
+     mode: Mode,
+     title: String,
+@@ -24,128 +27,93 @@
+ }
+ 
+ fn parse(args: &[String]) -> Result<Options, String> {
+-    let mut options = Options {
+-        mode: Mode::Info,
+-        title: String::new(),
+-        text: String::new(),
+-        value: String::new(),
+-        ok: String::new(),
+-        cancel: String::new(),
+-    };
+-    let mut selected = false;
+-    let mut index = 0;
+-    while index < args.len() {
+-        let arg = args[index].trim_start_matches('-');
+-        match arg {
+-            "entry" | "question" | "info" | "warning" | "error" => {
+-                options.mode = match arg {
++    let mut options = Options::default();
++    let mut args = args.iter();
++    while let Some(arg) = args.next() {
++        match arg.trim_start_matches('-') {
++            mode @ ("entry" | "question" | "info") => {
++                options.mode = match mode {
+                     "entry" => Mode::Entry,
+                     "question" => Mode::Question,
+-                    "warning" => Mode::Warning,
+-                    "error" => Mode::Error,
+                     _ => Mode::Info,
+                 };
+-                selected = true;
+             }
+-            "title" | "text" | "entry-text" | "ok-label" | "cancel-label" => {
+-                index += 1;
+-                let value = args
+-                    .get(index)
+-                    .ok_or_else(|| format!("The {arg} option requires a value."))?
++            key @ ("title" | "text" | "entry-text" | "ok-label" | "cancel-label") => {
++                let field = match key {
++                    "title" => &mut options.title,
++                    "text" => &mut options.text,
++                    "entry-text" => &mut options.value,
++                    "ok-label" => &mut options.ok,
++                    _ => &mut options.cancel,
++                };
++                *field = args
++                    .next()
++                    .ok_or_else(|| format!("The {key} option requires a value."))?
+                     .clone();
+-                match arg {
+-                    "title" => options.title = value,
+-                    "text" => options.text = value,
+-                    "entry-text" => options.value = value,
+-                    "ok-label" => options.ok = value,
+-                    _ => options.cancel = value,
+-                }
+             }
+-            _ => {
++            arg => {
+                 return Err(format!(
+                     "The option is outside the evaluation contract: {arg}"
+                 ));
+             }
+         }
+-        index += 1;
+     }
+-    if !selected {
++    if options.mode == Mode::Unselected {
+         return Err("The command requires a dialog mode.".into());
+     }
++    let (ok, cancel) = if options.mode == Mode::Question {
++        ("Yes", "No")
++    } else {
++        ("OK", "Cancel")
++    };
+     if options.ok.is_empty() {
+-        options.ok = if options.mode == Mode::Question {
+-            "Yes"
+-        } else {
+-            "OK"
+-        }
+-        .into();
++        options.ok = ok.into();
+     }
+     if options.cancel.is_empty() {
+-        options.cancel = if options.mode == Mode::Question {
+-            "No"
+-        } else {
+-            "Cancel"
+-        }
+-        .into();
++        options.cancel = cancel.into();
+     }
+     Ok(options)
+ }
+ 
+-fn outcome(mode: &Mode, response: isize, value: &str) -> (u8, String) {
+-    if response != 1000 {
+-        (1, String::new())
+-    } else if *mode == Mode::Entry {
+-        (0, format!("{value}\n"))
+-    } else {
+-        (0, String::new())
++fn parameters(o: &Options) -> Value {
++    match o.mode {
++        Mode::Entry => {
++            json!({"operation":"displayDialog","text":o.text,"options":{"withTitle":o.title,"defaultAnswer":o.value,"buttons":[o.cancel,o.ok],"defaultButton":2,"cancelButton":1}})
++        }
++        Mode::Question => {
++            json!({"operation":"displayAlert","text":o.title,"options":{"message":o.text,"buttons":[o.cancel,o.ok],"defaultButton":2,"cancelButton":1}})
++        }
++        Mode::Info => {
++            json!({"operation":"displayAlert","text":o.title,"options":{"message":o.text,"as":"informational","buttons":[o.ok],"defaultButton":1}})
++        }
++        Mode::Unselected => unreachable!("The parser requires a dialog mode."),
+     }
+ }
+ 
+-fn show(options: Options) -> (u8, String) {
+-    let main = MainThreadMarker::new().expect("The dialog requires the main thread.");
+-    let app = NSApplication::sharedApplication(main);
+-    app.finishLaunching();
+-    let alert = NSAlert::new(main);
+-    alert.setMessageText(&NSString::from_str(&options.text));
+-    alert.window().setTitle(&NSString::from_str(&options.title));
+-    alert.setAlertStyle(match options.mode {
+-        Mode::Error => NSAlertStyle::Critical,
+-        Mode::Warning => NSAlertStyle::Warning,
+-        _ => NSAlertStyle::Informational,
+-    });
+-    alert.addButtonWithTitle(&NSString::from_str(&options.ok));
+-    if matches!(options.mode, Mode::Entry | Mode::Question) {
+-        alert.addButtonWithTitle(&NSString::from_str(&options.cancel));
+-    }
+-    let entry = NSTextField::textFieldWithString(&NSString::from_str(&options.value), main);
+-    entry.setFrame(NSRect::new(
+-        NSPoint::new(0.0, 0.0),
+-        NSSize::new(280.0, 24.0),
+-    ));
+-    if options.mode == Mode::Entry {
+-        alert.setAccessoryView(Some(&entry));
+-        alert.window().setInitialFirstResponder(Some(&entry));
+-    }
+-    #[allow(deprecated)]
+-    app.activateIgnoringOtherApps(true);
+-    let response = alert.runModal();
+-    outcome(&options.mode, response, &entry.stringValue().to_string())
++fn program(options: &Options) -> String {
++    let data = parameters(options)
++        .to_string()
++        .replace('\u{2028}', "\\u2028")
++        .replace('\u{2029}', "\\u2029");
++    format!("var p = {data};\n{}", include_str!("../assets/dialog.js"))
+ }
+ 
+-fn main() -> ExitCode {
+-    let args: Vec<_> = std::env::args().skip(1).collect();
+-    let options = match parse(&args) {
+-        Ok(options) => options,
+-        Err(error) => {
+-            eprintln!("{error}");
+-            return ExitCode::FAILURE;
+-        }
+-    };
+-    let (status, output) = show(options);
+-    if io::stdout().lock().write_all(output.as_bytes()).is_err() {
+-        return ExitCode::FAILURE;
+-    }
+-    ExitCode::from(status)
++fn script_file(options: &Options) -> io::Result<File> {
++    let mut file = tempfile::tempfile()?;
++    file.write_all(program(options).as_bytes())?;
++    file.rewind()?;
++    Ok(file)
++}
++
++fn main() -> Result<(), Box<dyn Error>> {
++    let options = parse(&std::env::args().skip(1).collect::<Vec<_>>())?;
++    Err(Command::new("/usr/bin/osascript")
++        .args(["-l", "JavaScript"])
++        .env_clear()
++        .stdin(script_file(&options)?)
++        .stderr(Stdio::null())
++        .exec()
++        .into())
+ }
+ 
+ #[cfg(test)]
+@@ -154,13 +122,11 @@
+ 
+     #[test]
+     fn question_defaults_match_the_observed_buttons() {
+-        let args = vec!["--question".into(), "--text".into(), "A & B?".into()];
+-        let options = parse(&args).unwrap();
++        let options = parse(&["--question".into(), "--text".into(), "A & B?".into()]).unwrap();
+         assert_eq!(
+-            (options.ok.as_str(), options.cancel.as_str()),
+-            ("Yes", "No")
++            [options.ok, options.cancel, options.text],
++            ["Yes", "No", "A & B?"]
+         );
+-        assert_eq!(options.text, "A & B?");
+     }
+ 
+     #[test]
+@@ -170,17 +136,37 @@
+     }
+ 
+     #[test]
+-    fn entry_results_keep_unicode_and_newlines() {
+-        assert_eq!(
+-            outcome(&Mode::Entry, 1000, "caf\u{e9}"),
+-            (0, "caf\u{e9}\n".into())
+-        );
+-        assert_eq!(outcome(&Mode::Entry, 1001, "ignored"), (1, String::new()));
++    fn parameters_preserve_the_original_dialog_protocol() {
++        for (flag, operation, buttons) in [
++            ("--entry", "displayDialog", vec!["Cancel", "OK"]),
++            ("--question", "displayAlert", vec!["No", "Yes"]),
++            ("--info", "displayAlert", vec!["OK"]),
++        ] {
++            let p = parameters(&parse(&[flag.into()]).unwrap());
++            assert_eq!(p["operation"], operation);
++            assert_eq!(p["options"]["buttons"], json!(buttons));
++            assert_eq!(p["options"]["defaultButton"], buttons.len());
++        }
+     }
+ 
+     #[test]
+-    fn question_results_have_no_output() {
+-        assert_eq!(outcome(&Mode::Question, 1000, ""), (0, String::new()));
+-        assert_eq!(outcome(&Mode::Question, 1001, ""), (1, String::new()));
++    fn parameters_preserve_quotes_unicode_and_script_text() {
++        let value = "\"\\\n\u{2028}caf\u{e9}'); throw Error('injected');";
++        let options = parse(&["--entry".into(), "--entry-text".into(), value.into()]).unwrap();
++        let script = program(&options);
++        let data = script.strip_prefix("var p = ").unwrap();
++        let (data, _) = data.split_once(";\n").unwrap();
++        let decoded: Value = serde_json::from_str(data).unwrap();
++        assert_eq!(decoded["options"]["defaultAnswer"], value);
++        assert!(!data.contains(['\u{2028}', '\u{2029}']));
++    }
++
++    #[test]
++    fn script_file_starts_at_the_complete_program() {
++        let options = parse(&["--info".into(), "--text".into(), "a\nb".into()]).unwrap();
++        assert_eq!(
++            io::read_to_string(script_file(&options).unwrap()).unwrap(),
++            program(&options)
++        );
+     }
+ }
+--- /dev/null
++++ exec/assets/dialog.js
+@@ -0,0 +1,14 @@
++ObjC.import('stdio');
++ObjC.import('stdlib');
++var app = Application.currentApplication();
++app.includeStandardAdditions = true;
++app.activate();
++try {
++    var res = app[p.operation](p.text, p.options);
++} catch (error) {
++    if (error.errorNumber === -128) $.exit(1);
++    $.dprintf(2, error);
++    $.exit(-1);
++}
++if (res.gaveUp) $.exit(5);
++res.textReturned;

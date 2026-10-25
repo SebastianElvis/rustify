@@ -32,7 +32,7 @@
       ],
       "returncode": 0,
       "log": "evaluations/xh/target/verification/logs/clippy.log",
-      "log_sha256": "8c233a54790c4800d3dd585436af679aa838da259bfdb129412e2d51cdb75cdc"
+      "log_sha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6"
     },
     {
       "name": "rust-tests",
@@ -43,7 +43,7 @@
       ],
       "returncode": 0,
       "log": "evaluations/xh/target/verification/logs/rust-tests.log",
-      "log_sha256": "d54f26d4ed754bb6fe2801f0a42c1b6b67445c7f66fe908f4bbb9eaf9411ea1f"
+      "log_sha256": "24a2b587e783137ca9b0a00fbe7424eb2ecfec61e84438d7fa935bb03968c164"
     },
     {
       "name": "build",
@@ -66,7 +66,7 @@
       ],
       "returncode": 0,
       "log": "evaluations/xh/target/verification/logs/comparison.log",
-      "log_sha256": "4065ab9992ec372ad0cd3496ae15689bd0b1ea297174684e8a93acb5e318a9fc"
+      "log_sha256": "6780d8793a6f34d93ef98959317b31b2970c479caaaf6f693e83203fa4ae1114"
     },
     {
       "name": "upstream",
@@ -103,7 +103,7 @@
     6,
     1
   ],
-  "candidate_sha256": "67f6c000180e005b4e8fc99030983b8f536ed7a1d44ddc000b2dae1fe62a34b3",
+  "candidate_sha256": "e50e06d586e150634609496591ccc8d61df8084dd531a8d5c6dfa5d51ec17ef3",
   "runtime_rust_line_budget": {
     "added": 7,
     "removed": 7,

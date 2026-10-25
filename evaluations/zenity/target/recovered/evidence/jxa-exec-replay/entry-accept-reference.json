@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "entry-accept",
+    "args": [
+      "--entry",
+      "--title",
+      "Rustify desktop test",
+      "--text",
+      "Rustify input test",
+      "--entry-text",
+      "seed"
+    ]
+  },
+  "executable_sha256": "5f917a17b59bc5c516fb8173a21d13f4ac0d47850ab09cd7097e19bcdb5495c5",
+  "captured_at_utc": "2026-10-25T02:05:34.963780+00:00",
+  "capture_method": "host-native CUA",
+  "returncode": 0,
+  "stdout_b64": "UnVzdGlmeSBHVUkgdGVzdAo=",
+  "stderr_b64": "",
+  "ax_file": "entry-accept-reference-ax.txt",
+  "screenshot_file": "entry-accept-reference.png",
+  "ax_sha256": "fcab25b2cec25ada074877f27c31e0c706dce8fffbadc3a5589ae9638c74c8b2",
+  "screenshot_sha256": "b4df783849160e7c670bf3cbfe5f49f36eabf13e0c08f9ddab5246c2288cd1a3"
+}

@@ -3,3 +3,4 @@ evaluations/b3sum/target/implementation/help.txt -whitespace
 evaluations/xh/target/verification/source-assisted.patch -whitespace
 evaluations/xh/target/verification/blocking-faithfulness.patch -whitespace
 evaluations/zenity/target/verification/jxa-fidelity.patch -whitespace
+evaluations/zenity/target/verification/jxa-exec-fidelity.patch -whitespace

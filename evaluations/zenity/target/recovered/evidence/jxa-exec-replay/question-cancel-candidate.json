@@ -1,0 +1,23 @@
+{
+  "case": {
+    "id": "question-cancel",
+    "args": [
+      "--question",
+      "--title",
+      "Rustify brief test",
+      "--text",
+      "Rustify will close this test dialog."
+    ]
+  },
+  "executable_sha256": "a88c5b2011ecb83b878e0b16c80c56f79bd10357487d6f4bab105e993318d3da",
+  "captured_at_utc": "2026-10-25T02:05:42.576879+00:00",
+  "capture_method": "host-native CUA",
+  "returncode": 1,
+  "stdout_b64": "",
+  "stderr_b64": "",
+  "ax_file": "question-cancel-candidate-ax.txt",
+  "screenshot_file": "question-cancel-candidate.png",
+  "source_pin_sha256": "666aece3d4e0be2ac261c5a915b3371c581261b531ffc144f6c1ef080484fd6f",
+  "ax_sha256": "c4bc8a2922baf1335dc446762575def889ac490fde8c9dae1b3241f9d16a9307",
+  "screenshot_sha256": "30ce67a36332214fee9b69e4a31b144a42a948879941446357f1f249ba3dd87a"
+}

@@ -1,0 +1,22 @@
+{
+  "case": {
+    "id": "info-accept",
+    "args": [
+      "--info",
+      "--title",
+      "Rustify brief test",
+      "--text",
+      "Rustify will close this test dialog."
+    ]
+  },
+  "executable_sha256": "5f917a17b59bc5c516fb8173a21d13f4ac0d47850ab09cd7097e19bcdb5495c5",
+  "captured_at_utc": "2026-10-25T02:05:43.480123+00:00",
+  "capture_method": "host-native CUA",
+  "returncode": 0,
+  "stdout_b64": "",
+  "stderr_b64": "",
+  "ax_file": "info-accept-reference-ax.txt",
+  "screenshot_file": "info-accept-reference.png",
+  "ax_sha256": "4aeb2e4e986656538b77df87e46d5d51c63dc5d3d4740b722b88c58d9b8abcbd",
+  "screenshot_sha256": "7ca3048d598a2edf5b1726594c8970c2e46c9660e2c17098cb04221a3c55a9c8"
+}

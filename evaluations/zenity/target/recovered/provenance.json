@@ -56,9 +56,17 @@
     "stage": "Historical AppKit replay only."
   },
   "current_source_assisted_repair": {
-    "kind": "SOURCE-ASSISTED native JXA fidelity repair",
-    "source_pin": "evidence/jxa-source-pin.json",
-    "status": "pending_fresh_gui_replay",
+    "kind": "SOURCE-ASSISTED anonymous-script and exec-boundary repair",
+    "source_pin": "evidence/jxa-exec-source-pin.json",
+    "status": "Five fresh CUA workflows pass.",
     "full_product_parity": "unestablished"
+  },
+  "current_replay": {
+    "proof": "../verification/fresh-proof.json",
+    "cases": 5,
+    "raw_identical_image_pairs": 4,
+    "pointer_difference": "Entry acceptance differs only in the external pointer effect within [192, 80, 225, 113].",
+    "capture_method": "host-native CUA",
+    "verifier_opens_gui": false
   }
 }

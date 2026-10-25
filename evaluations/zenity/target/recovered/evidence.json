@@ -50,15 +50,27 @@
   },
   {
     "id": "CURRENT-JXA-PENDING",
-    "claim": "The source-assisted JXA candidate builds and passes non-GUI protocol tests. Its GUI parity remains unverified.",
+    "claim": "The first child-process JXA stage passed process checks but failed Info focus and appearance parity.",
     "classification": "observed",
     "source": [
-      "evidence/jxa-source-pin.json",
-      "../verification/checks.json",
-      "../verification/summary.json"
+      "evidence/jxa-child-focus-failure.zip",
+      "evidence/jxa-source-pin.json"
     ],
     "limitations": [
-      "Historical AppKit captures are not current-source proof. The Mac is locked."
+      "The failed stage does not establish acceptance for the current exec candidate."
+    ]
+  },
+  {
+    "id": "JXA-EXEC-FRESH",
+    "claim": "The exec-stage candidate passes five original-derived process and native-dialog checks through fresh pinned CUA proof.",
+    "classification": "observed",
+    "source": [
+      "evidence/jxa-exec-source-pin.json",
+      "evidence/jxa-exec-replay/visual-review.json",
+      "../verification/fresh-proof.json"
+    ],
+    "limitations": [
+      "The entry acceptance images differ in the disclosed external pointer effect. Full-product parity and exact dirty-reference source identity remain unestablished."
     ]
   }
 ]

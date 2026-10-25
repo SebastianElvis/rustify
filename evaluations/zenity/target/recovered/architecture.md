@@ -1,33 +1,32 @@
 # Original architecture and current fidelity mapping
 
-The reference executable contains Go build metadata for `github.com/ncruces/zenity/cmd/zenity`.
+The reference contains Go build metadata for `github.com/ncruces/zenity/cmd/zenity`.
 REA observes `CGO_ENABLED=0` and a dirty source-tree marker.
-The original Question captures expose an osascript alert image.
+The original captures expose an osascript alert image.
 These observations suggested an OS script boundary before source review.
-The later tag review confirms that boundary without establishing the dirty binary's exact source identity.
+The tag review confirms that boundary without establishing the dirty binary's exact source identity.
 
-## Original tag boundary
+## Original and current boundaries
 
-The original CLI builds dialog data and renders a JavaScript template.
-`internal/zenutil/run_darwin.go::Run` invokes `osascript -l JavaScript`.
-The script uses currentApplication standard additions to show native dialogs.
+The original CLI constructs dialog data and renders a JavaScript program.
+Its command path writes an unlinked script file and replaces itself with `osascript -l JavaScript`.
+The program activates currentApplication and uses standard additions for native dialogs.
 Entry selects `displayDialog` with a title and default answer.
 The scoped CLI Question and Info flows select `displayAlert`.
-The CLI supplies the Yes and No labels that select the Question alert path.
 
-## Current Rust boundary
+The current Rust path is options -> safe JSON data -> anonymous script file -> Unix exec -> top-level JXA activation -> native standard-additions dialog.
+The script supplies the original process cancellation and output behavior.
+The Rust implementation no longer waits for an osascript child.
+It uses no AppKit bindings or System Events automation.
+`tempfile` supplies the anonymous file, and serde_json supplies the data encoding.
+The JSON transport escapes Unicode line and paragraph separators before script compilation.
 
-The current path is Rust options -> JSON parameter argument -> embedded `assets/dialog.js` -> osascript -> currentApplication standard additions -> native dialog.
-The script returns a JSON acceptance-and-text tuple.
-Rust maps cancellation and accepted entry text to the original CLI result contract.
-The implementation uses no direct AppKit bindings or System Events automation.
-The current source pin is `evidence/jxa-source-pin.json`.
-The historical direct-AppKit implementation remains in the preserved archives.
+## Stage evidence and limits
 
-## Open proof gaps
-
-Fresh GUI proof is pending for all five workflows.
-The old recordings do not validate the new source.
-The Rust parent waits for its child; the original CLI can replace its own process with osascript.
-Complete process-lifecycle, signal, option, and product parity remain unestablished.
-`roadmap.md` records the current parity backlog.
+The first JXA child-process stage fails Info focus despite matching all five process results.
+`evidence/jxa-child-focus-failure.zip` preserves that distinct failed stage.
+The exec-stage proof passes all five workflows and is stored in `evidence/jxa-exec-replay/`.
+The current immutable source pin is `evidence/jxa-exec-source-pin.json`.
+The first JXA pin and historical AppKit freeze remain unchanged.
+The original tag and current scoped Rust architecture now share the OS script and process-replacement boundary.
+Complete signal, option, platform, and product parity remain unestablished.

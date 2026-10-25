@@ -9,7 +9,7 @@
     },
     "candidate": {
       "path": "/Users/runchao/Projects/Personal/rustify/evaluations/b3sum/target/implementation/target/debug/rustify-b3sum",
-      "sha256": "91eaef9391fcaee29623907c53b8383d5558aefb8f95c1fefc7acadacb8ed5c0"
+      "sha256": "9caa6fcb08b7aa6d981fd07e5f0a0e84742d97af8df7c83664f1714a95caf911"
     }
   },
   "cases": [
@@ -2570,5 +2570,5 @@
     }
   ],
   "raw_report": "evaluations/b3sum/target/verification/raw/runtime-comparison.json",
-  "raw_report_sha256": "4af49f60a3c3b7ae0e09f7f18de546c8abdc4fa8f75f2e6d43f1fe5502bf1d90"
+  "raw_report_sha256": "73ec750f083388d6c131a3151c202b5c08762588c9cae61b1e75eb353f64a354"
 }

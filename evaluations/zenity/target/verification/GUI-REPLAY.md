@@ -1,57 +1,58 @@
-# Fresh host-native replay for the JXA candidate
+# Source-bound host-native GUI replay
 
-The current verifier runs no GUI automation.
-The parent performs fresh CUA replay after the Mac is unlocked.
-The historical AppKit captures cannot establish current parity.
+The parent performs native CUA interactions.
+The verifier opens no dialogs.
+The current five-case exec replay passes.
+Full-product parity remains unestablished.
 
-The current candidate is `../implementation/target/release/zenity`.
-The exact cases and source-pin hash are in `work/strict-zenity/replay-cases.json` under the repository root.
-The immutable source pin is `../recovered/evidence/jxa-source-pin.json`.
-The parent verifies copied executable hashes before using app wrappers.
+The executable is `../implementation/target/release/zenity`.
+The immutable pin is `../recovered/evidence/jxa-exec-source-pin.json`.
+The earlier `jxa-source-pin.json` belongs to the failed child stage and stays unchanged.
+The exact arguments and expectations are in `recovered/scenarios.json` and `recovered/tests.json`.
 
 ## Capture convention
 
-The parent writes captures under `work/strict-zenity/evidence/`.
-Each case uses `entry-accept`, `entry-cancel`, `question-accept`, `question-cancel`, or `info-accept` as its identifier.
-Each executable uses `reference` or `candidate` as its role.
-The file names are `{id}-{role}.json`, `{id}-{role}-ax.txt`, and `{id}-{role}.png`.
+Each workflow uses `entry-accept`, `entry-cancel`, `question-accept`, `question-cancel`, or `info-accept`.
+Each role uses `reference` or `candidate`.
+The files are `{id}-{role}.json`, `{id}-{role}-ax.txt`, and `{id}-{role}.png`.
+The tool supplies JPEG image bytes under those original filenames.
+The verifier preserves the raw bytes.
 
-Each process JSON contains these fields.
+Each process record contains `case: {id, args}`, `executable_sha256`, `captured_at_utc`, `capture_method: "host-native CUA"`, `returncode`, `stdout_b64`, and `stderr_b64`.
+The record also contains `ax_file`, `ax_sha256`, `screenshot_file`, and `screenshot_sha256`.
+Candidate records include the current `source_pin_sha256`.
+Every timestamp follows pin creation.
 
-```json
-{
-  "case": {"id": "entry-accept", "args": ["the exact recorded case arguments"]},
-  "executable_sha256": "the actual executed binary hash",
-  "source_pin_sha256": "the current pin-file hash; this field is required for candidate captures",
-  "capture_method": "host-native CUA",
-  "captured_at_utc": "the actual UTC capture time",
-  "returncode": 0,
-  "stdout_b64": "the actual stdout bytes in base64",
-  "stderr_b64": "the actual stderr bytes in base64",
-  "ax_file": "entry-accept-candidate-ax.txt",
-  "screenshot_file": "entry-accept-candidate.png",
-  "visual_parity": "passed only after the parent compares both native dialogs"
-}
+The visual-review.json file identifies that source pin and the CUA method.
+Its cases object contains all five IDs.
+Each case requires passed status, focus, title, icon, family, and controls verdicts.
+Entry acceptance may disclose an external pointer effect.
+No other unexplained raw image difference passes.
+The verifier never alters images or normalizes application appearance.
+
+## Actions and verification
+
+The parent verifies copied executable hashes before using app wrappers.
+The parent captures both dialogs before each action closes them.
+Entry acceptance replaces seed with `Rustify GUI test` and presses OK.
+Entry cancellation presses Cancel.
+Question acceptance presses Yes, and cancellation presses No.
+Info acceptance presses OK.
+The parent records actual process results and preserves failures even when process results pass.
+A code change needs a new pin and a separate replay stage.
+
+The verifier imports a completed batch with:
+
+```sh
+python3 evaluations/zenity/run.py --fresh-evidence /absolute/capture/directory
 ```
 
-The parent copies actual values into every field.
-The example strings do not constitute proof.
-The parent records `visual_parity: "passed"` only after it checks native family, title, icon, controls, and focus.
-The parent preserves failed and incomplete results.
-The parent does not record a completed workflow while the session is locked.
-The source pin stays unchanged throughout a replay batch.
+The default command checks `recovered/evidence/jxa-exec-replay/`.
+It consumes tests.json expectations, raw hashes, source identities, timestamps, and manual verdicts.
+It advances checkpoints only after those checks pass.
+Missing, stale, altered, or failed proof cannot pass.
+The proof tests also verify that a checkpoint failure cannot return success.
 
-## Actions and expected results
-
-| Case | Native family and controls | Action | Independent expected result |
-| --- | --- | --- | --- |
-| Entry accept | `displayDialog`, the title, the message, seed text, OK, and Cancel | The parent replaces seed with `Rustify GUI test` and presses OK. | Status 0, stdout `Rustify GUI test` plus a newline, and empty stderr. |
-| Entry cancel | The same entry controls | The parent presses Cancel. | Status 1 and empty stdout and stderr. |
-| Question accept | `displayAlert`, the title as alert text, the message, Yes, and No | The parent presses Yes. | Status 0 and empty stdout and stderr. |
-| Question cancel | The same Question controls | The parent presses No. | Status 1 and empty stdout and stderr. |
-| Info accept | `displayAlert`, the title as alert text, the message, and OK | The parent presses OK. | Status 0 and empty stdout and stderr. |
-
-The parent runs both pinned executables with each case's arguments.
-The parent uses fresh AX and image captures before the action closes each dialog.
-A later verification step must check all five current-source workflows before it can advance the candidate's state.
-The current runner intentionally remains pending until that fresh proof is supplied and verified.
+The current proof has four byte-identical image pairs.
+Entry acceptance has the disclosed external pointer effect within `[192, 80, 225, 113]`.
+The current Info focus and appearance match the original.

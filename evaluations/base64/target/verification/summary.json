@@ -49,7 +49,7 @@
   "freeze_manifest_sha256": "f0b9780ddab29110647d071d299e48db2e6440473bf7937c7d93cf8cab738e78",
   "unit_tests": 10,
   "reference_sha256": "41dd92cf260491c5c8fc0084c42e58b1baaca9ebcc88aa38f60a17a2ef603570",
-  "candidate_sha256": "2de8c78d453d5e47de2c9edd5830422de3d98e6a541359db150b974706773568",
+  "candidate_sha256": "37dce211ceec3355a448d9beae50b6f35e6dfbf653f19bd55b52fec185748469",
   "challenge_cases": 279,
   "upstream_vectors": 201,
   "comparison_cases": 480,
