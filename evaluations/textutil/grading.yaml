@@ -1,0 +1,123 @@
+# Confidence: these grades are lower than source-based grades. No source exists.
+# The feature patterns come from the manual page, the help text, and observed behavior.
+# The component patterns come from the evaluator's own reverse engineering of /usr/bin/textutil:
+# the Objective-C class, selector, and string names that `strings` and `otool -ov` show.
+scope: the complete textutil command on macOS 26.7.2 (25G325) in the C locale, every command, option, and format
+features:
+- id: help
+  pattern: (?i)-help|usage
+- id: info
+  pattern: (?i)-info|document information|file information
+- id: convert
+  pattern: (?i)-convert|convert
+- id: cat
+  pattern: (?i)-cat|concatenat
+- id: txt
+  pattern: (?i)plain text|\btxt\b
+- id: html
+  pattern: (?i)\bhtml\b
+- id: rtf
+  pattern: (?i)\brtf\b|rich text
+- id: rtfd
+  pattern: (?i)\brtfd\b|rich text with graphics
+- id: doc
+  pattern: (?i)\bdoc\b|word (97|binary)|word format
+- id: docx
+  pattern: (?i)\bdocx\b|office open xml|ooxml
+- id: wordml
+  pattern: (?i)wordml|word xml|word 2003
+- id: odt
+  pattern: (?i)\bodt\b|opendocument|open document
+- id: webarchive
+  pattern: (?i)web ?archive
+- id: extension
+  pattern: (?i)-extension|output extension
+- id: output
+  pattern: (?i)-output|output (file|path|name)
+- id: stdin
+  pattern: (?i)-stdin|standard input|stdin
+- id: stdout
+  pattern: (?i)-stdout|standard output|stdout
+- id: encoding
+  pattern: (?i)-encoding|output encoding|NSStringEncoding|IANA
+- id: inputencoding
+  pattern: (?i)-inputencoding|input encoding|\bBOM\b|byte order mark
+- id: format
+  pattern: (?i)-format|force.*(input|format)|input format
+- id: font
+  pattern: (?i)-font\b|font name
+- id: fontsize
+  pattern: (?i)-fontsize|font size
+- id: noload
+  pattern: (?i)-noload|(not|no) load.*resource
+- id: nostore
+  pattern: (?i)-nostore|(not|no) (write|store).*resource
+- id: baseurl
+  pattern: (?i)-baseurl|base url
+- id: timeout
+  pattern: (?i)-timeout|time ?out
+- id: textsizemultiplier
+  pattern: (?i)-textsizemultiplier|text size multiplier|font sizes? (factor|multipl)
+- id: excludedelements
+  pattern: (?i)-excludedelements|exclude[ds]? (html )?elements
+- id: prefixspaces
+  pattern: (?i)-prefixspaces|indent.*nested|prefix spaces
+- id: strip
+  pattern: (?i)-strip|strip.*metadata|do not copy metadata
+- id: title
+  pattern: (?i)-title|title (metadata|attribute)
+- id: author
+  pattern: (?i)-author|author
+- id: subject
+  pattern: (?i)-subject|subject
+- id: keywords
+  pattern: (?i)-keywords|keyword
+- id: comment
+  pattern: (?i)-comment|comment
+- id: editor
+  pattern: (?i)-editor|last editor
+- id: company
+  pattern: (?i)-company|company
+- id: creationtime
+  pattern: (?i)-creationtime|creation (time|date)
+- id: modificationtime
+  pattern: (?i)-modificationtime|modification (time|date)|last modified
+- id: noversion
+  pattern: (?i)-noversion|cocoa ?version
+- id: end-of-options
+  pattern: (?i)(^|\s)--(\s|$)|end of options|further arguments are file names
+- id: errors
+  pattern: (?i)error (reading|writing)|invalid (output|input|font|prefix|multiplier|timeout)|multiple .* specified|no .* specified
+- id: exit-status
+  pattern: (?i)exit (status|code)|exits? (0|1)
+components:
+- id: argument-parser
+  pattern: (?i)argument|option pars|command[- ]line|NSProcessInfo
+- id: usage-printer
+  pattern: (?i)usage|help (text|printer|message)
+- id: info-reporter
+  pattern: (?i)info(rmation)? (report|print|command)|document attributes
+- id: document-reader
+  pattern: (?i)reader|import|initWith(URL|Data):options:documentAttributes
+- id: document-writer
+  pattern: (?i)writer|export|dataFromRange|fileWrapperFromRange
+- id: concatenator
+  pattern: (?i)concat|appendAttributedString
+- id: attributed-text-model
+  pattern: (?i)attributed (string|text)|text storage|document model|rich text model
+- id: web-resource-loader
+  pattern: (?i)TextutilWebDelegate|resource load|subresource|web ?view delegate
+- id: web-archive-builder
+  pattern: (?i)web ?archive (builder|writer)|initWithMainResource|WebResource
+- id: font-resolver
+  pattern: (?i)font (resol|lookup|match|manager)|fontWithFamily|userFontOfSize|availableMembersOfFontFamily
+- id: text-encoding
+  pattern: (?i)encod(ing|er) (table|convert|lookup|registry)|charset|IANA
+- id: metadata-attributes
+  pattern: (?i)metadata|document attribute
+- id: property-list-parser
+  pattern: (?i)property ?list|plist|old-style list
+- id: rtfd-package
+  pattern: (?i)rtfd (package|bundle)|file ?wrapper|attachment
+- id: output-naming
+  pattern: (?i)output (path|name|naming)|path extension|stringByAppendingPathExtension

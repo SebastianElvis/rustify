@@ -25,7 +25,7 @@ def main():
     start = time.monotonic()
     results = []
     for track in tracks:
-        runner = ROOT / "evaluations" / track / "run.py"
+        runner = next((ROOT / "evaluations").glob(f"*/{track}/run.py"))
         result = subprocess.run([sys.executable, str(runner), "--project", str(args.projects.resolve() / track)], cwd=ROOT)
         results.append({"track": track, "returncode": result.returncode})
     report = {

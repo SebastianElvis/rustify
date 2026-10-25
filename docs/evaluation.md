@@ -125,7 +125,7 @@ The scorer accepts only captures of the reference and of the executable that it 
 ```sh
 make evaluate
 python3 scripts/evaluate.py --desktop
-python3 evaluations/xh/run.py --project /path/to/project
+python3 evaluations/open/xh/run.py --project /path/to/project
 ```
 
 The first run needs internet access for pinned binaries and Cargo dependencies.

@@ -167,7 +167,7 @@ def main():
     if args.command == "grade":
         stamp = args.run.resolve()
     else:
-        tracks = [path.resolve() for path in args.track or [ROOT / "evaluations" / name for name in ("base64", "b3sum", "xh")]]
+        tracks = [path.resolve() for path in args.track or [ROOT / "evaluations/open" / name for name in ("base64", "b3sum", "xh")]]
         stamp = run(tracks, args.agent, args.trials, args.output.resolve(), args.timeout)
         if args.no_grade:
             print(stamp)

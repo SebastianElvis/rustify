@@ -8,7 +8,7 @@ import sys
 
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import harness
 
 ROOT = Path(__file__).resolve().parent

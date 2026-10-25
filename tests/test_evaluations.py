@@ -9,7 +9,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("zenity_run", ROOT / "evaluations/zenity/run.py")
+SPEC = importlib.util.spec_from_file_location("zenity_run", ROOT / "evaluations/open/zenity/run.py")
 zenity = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(zenity)
 HASHES = {"reference": "a" * 64, "candidate": "b" * 64}
@@ -20,7 +20,7 @@ class CaptureTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.directory = Path(temporary.name)
-        cases = yaml.safe_load((ROOT / "evaluations/zenity/cases.yaml").read_text())
+        cases = yaml.safe_load((ROOT / "evaluations/open/zenity/cases.yaml").read_text())
         review = {"capture_method": "host-native CUA", "cases": {}}
         for case in cases:
             args = case["args"]

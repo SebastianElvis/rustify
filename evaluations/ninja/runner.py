@@ -1,14 +1,26 @@
-"""Run multi-step Ninja scenarios and compare the steps of two executables."""
+"""Run multi-step Ninja scenarios and compare the views of two executable schedules.
+
+The view contains stdout, stderr, the exit status, and every file after each step.
+The runner applies only the equivalence rules that the README declares:
+- A nanosecond timestamp inside the wall-clock window of the scenario becomes `<wall>`.
+- The start and end times of each `.ninja_log` entry become `*`.
+- Each `"%p"` graph node identifier becomes a number in the order of first use.
+- The path of the scenario directory becomes `$ROOT`.
+"""
 
 import os
 from pathlib import Path
+import re
 import signal
 import struct
 import subprocess
 import tempfile
 import time
 
-BASE = 946684800  # The runner gives every fixture file the mtime 2000-01-01T00:00:00Z.
+BASE = 946684800  # The runner gives every written fixture file the mtime 2000-01-01T00:00:00Z.
+SLACK = 3600 * 10**9
+NUMBER = re.compile(r"\b\d{16,20}\b")
+POINTER = re.compile(r'"0x[0-9a-f]+"')
 
 
 def encode(text):
@@ -19,29 +31,42 @@ def decode(data):
     return data.decode("utf-8", "surrogateescape")
 
 
-def build_log(data):
-    """Mask the start time, the end time, and the nonzero mtime of each build log entry."""
+def wall(text, window):
+    return NUMBER.sub(lambda match: "<wall>" if window[0] - SLACK <= int(match.group()) <= time.time_ns() + SLACK else match.group(), text)
+
+
+def pointers(text):
+    names = {}
+    return POINTER.sub(lambda match: '"node%d"' % names.setdefault(match.group(), len(names)), text)
+
+
+def rooted(text, root):
+    for place in sorted({str(root), os.path.realpath(root)}, key=len, reverse=True):
+        text = text.replace(place, "$ROOT")
+    return text
+
+
+def build_log(data, window):
     lines = []
     for line in decode(data).split("\n"):
         fields = line.split("\t")
         if len(fields) == 5 and not line.startswith("#"):
-            fields[:3] = ["*", "*", "0" if fields[2] == "0" else "*"]
+            fields[:3] = ["*", "*", wall(fields[2], window)]
         lines.append("\t".join(fields))
     return "\n".join(lines)
 
 
-def deps_log(data):
-    """Mask the nonzero output mtime of each deps log record."""
+def deps_log(data, window):
     data, offset = bytearray(data), 16
     while offset + 4 <= len(data):
         size = struct.unpack_from("<I", data, offset)[0]
-        if size >> 31 and offset + 16 <= len(data) and struct.unpack_from("<Q", data, offset + 8)[0]:
-            struct.pack_into("<Q", data, offset + 8, 1)
+        if size >> 31 and offset + 16 <= len(data) and wall(str(struct.unpack_from("<Q", data, offset + 8)[0]), window) == "<wall>":
+            data[offset + 8:offset + 16] = b"<wall>\0\0"
         offset += 4 + (size & 0x7FFFFFFF)
     return decode(bytes(data))
 
 
-def snapshot(root):
+def snapshot(root, window):
     files = {}
     for path in sorted(root.rglob("*")):
         name = path.relative_to(root).as_posix()
@@ -51,29 +76,33 @@ def snapshot(root):
             files[name + "/"] = None
             continue
         data = path.read_bytes()
-        files[name] = build_log(data) if path.name == ".ninja_log" else deps_log(data) if path.name == ".ninja_deps" else decode(data)
+        files[name] = build_log(data, window) if path.name == ".ninja_log" else deps_log(data, window) if path.name == ".ninja_deps" else rooted(decode(data), root)
     return files
 
 
-def prepare(root, step, now):
+def prepare(root, step):
     for name, text in step.get("write", {}).items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(encode(text))
         os.utime(path, (BASE, BASE))
     for name in step.get("remove", []):
-        (root / name).unlink()
+        (root / name).unlink(missing_ok=True)
     for name, seconds in step.get("mtime", {}).items():
         os.utime(root / name, (seconds, seconds))
+    now = time.time_ns()
     for name in step.get("touch", []):
         os.utime(root / name, ns=(now, now))
 
 
-def execute(executable, root, step, timeout):
-    """Run one Ninja step and return its normalized result."""
+def execute(executable, root, step, window, timeout):
+    """Run one Ninja step and return its normalized view."""
     env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": str(root), "PATH": "/usr/bin:/bin", "TERM": "dumb", **step.get("env", {})}
+    command = ["/usr/bin/script", "-q", "/dev/null", str(executable)] if step.get("tty") else ["ninja"]
+    stdin, hold = os.pipe()
     result = {"returncode": None, "stdout": "", "stderr": "", "error": None}
-    process = subprocess.Popen(["ninja", *step["args"]], executable=str(executable), cwd=root, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if step.get("merge") else subprocess.PIPE, start_new_session=True)
+    process = subprocess.Popen([*command, *step["args"]], executable=None if step.get("tty") else str(executable), cwd=root, env=env, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if step.get("merge") else subprocess.PIPE, start_new_session=True)
+    os.close(stdin)
     try:
         if "signal" in step:
             deadline = time.monotonic() + timeout
@@ -83,50 +112,50 @@ def execute(executable, root, step, timeout):
             process.send_signal(step["signal"])
         stdout, stderr = process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        os.killpg(process.pid, signal.SIGKILL)
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except OSError:
+            process.kill()
         stdout, stderr = process.communicate()
         result["error"] = "The step exceeded the time limit."
     finally:
+        os.close(hold)
         try:
             os.killpg(process.pid, signal.SIGKILL)
-        except ProcessLookupError:
+        except OSError:
             pass
-    places = sorted({str(root), os.path.realpath(root)}, key=len, reverse=True)
     for label, data in (("stdout", stdout), ("stderr", stderr or b"")):
-        text = decode(data)
-        for place in places:
-            text = text.replace(place, "$ROOT")
-        result[label] = text
+        result[label] = pointers(wall(rooted(decode(data), root), window))
     result["returncode"] = process.returncode
     return result
 
 
-def play(executables, scenario, timeout=10):
-    """Run each step with the executable at the same position and record the results."""
+def play(executables, scenario, timeout=15):
+    """Run step i with executable i modulo the schedule length and record each view."""
     steps = []
+    window = (time.time_ns(),)
     with tempfile.TemporaryDirectory(prefix="rustify-ninja-") as directory:
         root = Path(directory)
-        prepare(root, {"write": scenario.get("files", {})}, 0)
+        prepare(root, {"write": scenario.get("files", {})})
         for index, step in enumerate(scenario["steps"]):
-            prepare(root, step, time.time_ns())
-            record = {"executable": executables[index % len(executables)][0], **execute(executables[index % len(executables)][1], root, step, timeout)}
+            label, executable = executables[index % len(executables)]
+            prepare(root, step)
+            record = {"executable": label, **execute(executable, root, step, window, timeout)}
             try:
-                record["files"] = snapshot(root)
+                record["files"] = snapshot(root, window)
             except (OSError, ValueError) as error:
                 record["error"] = record["error"] or str(error)
             steps.append(record)
     return steps
 
 
-def compare(expected, actual, scenarios, timeout=10):
-    """Compare two executable schedules on each scenario and report the differing steps."""
-    report = {"status": "passed", "passed": 0, "failed": 0, "cases": []}
+def compare(expected, actual, scenarios, timeout=15):
+    """Compare two executable schedules on each scenario and list the differing steps."""
+    rows = []
     for scenario in scenarios:
         results = {"expected": play(expected, scenario, timeout), "actual": play(actual, scenario, timeout)}
         differences = [f"step {index}: {field}" for index, (left, right) in enumerate(zip(results["expected"], results["actual"])) for field in ("returncode", "stdout", "stderr", "files") if left.get(field) != right.get(field)]
         differences += [f"step {index}: {step['error']}" for side in results.values() for index, step in enumerate(side) if step["error"]]
-        passed = not differences
-        report["passed" if passed else "failed"] += 1
-        report["cases"].append({"input": scenario, **results, "differences": differences, "passed": passed})
-    report["status"] = "failed" if report["failed"] else "passed"
-    return report
+        rows.append({"id": scenario["id"], "input": scenario, **results, "differences": differences, "passed": not differences})
+    failed = sum(not row["passed"] for row in rows)
+    return {"status": "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, "cases": rows}

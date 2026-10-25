@@ -1,0 +1,125 @@
+scope: the complete doomgeneric SDL game with Freedoom Phase 1 on macOS arm64 without sound
+features:
+- id: startup
+  pattern: (?i)startup|banner|init(iali[sz]ation)? (text|message|sequence)|Z_Init|R_Init
+- id: iwad
+  pattern: (?i)\biwad\b|game mode indeterminate|game data
+- id: pwad
+  pattern: (?i)\bpwad\b|-file\b|add(itional)? wad
+- id: response-file
+  pattern: (?i)response file|@file|@arg
+- id: demo-playback
+  pattern: (?i)-playdemo|demo playback|play(s|ing)? (back )?(a )?demo
+- id: timedemo
+  pattern: (?i)-timedemo|time ?demo|gametics|realtics|benchmark
+- id: demo-format
+  pattern: (?i)demo (format|header|version|lump)|ticcmd|longtics|\.lmp\b|demo marker
+- id: netdemo
+  pattern: (?i)net ?demo|multi-?player demo|-solo-net|several players
+- id: demo-recording
+  pattern: (?i)-record\b|record(s|ing)? (a )?demo|-maxdemo|demo buffer
+- id: save-game
+  pattern: (?i)save ?game|\.dsg\b|save slot|save file
+- id: load-game
+  pattern: (?i)load ?game|-loadgame|restore (a )?(saved )?game
+- id: pause
+  pattern: (?i)\bpause
+- id: game-options
+  pattern: (?i)-skill|-warp|-episode|-respawn|-fast\b|-nomonsters|-deathmatch|-altdeath|-turbo|-timer|-avg|difficulty|skill level
+- id: game-version
+  pattern: (?i)-gameversion|game version|emulat(e|ing|ion)|ultimate doom|final doom
+- id: simulation
+  pattern: (?i)simulation|game ?logic|tic(k)?er|thinker|monster|physics|fixed[- ]point|movement
+- id: configuration
+  pattern: (?i)config(uration)?|default\.cfg|-extraconfig
+- id: statdump
+  pattern: (?i)statdump|statistics
+- id: devparm
+  pattern: (?i)-devparm|developer mode
+- id: memory
+  pattern: (?i)zone memory|-mb\b|heap|z_malloc|allocat
+- id: renderer
+  pattern: (?i)render|\bbsp\b|software rasteri[sz]|frame ?buffer|visplane|texture|sprite
+- id: status-bar
+  pattern: (?i)status bar|\bhud\b|heads[- ]up|face|ammo count
+- id: automap
+  pattern: (?i)auto ?map
+- id: menus
+  pattern: (?i)\bmenu|new game|options screen|quit game
+- id: intermission
+  pattern: (?i)intermission|level (end|complet)|tally|par time
+- id: finale
+  pattern: (?i)finale|end ?text|episode end|victory
+- id: cheats
+  pattern: (?i)cheat|iddqd|idkfa
+- id: controls
+  pattern: (?i)keyboard|key (binding|input|map)|controls|input queue
+- id: window
+  pattern: (?i)window|\bsdl\b|title|scal(e|ing) factor|640 ?x ?400
+- id: screenshot
+  pattern: (?i)screen ?shot|\.pcx\b
+- id: wipe
+  pattern: (?i)\bwipe|melt
+- id: quit
+  pattern: (?i)\bquit|endoom|exit (status|code)|shut ?down
+- id: errors
+  pattern: (?i)I_Error|error message|fatal error|W_GetNumForName
+- id: networking
+  pattern: (?i)network|net ?game|-server|-connect|consistency|node
+components:
+- id: entry
+  pattern: (?i)\bmain\b|entry|doomgeneric_(create|tick)|D_DoomMain
+- id: platform
+  pattern: (?i)platform|front ?end|\bDG_|\bsdl\b|i_video|i_system
+- id: arguments
+  pattern: (?i)argument|m_argv|command line|response file
+- id: configuration
+  pattern: (?i)m_config|config(uration)? (store|loader|module)|default(s)? (table|collection)
+- id: zone-memory
+  pattern: (?i)\bzone\b|z_zone|allocator
+- id: wad-loader
+  pattern: (?i)\bwad\b|w_wad|lump (directory|loader|cache)
+- id: iwad-detection
+  pattern: (?i)iwad (detect|search|identif)|d_iwad|game mode
+- id: main-loop
+  pattern: (?i)main loop|game loop|d_main|d_loop|TryRunTics|tic loop
+- id: game-state
+  pattern: (?i)g_game|game state|game actions?|G_Ticker
+- id: demo
+  pattern: (?i)demo (player|recorder|reader|writer|module)|G_(Do)?PlayDemo|G_RecordDemo
+- id: savegame
+  pattern: (?i)p_saveg|save ?game (serial|writer|reader|codec|archive)|archive
+- id: play-simulation
+  pattern: (?i)p_(tick|mobj|map|maputl|enemy|user|inter|spec|setup)|play ?sim|thinker|map objects?|mobj
+- id: level-setup
+  pattern: (?i)level (setup|loader)|p_setup|blockmap|reject
+- id: random
+  pattern: (?i)m_random|random (table|number)|\brng\b
+- id: fixed-point
+  pattern: (?i)fixed[- ]point|m_fixed|fixed_t|tables|trig(onometry)? table
+- id: renderer
+  pattern: (?i)r_main|r_bsp|r_segs|r_plane|r_things|r_draw|renderer
+- id: video
+  pattern: (?i)v_video|i_video|palette|frame ?buffer|screen buffer
+- id: status-bar
+  pattern: (?i)st_stuff|st_lib|status bar
+- id: hud
+  pattern: (?i)hu_stuff|hu_lib|\bhud\b|heads[- ]up
+- id: menu
+  pattern: (?i)m_menu|\bmenu
+- id: automap
+  pattern: (?i)am_map|auto ?map
+- id: intermission
+  pattern: (?i)wi_stuff|intermission
+- id: finale
+  pattern: (?i)f_finale|finale
+- id: wipe
+  pattern: (?i)f_wipe|wipe
+- id: input
+  pattern: (?i)input|key (queue|event)|d_event|event queue
+- id: info-tables
+  pattern: (?i)info\.c|state table|mobjinfo|d_items|weapon info
+- id: sound-stub
+  pattern: (?i)sound|s_sound|i_sound
+- id: statdump
+  pattern: (?i)statdump

@@ -1,0 +1,6 @@
+product: textutil
+license: Apple macOS software license (closed source)
+path: /usr/bin/textutil
+sha256: f2e3b5831cb776ad7cb1648d5caca94bc2258af35d02c7922457590d5d1dfb1c
+os_build: 25G325
+forbidden_libraries: [AppKit, Cocoa, Foundation, WebKit, CoreText]

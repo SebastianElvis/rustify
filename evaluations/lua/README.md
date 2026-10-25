@@ -16,18 +16,19 @@ The `lua` program is the standalone interpreter.
 
 ## Reference build
 
-- Source: Lua 5.5.1 from `lua.org`. The SHA-256 is in `reference.json`.
+- Source: Lua 5.5.1 from `lua.org`. The SHA-256 is in `reference.yaml`.
 - Build: `scripts/build_reference.py lua` runs `make macosx` with the hardened flags and runs `strip`.
-- Hidden symbol visibility prevents dynamic C modules from linking against the interpreter. The evaluation excludes C modules.
+- Hidden symbol visibility prevents dynamic C modules from linking against this interpreter. The reconstruction matches that binary, so it also rejects C modules in the same way.
 
 ## Oracle
 
 - Byte-exact stdout, stderr, and exit status for script scenarios.
 - After the source reveal: the official `lua-5.5.1-tests` suite in portable mode.
 
-## Scope and limits
+## Scope
 
-- The scope covers the command line, the language core, and the `base`, `string`, `table`, `math`, `utf8`, and `coroutine` libraries.
-- The scope covers the deterministic parts of `io` and `os`.
-- The scope excludes the C API, binary chunks, garbage-collector timing, and interactive line editing.
+- The scope is the full product. Rustify always targets a complete one-to-one reconstruction.
+- The scorer measures the features that its cases cover. A feature without a case stays in scope.
+- A failed or missing feature is a skill defect. The fix goes into the skills, not into a narrower scope.
+- The full product covers the interpreter command line, interactive mode, the complete language, all standard libraries including `debug`, binary chunks, `string.dump`, and the garbage collector behavior that a script can observe.
 - `evaluations/lua/run.py` scores a project in `work/projects/lua` and writes reports to `work/evaluation/lua/`.
