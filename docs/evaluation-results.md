@@ -79,6 +79,21 @@ The witnesses cover jobserver values, build state, and dependency paths.
 Its saved time and cost omit the interrupted resume.
 The snapshot lacks the final comparison record.
 
+## bzip2 record continuation
+
+A separate source-free continuation adds 188 surface items.
+The continuation preserves all 22 implementation files byte for byte.
+Its replay passes 501 cases.
+Its generated search passes 500 probes with seed 29.
+Its round trips pass 54 cases.
+The current gate keeps seven uncertain edges and five gaps open.
+Four surface items lack requirements.
+The validate checkpoint refuses acceptance.
+The evaluator verifies all 209 active file hashes and repeats the gate.
+The freeze explicitly excludes inherited mutation work directories.
+The clone preserves those directories as historical evidence.
+This continuation does not replace the baseline.
+
 ## SQLite continuation
 
 The evaluator keeps the failed SQLite baseline frozen.
