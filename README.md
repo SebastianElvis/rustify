@@ -4,31 +4,70 @@
 
 Rustify gives AI agents a workflow to reconstruct software from a binary in idiomatic Rust.
 It recovers product specifications, UX, architecture, evidence, and tests alongside the implementation.
+Rustify depends on [REA](https://github.com/morluto/rea) for reverse engineering.
 The goal is software that you can inspect, build, and maintain without the original source.
 
 ## Installation
 
-Your environment needs Node.js 22.20 or later, Python 3, and a Rust toolchain with Cargo.
+The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3, and Rust with Cargo.
+
+### 1. Set up REA
+
+REA supplies the tools for product, UX, and architecture discovery.
+
+```sh
+npx rea-agents setup
+```
+
+You select the agents that will use REA.
+You review the proposed configuration and approve the changes.
+Setup registers the MCP server and installs REA's matching workflow instructions.
+You restart the agents named in the completion message.
+
+Native binary analysis needs Hopper, Ghidra, or IDA.
+Setup can connect an existing Hopper or Ghidra installation.
+It can also install Hopper when you select that option.
+Other target types can use REA's built-in inspection tools.
+
+### 2. Install Rustify
+
+You run this command from your project folder:
 
 ```sh
 npx skills add SebastianElvis/rustify --skill '*'
 ```
 
-The [Skills CLI](https://github.com/vercel-labs/skills/blob/main/docs/commands.md) installs all seven skills and lets you select your agents.
-The installation applies to the current project by default.
-The `-g` option installs the bundle across your projects.
+The installer includes all seven Rustify skills and prompts you to select your agents.
+The installation applies to the current project.
+The `-g` option makes the bundle available across your projects:
+
+```sh
+npx skills add SebastianElvis/rustify --skill '*' -g
+```
 
 Rustify follows the [Agent Skills format](https://agentskills.io/specification).
-The bundle works with compatible agents such as Claude Code, Codex, Cursor, and OpenCode.
-The CLI lists its [supported agents](https://github.com/vercel-labs/skills/blob/main/docs/agents.md).
+Compatible agents include Claude Code, Codex, Cursor, and OpenCode.
 Local and cloud agents use the same skill files.
-Their environment must provide the target binary, its resources, and a compatible runtime.
+Their environment must provide REA, the target binary, its resources, and a compatible runtime.
 Desktop investigation also needs a GUI session.
 
-[REA](https://github.com/morluto/rea) supplies the reverse-engineering tools.
-Its [installation guide](https://github.com/morluto/rea/blob/main/docs/installation.md) explains how to connect those tools to your agent.
-The three discovery skills declare REA as a dependency.
-The skill installer does not configure REA automatically.
+### 3. Check the setup
+
+This command checks the installed REA workflow:
+
+```sh
+npx rea-agents doctor --skill --json
+```
+
+Native analysis also needs a working provider.
+This example checks Hopper:
+
+```sh
+npx rea-agents doctor --provider hopper --json
+```
+
+You can replace `hopper` with `ghidra` or `ida` for your configured provider.
+Your agent must expose the REA tools before reconstruction starts.
 
 ## Usage
 
@@ -77,9 +116,8 @@ The [architecture guide](docs/architecture.md) includes the diagram's editable L
 
 ## Design principles
 
-- **The original defines the product.** Rustify targets one-to-one mappings wherever evidence permits them. A convenient redesign does not close a parity gap.
-- **Evidence outranks guesses.** Findings separate observations, inferences, and unknowns.
-- **Tests must challenge the reconstruction.** Unit tests, E2E comparisons, independent expectations, and upstream vectors check different failure modes.
+- **We strive for one-to-one mapping.** Rustify maps the original product, UX, behavior, data, and architecture to the Rust implementation. Known differences remain open until a repair resolves them.
+- **Evidence and user experience guide reconstruction.** Observed workflows, interface states, binary evidence, and tests support each mapping. Unit tests, E2E comparisons, independent expectations, and available upstream vectors challenge the result.
 - **Rust code follows Rust conventions.** The implementation preserves original responsibilities and execution boundaries. The [stack guide](skills/rustify-plan/references/rust-stack.md) ties dependencies to those requirements.
 - **Reports keep gaps visible.** A passing subset does not establish full-product parity. Changed evidence invalidates stale results.
 
