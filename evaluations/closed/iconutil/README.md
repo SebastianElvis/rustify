@@ -70,5 +70,7 @@ Two self-tests of the reference, each with a repeatability pass, found two varia
 - The scorer measures the features that its cases cover. A feature without a case stays in scope.
 - A failed or missing feature is a skill defect. The fix goes into the skills, not into a narrower scope.
 - The full product covers `-c icns`, `-c iconset`, `-o`, default output names, `.car` extraction, and every error.
-- The Rust program must not link IconServices, ImageIO, CoreGraphics, or AppKit.
+- The Rust program must not link the feature libraries in `reference.yaml`.
+- The observed catalog pipeline uses `CoreImage` for resize and composition. The track forbids `CoreImage`.
+- The Rust program can use Metal for its own GPU kernel. The kernel must not load the original `CoreImage` code.
 - `run.py` scores a project in `work/projects/iconutil` and writes reports to `work/evaluation/iconutil/`.
