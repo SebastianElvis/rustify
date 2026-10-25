@@ -2,7 +2,7 @@
 
 The original version and binary hash are {{ORIGINAL_VERSION_AND_SHA256}}.
 The environment is {{PLATFORM_LOCALE_TERMINAL_AND_ENVIRONMENT}}.
-The scope is {{FULL_PRODUCT_OR_EXPLICIT_PARTIAL_EVALUATION}}.
+The scope is {{FULL_PRODUCT_OR_SUBSET_WITH_USER_INSTRUCTION}}.
 The invocation grammar is `{{ORIGINAL_INVOCATION_GRAMMAR}}`.
 The original help and version captures are {{HELP_AND_VERSION_CAPTURE_PATHS}}.
 
@@ -38,15 +38,14 @@ The evidence is {{CAPTURE_PATH_AND_EVIDENCE_IDS}}.
 The terminal-specific behavior is {{TERMINAL_BEHAVIOR_OR_EVIDENCE_BASED_INAPPLICABILITY}}.
 The visual design system is {{VISUAL_SURFACE_OR_EVIDENCE_BASED_INAPPLICABILITY}}.
 
-## Original-to-Rust parity
+## Requirements
 
-| Original rule | Original capture | Scenario | Declarative test and origin | Rust entry point | Replay result | Open gap |
-| --- | --- | --- | --- | --- | --- | --- |
-| {{RULE_ID}} | {{CAPTURE_AND_EVIDENCE_IDS}} | {{SCENARIO_ID}} | {{TEST_ID_AND_ORIGIN}} | {{RUST_ENTRY_POINT_OR_PENDING}} | {{MEASURED_RESULT_OR_UNTESTED}} | {{GAP_ID_OR_VERIFIED_NONE}} |
+| ID | EARS statement | States, rules, or tokens | Captures and evidence | Verification |
+| --- | --- | --- | --- | --- |
+| {{REQUIREMENT_ID}} | {{EARS_STATEMENT}} | {{STATE_RULE_OR_TOKEN_IDS}} | {{CAPTURE_AND_EVIDENCE_IDS}} | {{TEST_INSPECTION_ANALYSIS_OR_DEMONSTRATION}} |
 
 ## Coverage and unknowns
 
 The examined commands and conditions are {{EXAMINED_COMMANDS_AND_CONDITIONS}}.
 The unexamined syntax, states, and terminal conditions are {{UNEXAMINED_SURFACE}}.
 The known mismatches are {{OPEN_GAP_IDS}}.
-The completion claim is limited to {{EXPLICIT_CONTRACTED_SCOPE_AND_CHECKS}}.

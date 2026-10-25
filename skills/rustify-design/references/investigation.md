@@ -49,11 +49,12 @@ A provider limitation remains explicit; it does not justify an invented interact
 Static resource evidence does not prove that a screen displays that resource.
 The agent confirms usage through a runtime capture when possible.
 
-## Verify parity expectations
+## Turn captures into requirements
 
-Each state and transition links to an original capture, scenario, and declarative expectation.
-A proposed replay can add a new action sequence, but its expected outcome must come from the original before it becomes a requirement.
-An inferred transition stays unconfirmed until a probe establishes the result.
-The agent records every Rust visual or interaction difference as an open gap.
-The agent does not close gaps through a redesign, normalization, or preferred behavior.
-The agent writes only its assigned shards before the orchestrator merges evidence, scenarios, and tests.
+Each state and transition becomes one or more `ux` requirements in EARS form.
+For example: "When the user presses Escape in the entry dialog, the zenity program shall exit with status 1."
+Each requirement links to an original capture, a scenario, and a declarative expectation.
+A proposed replay can add a new action sequence. The original must supply its outcome before it becomes a requirement.
+An inferred transition stays `inferred` until a probe establishes the result.
+The agent does not close a gap through a redesign, normalization, or preferred behavior.
+The agent writes only its assigned shards. The orchestrator merges them.

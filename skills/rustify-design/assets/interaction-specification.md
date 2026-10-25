@@ -3,7 +3,7 @@
 The original version is {{ORIGINAL_VERSION}}.
 The interface environment is {{PLATFORM_LOCALE_THEME_SCALE_AND_VIEWPORT}}.
 The initial session and data are {{INITIAL_SESSION_DATA_AND_SETTINGS}}.
-The scope is {{FULL_PRODUCT_OR_EXPLICIT_PARTIAL_EVALUATION}}.
+The scope is {{FULL_PRODUCT_OR_SUBSET_WITH_USER_INSTRUCTION}}.
 The capture baseline is {{ORIGINAL_CAPTURE_SET_AND_REA_EXPORT}}.
 
 ## Screen and navigation map
@@ -53,11 +53,11 @@ The loading and motion contract is {{OBSERVED_TIMING_INTERRUPTION_AND_FEEDBACK}}
 The accessibility contract is {{OBSERVED_ACCESSIBILITY_BEHAVIOR_OR_UNKNOWN}}.
 The unsaved-change and restart behavior is {{UNSAVED_CHANGE_AND_RESTART_RULES}}.
 
-## Original-to-Rust parity
+## Requirements
 
-| Original state, token, or rule | Captures and evidence | Scenarios and declarative tests | Rust component | Replay result | Open gap |
-| --- | --- | --- | --- | --- | --- |
-| {{ORIGINAL_ID}} | {{CAPTURE_AND_EVIDENCE_IDS}} | {{SCENARIO_IDS_AND_TEST_IDS_WITH_ORIGINS}} | {{RUST_COMPONENT_OR_PENDING}} | {{MEASURED_RESULT_OR_UNTESTED}} | {{GAP_ID_OR_VERIFIED_NONE}} |
+| ID | EARS statement | States, rules, or tokens | Captures and evidence | Verification |
+| --- | --- | --- | --- | --- |
+| {{REQUIREMENT_ID}} | {{EARS_STATEMENT}} | {{STATE_RULE_OR_TOKEN_IDS}} | {{CAPTURE_AND_EVIDENCE_IDS}} | {{TEST_INSPECTION_ANALYSIS_OR_DEMONSTRATION}} |
 
 ## Coverage and gaps
 
@@ -65,4 +65,3 @@ The examined screens and states are {{EXAMINED_SCREEN_AND_STATE_IDS}}.
 The unexamined surfaces and transitions are {{UNEXAMINED_SURFACES}}.
 The known mismatches are {{OPEN_GAP_IDS}}.
 The inapplicable sections and reasons are {{INAPPLICABLE_SECTIONS_AND_EVIDENCE}}.
-The completion claim is limited to {{EXPLICIT_CONTRACTED_SCOPE_AND_CHECKS}}.

@@ -1,6 +1,6 @@
 ---
 name: rustify-architecture
-description: Recover technical architecture and workflow traces from a binary with REA. Use during Rustify discovery to explain shipped components and data flows.
+description: Recover technical architecture as C4 components, edges, and runtime traces from a binary with REA. Use during Rustify discovery to explain shipped components and data flows.
 metadata:
   dependencies: "rea"
   rea-source: "https://github.com/morluto/rea"
@@ -10,17 +10,15 @@ metadata:
 # Recover the original architecture
 
 The agent reads `recovered/contract.json` and [the project contract](../rustify/references/project.md).
-The default goal is faithful one-to-one reconstruction.
+The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent does not redesign the original system.
 
 1. The agent reads [the investigation method](references/investigation.md).
 2. The agent uses [the REA guide](references/rea.md) for binary evidence.
-3. The agent writes `recovered/architecture.md` with [the output schema and templates](references/outputs.md).
-4. The agent supplies component, control-flow, and data-flow diagrams with editable sources.
+3. The agent writes the `components` and `edges` shards and `recovered/architecture.md` with [the output rules](references/outputs.md).
+4. The agent supplies component and runtime diagrams with editable sources.
 5. The agent adds state and storage models when the original requires them.
 
-Each component and edge links to evidence, confidence, and unknowns.
-The agent preserves original boundaries and execution semantics where evidence establishes them.
+Each component and edge links to evidence, a classification, and unknowns.
 The agent blocks dependent work when an unresolved boundary prevents a faithful mapping.
-The agent returns recovered facts to the orchestrator.
-The Rust design and component mapping belong in the external agent workspace.
+The plan skill owns the original-to-Rust correspondences.
