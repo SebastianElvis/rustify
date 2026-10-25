@@ -6,6 +6,12 @@ The installed skill bundle, temporary agent workspace, and generated target proj
 
 ![Rustify architecture](architecture.svg)
 
+The figure separates the reconstruction phases, shared investigation, and target project.
+The phase sequence runs from left to right.
+One shared relation connects all phases to the probe skill.
+The figure omits individual helper connections.
+The component table records those responsibilities.
+
 ## Components and evidence
 
 | Component | Responsibility | Evidence |
