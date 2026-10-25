@@ -8,7 +8,7 @@ A passing subset does not establish full-product parity.
 
 ## Complete flow
 
-1. The evaluator selects an open-source target with a released binary and test vectors.
+1. The evaluator selects an open-source target with test vectors and pins its binary.
 2. The evaluator records the binary origin, version, platform, license, and SHA-256.
 3. The reconstruction receives only the binary, resources, skill, and execution environment.
 4. Discovery captures product, experience, architecture, and reproducible scenarios.
@@ -69,6 +69,39 @@ Other hosts use an equivalent target-specific replay tool.
 | Cryptography | b3sum 1.8.7 | Hashing, keyed hashing, derivation, XOF output, and checksum verification. |
 | Client | xh 0.26.3 | Local HTTP methods, headers, bodies, redirects, and error status. |
 | Desktop | zenity 0.10.15 | Entry acceptance, entry cancellation, question choices, and information acknowledgement. |
+| Compression | bzip2 1.0.8 | The complete `bzip2` command and byte-exact `.bz2` output. |
+| Interpreter | Lua 5.5.1 | The command line, the language core, and the deterministic standard libraries. |
+| Database | SQLite 3.54.1 shell | Shell basics, core SQL, and rollback-journal database files. |
+| Build tool (C++) | Ninja 1.13.2 | The manifest language, dirty checks, logs, flags, and tools. |
+| Game | doomgeneric with Freedoom 0.13.0 | Startup, WAD loading, demo simulation, and the software renderer. |
+
+Each track folder has a `README.md` with the product, the selection rationale, the reference build, the oracle, and the scope.
+`evaluations/README.md` explains the dataset design and its relation to published benchmarks.
+
+## Reference builds
+
+The first four tracks pin upstream release binaries.
+The upstream projects control their compiler flags.
+The last five tracks pin a hardened local build from pinned source.
+`scripts/build_reference.py <track>` reads `evaluations/<track>/reference.json` and builds the binary in `work/references/<track>/`.
+
+- The C and C++ flags are `-O3 -flto -fvisibility=hidden -DNDEBUG`.
+- The link flags are `-flto -Wl,-dead_strip`.
+- The script runs `strip` on the result.
+- The script deletes the source tree after the build.
+
+Optimization inlines code and changes its structure.
+Stripping and hidden visibility remove the symbol names.
+`-DNDEBUG` removes assertion strings that contain source paths.
+The script records a metadata audit in `build.json`: the defined symbols, the source-file strings, and the build-path leaks.
+Each hardened reference keeps one defined symbol.
+
+The build is deterministic for one compiler version.
+`reference.json` pins the binary SHA-256 and the compiler.
+The scorer rebuilds a missing reference and rejects a different hash.
+Go and Rust binaries keep more metadata after `strip`.
+Go keeps function and type names in its runtime tables.
+Rust keeps panic locations unless the build remaps or removes them.
 
 The repository stores the dataset, not agent outputs.
 Each track folder has a `run.py` scorer and its pinned reference, cases, and upstream vectors.

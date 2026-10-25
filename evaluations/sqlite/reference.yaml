@@ -1,0 +1,14 @@
+product: SQLite command-line shell
+version: 3.54.1
+license: Public domain
+homepage: https://sqlite.org/
+sources:
+- name: sqlite-amalgamation-3540100.zip
+  url: https://sqlite.org/2026/sqlite-amalgamation-3540100.zip
+  sha256: 0a9c8e34352dad46006aa82836d5383bff9dc6bc9ce5a60553c05aa30e6ad1f9
+workdir: sqlite-amalgamation-3540100
+build:
+- $CC $CFLAGS shell.c sqlite3.c $LDFLAGS -o sqlite3
+binary: sqlite3
+sha256: dcc5e16fb4b53dca6e3a66beac7fed4c38d697a088b52e11df9755dfb26e6e78
+compiler: Apple clang version 21.0.0 (clang-2100.3.34.2)

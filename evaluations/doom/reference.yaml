@@ -1,0 +1,23 @@
+product: 'doomgeneric (Doom engine, SDL front end) with Freedoom: Phase 1'
+version: doomgeneric e257a09527062bfb986b6e5e0780839b6cbd5b71; Freedoom 0.13.0
+license: GPL-2.0 (engine); BSD-3-Clause (Freedoom)
+homepage: https://github.com/ozkl/doomgeneric
+sources:
+- name: doomgeneric-e257a09.tar.gz
+  url: https://codeload.github.com/ozkl/doomgeneric/tar.gz/e257a09527062bfb986b6e5e0780839b6cbd5b71
+  sha256: 26f8f60daa6c6e4d3c01e5eac9fb700d592dede803d13ac848154ff356b2a2e7
+- name: freedoom-0.13.0.zip
+  url: https://github.com/freedoom/freedoom/releases/download/v0.13.0/freedoom-0.13.0.zip
+  sha256: 3f9b264f3e3ce503b4fb7f6bdcb1f419d93c7b546f4df3e874dd878db9688f59
+workdir: doomgeneric-e257a09527062bfb986b6e5e0780839b6cbd5b71/doomgeneric
+build:
+- make -f Makefile.sdl CC="$CC" CFLAGS="$CFLAGS $(sdl2-config --cflags)" LDFLAGS="$LDFLAGS"
+  SDL_LIBS="$(sdl2-config --libs)" SRC_DOOM="$(sed -n 's/^SRC_DOOM = //p' Makefile.sdl
+  | sed 's/ i_sdlmusic.o i_sdlsound.o//')"
+binary: doomgeneric
+resources:
+  freedoom1.wad: freedoom-0.13.0/freedoom1.wad
+sha256: 2d0cfd7af1290d434d700eec470e7a0df5d31ed3e4e904ae6b748f5bdc6e0da9
+compiler: Apple clang version 21.0.0 (clang-2100.3.34.2)
+resource_sha256:
+  freedoom1.wad: 7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d

@@ -1,0 +1,15 @@
+product: Ninja
+version: 1.13.2
+license: Apache-2.0
+homepage: https://ninja-build.org/
+sources:
+- name: ninja-1.13.2.tar.gz
+  url: https://github.com/ninja-build/ninja/archive/refs/tags/v1.13.2.tar.gz
+  sha256: 974d6b2f4eeefa25625d34da3cb36bdcebe7fbce40f4c16ac0835fd1c0cbae17
+workdir: ninja-1.13.2
+build:
+- cmake -S . -B out -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+- cmake --build out -j 8
+binary: out/ninja
+sha256: 117dad1e0c303889221be3149db93cd1cbf496e545786d968402287072bdb92f
+compiler: Apple clang version 21.0.0 (clang-2100.3.34.2)

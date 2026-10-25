@@ -132,7 +132,9 @@ make evaluate
 python3 scripts/check_install.py
 ```
 
-The compact dataset covers GNU base64, BLAKE3 hashing, an HTTP client, and native desktop dialogs.
+The dataset covers GNU base64, BLAKE3 hashing, an HTTP client, native desktop dialogs, bzip2, Lua, SQLite, Ninja, and Doom.
+The last five tracks use hardened `-O3`, LTO, and stripped reference builds.
+The [evaluation overview](evaluations/README.md) explains the track selection.
 The repository stores the pinned references, cases, and scorers, not agent outputs.
 You reconstruct each reference into `work/projects/<track>` with your agent.
 `make evaluate` scores the first three tracks.

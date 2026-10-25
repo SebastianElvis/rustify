@@ -1,0 +1,15 @@
+product: bzip2
+version: 1.0.8
+license: bzip2-1.0.6 (BSD-style)
+homepage: https://sourceware.org/bzip2/
+sources:
+- name: bzip2-1.0.8.tar.gz
+  url: https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
+  sha256: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+workdir: bzip2-1.0.8
+build:
+- $CC $CFLAGS -D_FILE_OFFSET_BITS=64 blocksort.c huffman.c crctable.c randtable.c
+  compress.c decompress.c bzlib.c bzip2.c $LDFLAGS -o bzip2
+binary: bzip2
+sha256: a95d06a6f4dbce0a491930ecd09a5714d7fa1395a7cff8d910c167125ca0e079
+compiler: Apple clang version 21.0.0 (clang-2100.3.34.2)

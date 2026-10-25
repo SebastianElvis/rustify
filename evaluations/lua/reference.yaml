@@ -1,0 +1,14 @@
+product: Lua
+version: 5.5.1
+license: MIT
+homepage: https://www.lua.org/
+sources:
+- name: lua-5.5.1.tar.gz
+  url: https://www.lua.org/ftp/lua-5.5.1.tar.gz
+  sha256: 1c4b4068d67061f2a2231ad2b5422e77acea1487ea9890f6320af614f4373dce
+workdir: lua-5.5.1
+build:
+- make macosx CC="$CC" MYCFLAGS="$CFLAGS" MYLDFLAGS="$LDFLAGS"
+binary: src/lua
+sha256: e0cde8dc16679e6acfda55c1c87cc74daa9d29e90e844a1bf6c95d744dec427b
+compiler: Apple clang version 21.0.0 (clang-2100.3.34.2)
