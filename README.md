@@ -28,6 +28,7 @@ Native binary analysis needs Hopper, Ghidra, or IDA.
 Setup can connect an existing Hopper or Ghidra installation.
 It can also install Hopper when you select that option.
 Other target types can use REA's built-in inspection tools.
+The [REA setup reference](https://github.com/morluto/rea/blob/main/docs/installation.md) provides additional provider settings and troubleshooting steps.
 
 ### 2. Install Rustify
 
@@ -37,7 +38,7 @@ You run this command from your project folder:
 npx skills add SebastianElvis/rustify --skill '*'
 ```
 
-The installer includes all seven Rustify skills and prompts you to select your agents.
+The [Skills CLI](https://github.com/vercel-labs/skills) installs all seven Rustify skills and prompts you to select your agents.
 The installation applies to the current project.
 The `-g` option makes the bundle available across your projects:
 
@@ -46,7 +47,7 @@ npx skills add SebastianElvis/rustify --skill '*' -g
 ```
 
 Rustify follows the [Agent Skills format](https://agentskills.io/specification).
-Compatible agents include Claude Code, Codex, Cursor, and OpenCode.
+[Compatible agents](https://github.com/vercel-labs/skills/blob/main/docs/agents.md) include Claude Code, Codex, Cursor, and OpenCode.
 Local and cloud agents use the same skill files.
 Their environment must provide REA, the target binary, its resources, and a compatible runtime.
 Desktop investigation also needs a GUI session.
