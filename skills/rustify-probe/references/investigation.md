@@ -26,6 +26,9 @@ The agent continues supported probes when one analysis method fails.
 ## Preserve the experiment
 
 The agent uses separate experiment data and a known initial state.
+The agent sets supervisor limits for time, memory, process count, output, and concurrent probes before execution.
+The agent records resource samples and limit terminations.
+The agent follows [software quality acceptance](../../rustify-validate/references/quality.md) for resource and lifecycle probes.
 Each capture identifies the binary, resources, inputs, environment, commands, and observation method.
 The agent preserves raw outputs, files, status, protocol bytes, GUI captures, and trace exports for the channels under test.
 The evidence record binds each capture through its path and SHA-256.

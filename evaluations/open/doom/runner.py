@@ -4,10 +4,10 @@ import hashlib
 import os
 from pathlib import Path
 import re
-import signal
 import struct
-import subprocess
 import tempfile
+
+import harness
 
 PLAYER = 280
 PLAYER_POINTERS = (0, 216, 228)
@@ -118,19 +118,11 @@ def execute(executable, wad, case):
             env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": directory, "PATH": "/usr/bin:/bin", **step.get("env", {})}
             args = [arg.replace("{iwad}", str(wad.path)) for arg in step["args"]]
             result = {"returncode": None, "stdout": "", "stderr": "", "error": None}
-            process = subprocess.Popen(["doomgeneric", *args], executable=str(executable), cwd=root, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
-            try:
-                stdout, stderr = process.communicate(timeout=step.get("timeout", 30))
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
-                stdout, stderr = process.communicate()
-                result["error"] = "The process exceeded the time limit."
-            finally:
-                try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except (ProcessLookupError, PermissionError):
-                    pass
-            result["returncode"] = process.returncode
+            completed, result["error"], result["resources"] = harness.compare.execute(
+                ["doomgeneric", *args], executable=str(executable), cwd=root, env=env, timeout=step.get("timeout", 30),
+            )
+            stdout, stderr = completed.stdout, completed.stderr
+            result["returncode"] = completed.returncode
             result["stdout"], result["stderr"] = normalize(stdout, stderr)
             steps.append(result)
         try:
@@ -144,7 +136,8 @@ def compare(reference, candidate, wad, cases):
     report = {"status": "passed", "passed": 0, "failed": 0, "cases": []}
     for case in cases:
         results = {"reference": execute(reference, wad, case), "candidate": execute(candidate, wad, case)}
-        differences = [field for field in ("steps", "files") if results["reference"][field] != results["candidate"][field]]
+        views = {label: {"steps": [{key: value for key, value in step.items() if key != "resources"} for step in result["steps"]], "files": result["files"]} for label, result in results.items()}
+        differences = [field for field in ("steps", "files") if views["reference"][field] != views["candidate"][field]]
         if any(step["error"] for result in results.values() for step in result["steps"]):
             differences.append("execution_error")
         passed = not differences

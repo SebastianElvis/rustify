@@ -43,7 +43,8 @@ A failed slice returns to implementation. A new behavior returns to discovery.
 4. The agent runs the surface and adaptive distinguishers from [the indistinguishability guide](indistinguishability.md).
    Each confirmed witness returns to discovery or implementation. Acceptance needs zero witnesses in every class.
 5. The agent runs the implementation `check` command with `--mutants` when the tool is installed.
-6. The agent runs the parity gate and writes `verification/compatibility.md`.
+6. The agent checks [software quality acceptance](quality.md).
+7. The agent runs the parity gate and writes `verification/compatibility.md`.
 
 The agent obtains fresh captures through `rustify-probe`.
 The agent checks mapped trace relations against the current implementation.

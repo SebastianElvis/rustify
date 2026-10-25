@@ -3,14 +3,19 @@
 
 import argparse
 import base64
+import ctypes
 import hashlib
 import math
 import os
 from pathlib import Path, PurePosixPath
 import signal
+import selectors
 import stat
 import subprocess
+import struct
+import sys
 import tempfile
+import time
 
 import yaml
 
@@ -63,19 +68,96 @@ def validate(cases):
 
 
 def capture_files(root):
-    files = {}
+    files, size = {}, 0
     for path in sorted(root.rglob("*")):
         mode = path.lstat().st_mode
         if stat.S_ISDIR(mode):
             continue
         if not stat.S_ISREG(mode):
             raise ValueError("A process produced a symlink or a special file.")
-        data, status = path.read_bytes(), path.lstat()
+        status = path.lstat()
+        size += status.st_size
+        if size > 64 * 1024 * 1024:
+            raise ValueError("The files exceeded the capture limit.")
+        data = path.read_bytes()
         files[path.relative_to(root).as_posix()] = {
             "sha256": hashlib.sha256(data).hexdigest(), "data_b64": base64.b64encode(data).decode("ascii"),
             "mode": format(stat.S_IMODE(status.st_mode), "o"), "mtime": "fixture" if int(status.st_mtime) == FIXTURE_TIME else "new", "uid": status.st_uid, "gid": status.st_gid,
         }
     return files
+
+
+def execute(command, *, timeout, stdin=b"", memory_mib=512, output_mib=16, process_limit=64, **options):
+    """Run a process group with sampled limits and bounded pipe captures."""
+    if not math.isfinite(timeout) or timeout <= 0 or any(type(value) is not int or value <= 0 for value in (memory_mib, output_mib, process_limit)):
+        raise ValueError("Resource limits must be positive and finite.")
+    usage = ctypes.CDLL("/usr/lib/libproc.dylib").proc_pid_rusage if sys.platform == "darwin" else None
+    if usage:
+        usage.argtypes, usage.restype = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p], ctypes.c_int
+    peak, footprint, count, error = 0, 0, 0, None
+    output = {"stdout": bytearray(), "stderr": bytearray()}
+    remaining, size = memoryview(stdin), 0
+    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True, **options)
+    start, sample = time.monotonic(), 0
+    with selectors.DefaultSelector() as selector:
+        for stream, name in ((process.stdout, "stdout"), (process.stderr, "stderr")):
+            os.set_blocking(stream.fileno(), False)
+            selector.register(stream, selectors.EVENT_READ, name)
+        if remaining:
+            os.set_blocking(process.stdin.fileno(), False)
+            selector.register(process.stdin, selectors.EVENT_WRITE, "stdin")
+        else:
+            process.stdin.close()
+        try:
+            while selector.get_map() or process.poll() is None:
+                now = time.monotonic()
+                if now >= sample:
+                    rows = subprocess.check_output(["/bin/ps", "-axo", "pid=,pgid=,rss="], text=True)
+                    members = [(int(pid), int(rss)) for pid, group, rss in (row.split() for row in rows.splitlines()) if int(group) == process.pid]
+                    memory = 0
+                    for pid, rss in members:
+                        info = ctypes.create_string_buffer(160)
+                        physical = struct.unpack_from("=Q", info, 72)[0] // 1024 if usage and usage(pid, 2, info) == 0 else 0
+                        memory += max(rss, physical)
+                    peak, footprint, count = max(peak, sum(rss for _, rss in members)), max(footprint, memory), max(count, len(members))
+                    if memory > memory_mib * 1024:
+                        error = "The process group exceeded the memory limit."
+                    elif len(members) > process_limit:
+                        error = "The process group exceeded the process limit."
+                    sample = now + 0.05
+                if now - start > timeout:
+                    error = error or "The process exceeded the time limit."
+                if error:
+                    break
+                for key, _ in selector.select(0.05):
+                    if key.data == "stdin":
+                        try:
+                            remaining = remaining[os.write(key.fd, remaining[:65536]):]
+                        except BrokenPipeError:
+                            remaining = remaining[len(remaining):]
+                        if remaining:
+                            continue
+                    else:
+                        chunk = os.read(key.fd, 65536)
+                        if chunk:
+                            allowed = max(0, output_mib * 1024 * 1024 - size)
+                            output[key.data].extend(chunk[:allowed])
+                            size += len(chunk)
+                            if size > output_mib * 1024 * 1024:
+                                error = "The process group exceeded the output limit."
+                            continue
+                    selector.unregister(key.fileobj)
+                    key.fileobj.close()
+        finally:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.wait()
+            for stream in (process.stdin, process.stdout, process.stderr):
+                stream.close()
+    result = subprocess.CompletedProcess(command, process.returncode, bytes(output["stdout"]), bytes(output["stderr"]))
+    return result, error, {"peak_rss_kib": peak, "peak_memory_kib": footprint, "memory_method": "RSS and physical footprint" if usage else "RSS", "peak_processes": count, "memory_mib": memory_mib, "output_mib": output_mib, "process_limit": process_limit}
 
 
 def run(executable, name, case, timeout):
@@ -90,28 +172,14 @@ def run(executable, name, case, timeout):
             os.utime(path, (FIXTURE_TIME, FIXTURE_TIME))
         env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": directory, "PATH": "/usr/bin:/bin"}
         env.update(case.get("env", {}))
-        process = None
         try:
-            process = subprocess.Popen(
+            completed, error, metrics = execute(
                 [name, *case["args"]], executable=str(executable), cwd=root, env=env,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                start_new_session=True,
+                stdin=decode(case.get("stdin_b64", "")), timeout=timeout,
             )
-            try:
-                stdout, stderr = process.communicate(decode(case.get("stdin_b64", "")), timeout=timeout)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
-                stdout, stderr = process.communicate()
-                result["error"] = "The process exceeded the time limit."
-            result.update(returncode=process.returncode, stdout_b64=base64.b64encode(stdout).decode("ascii"), stderr_b64=base64.b64encode(stderr).decode("ascii"))
+            result.update(returncode=completed.returncode, stdout_b64=base64.b64encode(completed.stdout).decode("ascii"), stderr_b64=base64.b64encode(completed.stderr).decode("ascii"), error=error, resources=metrics)
         except OSError as error:
             result["error"] = str(error)
-        finally:
-            if process is not None:
-                try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except (ProcessLookupError, PermissionError):
-                    pass
         try:
             result["files"] = capture_files(root)
         except (OSError, ValueError) as error:

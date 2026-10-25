@@ -49,3 +49,15 @@ python3 <rustify-probe>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEME
 The report lists each divergence with both captures.
 The helper returns a failure status when it finds a divergence.
 The agent records the seed and the iteration count so that another run reproduces the search.
+
+## Supervisor limits
+
+The helper preserves pipe streams and kills its owned process group after a limit failure.
+The default limits are 512 MiB sampled memory, 64 processes, and 16 MiB of captured stream data.
+The API caller can set measured workload limits with `execute` parameters.
+The helper records resource peaks separately from exact behavior comparisons.
+A limit failure always produces an execution error, even when both programs reach the same limit.
+These limits protect probe execution. They do not establish the absence of a product leak.
+On macOS, the helper also checks physical footprint to include compressed memory.
+The helper uses `proc_pid_rusage` with `rusage_info_v2` from the host SDK.
+The file capture limit is 64 MiB. A larger capture produces an execution error.

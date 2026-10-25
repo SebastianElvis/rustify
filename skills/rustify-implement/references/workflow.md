@@ -62,3 +62,5 @@ The agent adds `--deny` when `cargo-deny` is installed.
 The agent adds `--mutants` when `cargo-mutants` is installed. The mutation score shows test adequacy.
 A missed mutant in a requirement path needs a new test or a recorded gap.
 The implementation checkpoint requires current successful checks.
+The agent also runs the planned [quality checks](../../rustify-validate/references/quality.md) before acceptance.
+Format, lint, and unit tests do not establish bounded resource use.

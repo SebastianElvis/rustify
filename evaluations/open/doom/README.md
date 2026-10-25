@@ -44,6 +44,10 @@ The game data is Freedoom: Phase 1, a free replacement for the original game dat
 Each case runs in a new temporary directory with `LC_ALL=C`, `TZ=UTC`, and a temporary `HOME`.
 Each case passes `-iwad` with the pinned `freedoom1.wad` and `-nogui`, so that `I_Error` opens no dialog.
 The runner compares stdout, stderr, exit status, and the files in the working directory after each step.
+The supervisor limits each process group to 512 MiB of sampled memory, 64 processes, and 16 MiB of stream output.
+The supervisor checks physical footprint as well as RSS on macOS.
+A limit failure blocks the score. It does not establish parity.
+The acceptance review also needs memory growth, repeated lifecycle, and shutdown evidence.
 
 - `-timedemo <demo> -nodraw` runs one tic per loop and ends with `I_Error("timed %i gametics ...")`. Most cases use it.
 - A demo tic with `BT_SPECIAL | BTS_SAVEGAME` makes the engine write `.savegame/doomsavN.dsg`. The savegame is the oracle for the simulation state at that tic.

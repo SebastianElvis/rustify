@@ -30,7 +30,7 @@ class CompareTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.root = Path(self.directory.name)
-        self.reference = self.program("reference", "import sys\nsys.stdout.buffer.write(sys.stdin.buffer.read())\n")
+        self.reference = self.program("reference", "import os,stat,sys\nassert all(stat.S_ISFIFO(os.fstat(fd).st_mode) for fd in (0,1,2))\nsys.stdout.buffer.write(sys.stdin.buffer.read())\n")
         self.case = {"id": "binary", "args": [], "stdin_b64": encoded(b"\x00\xff\r\n")}
 
     def tearDown(self):
@@ -52,6 +52,26 @@ class CompareTests(unittest.TestCase):
         path.write_text("#!" + sys.executable + "\n" + body)
         path.chmod(0o755)
         return path
+
+    def test_supervisor_limits_memory_children_and_streams(self):
+        programs = [
+            ("allocate", "import time\nx=[]\nwhile True:\n x.append(bytearray(1024*1024))\n time.sleep(.005)\n", {"memory_mib": 48}, "memory"),
+            ("children", "import subprocess,time\np=subprocess.Popen(['/bin/sleep','10'])\ntime.sleep(10)\n", {"process_limit": 1}, "process"),
+            ("output", "import os\nwhile True: os.write(1,b'x'*65536)\n", {"output_mib": 1}, "output"),
+        ]
+        for name, body, limits, message in programs:
+            with self.subTest(name=name):
+                result, error, metrics = compare.execute([str(self.program(name, body))], timeout=3, **limits)
+                self.assertIn(message + " limit", error)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertLessEqual(len(result.stdout), limits.get("output_mib", 16) * 1024 * 1024)
+                self.assertGreaterEqual(metrics["peak_processes"], 1)
+
+    def test_oversized_files_do_not_enter_memory(self):
+        program = self.program("large-file", "with open('out', 'wb') as stream: stream.truncate(1024**3)\n")
+        result = compare.run(program, "large-file", {"id": "large-file", "args": []}, 3)
+        self.assertEqual(result["error"], "The files exceeded the capture limit.")
+        self.assertEqual(result["files"], {})
 
     def test_binary_data_and_fixture_files_match(self):
         self.case["env"] = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC0"}

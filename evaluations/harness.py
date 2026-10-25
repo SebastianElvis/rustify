@@ -89,12 +89,13 @@ def reference(track, pin):
 def rust(project, logs):
     commands = []
     for label, args in (("fmt", ["fmt", "--check"]), ("clippy", ["clippy", "--locked", "--all-targets", "--", "-D", "warnings"]), ("test", ["test", "--locked"]), ("build", ["build", "--release", "--locked", "--message-format=json"])):
-        result = subprocess.run(["cargo", *args], cwd=project / "implementation", capture_output=True, timeout=900)
+        result, error, resources = compare.execute(["cargo", *args], cwd=project / "implementation", timeout=900, memory_mib=8192)
+        returncode = result.returncode or int(error is not None)
         log = logs / f"{label}.log"
         log.parent.mkdir(parents=True, exist_ok=True)
-        log.write_bytes(result.stdout + result.stderr)
-        commands.append({"command": ["cargo", *args], "returncode": result.returncode, "log": str(log)})
-        if result.returncode and label == "build":
+        log.write_bytes(result.stdout + result.stderr + (error.encode() if error else b""))
+        commands.append({"command": ["cargo", *args], "returncode": returncode, "log": str(log), "error": error, "resources": resources})
+        if returncode and label == "build":
             raise RuntimeError(f"The {label} check failed. Read {log}.")
     messages = [json.loads(line) for line in result.stdout.splitlines() if line.startswith(b"{")]
     binaries = sorted({item["executable"] for item in messages if item.get("executable") and "bin" in item["target"]["kind"]})

@@ -44,3 +44,6 @@ An architectural preference does not close a gap.
 
 The parity backlog in `recovered/roadmap.md` lists every open gap first.
 The agent does not add product improvements to the faithful reconstruction.
+
+The agent defines applicable [quality acceptance budgets](../../rustify-validate/references/quality.md) before implementation.
+The agent includes resource lifetime and repeated-operation checks in each affected slice.
