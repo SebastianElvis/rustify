@@ -59,4 +59,4 @@ Many large C and C++ projects build with it.
 - The scorer measures the features that its cases cover. A feature without a case stays in scope.
 - A failed or missing feature is a skill defect. The fix goes into the skills, not into a narrower scope.
 - The full product covers the complete manifest language, all flags, all `-t` tools including `browse`, and the build and deps logs.
-- `evaluations/ninja/run.py` scores a project in `work/projects/ninja` and writes reports to `work/evaluation/ninja/`.
+- `run.py` scores a project in `work/projects/ninja` and writes reports to `work/evaluation/ninja/`.
