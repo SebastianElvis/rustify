@@ -68,6 +68,9 @@ def run(directories, agent, trials, output, timeout):
             binary.parent.mkdir(parents=True)
             shutil.copyfile(source, binary)
             binary.chmod(0o755)
+            if not source.is_relative_to(ROOT):
+                binary.unlink()
+                binary = source
             prompt = PROMPT.format(binary=binary, project=workspace / "project")
             start = time.monotonic()
             try:
