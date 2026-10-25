@@ -51,6 +51,7 @@ Each surface item links to the requirements that cover it. The gate fails an unc
 
 The agent applies equivalence partitioning and boundary value analysis (ISO/IEC/IEEE 29119-4) to each option, environment value, and input.
 Each partition and each boundary gets a probe on the original.
+The agent probes omitted options and explicit defaults separately.
 The agent provokes each diagnostic string. A diagnostic that no probe reaches stays an open gap with its next probe.
 
 The agent measures which functions of the original its scenarios execute when REA or a debugger supports a trace.

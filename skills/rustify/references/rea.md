@@ -12,6 +12,8 @@ The agent follows the installed REA workflow for target routing and provider lim
 The agent reads each actual tool schema before use.
 The agent preserves exported evidence identifiers and limitations.
 The agent distinguishes a missing tool connection from a failed native provider.
+The agent uses other available binary tools when a provider fails.
+The agent keeps unsupported facts open.
 
 When REA is absent, the agent identifies the missing connection or provider.
 The agent uses the official setup guide for the affected host.

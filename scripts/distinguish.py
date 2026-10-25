@@ -53,7 +53,7 @@ def load(name, path):
 def play(reference, candidate, agent, budget, name, output, timeout, seed):
     compare = load("rustify_compare", ROOT / "skills/rustify-validate/scripts/compare.py")
     labels = random.Random(seed).sample(("A", "B"), 2)
-    secret = {labels[0]: str(Path(reference).resolve()), labels[1]: str(Path(candidate).resolve())}
+    secret = {labels[0]: str(Path(reference).resolve(strict=True)), labels[1]: str(Path(candidate).resolve(strict=True))}
     workspace, config = output / "workspace", output / "config.yaml"
     workspace.mkdir(parents=True)
     config.write_text(yaml.safe_dump({"programs": secret, "name": name, "budget": budget, "timeout": timeout, "log": str(output / "probes.log")}))

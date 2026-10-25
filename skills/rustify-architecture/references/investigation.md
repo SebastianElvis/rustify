@@ -8,6 +8,7 @@ The agent identifies entry points, processes, libraries, plugins, and external s
 The agent assigns stable component, edge, and interface identifiers.
 A component represents an evidenced responsibility and boundary.
 A source filename or compiler symbol alone does not establish that boundary.
+The agent checks local symbols as well as exports before it declares symbols absent.
 
 ## Trace complete workflows
 

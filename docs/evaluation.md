@@ -151,7 +151,8 @@ The scorers above grade one project. The agent evaluation also produces the proj
 6. The `grade` step rejects a project that changed after the freeze.
 7. It runs the track scorer, the parity gate, and the quality measures on each trial.
 
-A successful trial requires both the scorer and the full parity gate to pass.
+A successful trial requires the scorer and the full parity gate to pass.
+The trial must also complete all four phase checkpoints.
 
 The harness records both installed skill copies before the agent starts.
 The grader rejects a changed skill copy before it loads the trial's parity helper.
