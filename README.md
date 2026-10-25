@@ -55,21 +55,6 @@ Known differences remain parity gaps.
 The evaluation dataset measures finite subsets and records unresolved differences.
 Its passing checks do not establish full-product parity.
 
-## Repository workflow
-
-The default branch is `main`.
-Every change uses a feature branch and a pull request.
-GitHub allows squash merge only.
-The author installs the local push guard with this command:
-
-```sh
-python3 scripts/install_hooks.py
-```
-
-The guard blocks direct pushes to `main` in this checkout.
-The installer preserves existing hooks.
-GitHub refused server-side branch protection for this private repository under the current plan.
-
 ## Checks
 
 ```sh
