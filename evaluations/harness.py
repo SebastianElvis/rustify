@@ -126,6 +126,8 @@ def run(track, pin, score):
         report["candidate_sha256"] = digest(candidate.read_bytes())
         linked = subprocess.run(["otool", "-L", str(candidate)], capture_output=True, text=True).stdout
         failures = [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked]
+        if str(executable).encode() in candidate.read_bytes():
+            failures.append("The candidate contains the reference path, so it can run the original.")
         reports, score_failures = score(executable, candidate, project)
         for name, value in reports.items():
             value["cases"] = [case if not case.get("passed", True) else {"id": case.get("id", case.get("input", {}).get("id")), "passed": True} for case in value.get("cases", [])]

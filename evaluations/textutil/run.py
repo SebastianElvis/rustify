@@ -136,6 +136,11 @@ def relation(entry):
     return entry
 
 
+def entry(case, reference, candidate):
+    differences = differ(reference, candidate)
+    return relation({"input": case, "reference": reference, "candidate": candidate, "differences": differences, "passed": not differences})
+
+
 def report(rows):
     return {"status": "failed" if any(not row["passed"] for row in rows) or not rows else "passed", "passed": sum(row["passed"] for row in rows), "failed": sum(not row["passed"] for row in rows), "cases": rows}
 
@@ -147,15 +152,8 @@ def score(reference, candidate, project, workers=os.cpu_count()):
         originals = list(pool.map(lambda case: [execute(reference, case) for _ in range(REPEATS)], everything))
         results = list(pool.map(lambda case: execute(candidate, case), everything))
     runs = {case["id"]: (originals[index], results[index]) for index, case in enumerate(everything)}
-    reports = {}
-    for name, rows in groups.items():
-        entries = []
-        for case in rows:
-            ours, theirs = runs[case["id"]]
-            differences = differ(ours[0], theirs)
-            entries.append(relation({"input": case, "reference": ours[0], "candidate": theirs, "differences": differences, "passed": not differences}))
-        reports[name] = report(entries)
-    reports["repeatability"] = report([{"input": case, "reference": runs[case["id"]][0][0], "candidate": run, "differences": differ(runs[case["id"]][0][0], run), "passed": not differ(runs[case["id"]][0][0], run)} for case in everything for run in runs[case["id"]][0][1:]])
+    reports = {name: report([entry(case, runs[case["id"]][0][0], runs[case["id"]][1]) for case in rows]) for name, rows in groups.items()}
+    reports["repeatability"] = report([entry(case, runs[case["id"]][0][0], again) for case in everything for again in runs[case["id"]][0][1:]])
     reports["parse-outputs"], failures = parsers.check(everything, runs)
     with tempfile.TemporaryDirectory() as directory:
         wrong = Path(directory) / "textutil"
