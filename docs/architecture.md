@@ -8,6 +8,7 @@ The installed skill bundle, temporary agent workspace, and generated target proj
 
 The figure separates the reconstruction phases, shared investigation, and target project.
 The phase sequence runs from left to right.
+The `/` prefix identifies each skill.
 One shared relation connects all phases to the probe skill.
 Separate relations show direct REA access from discovery and probing.
 The figure omits individual helper connections.
