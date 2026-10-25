@@ -1,6 +1,8 @@
 # REA dependency
 
 The probe and discovery skills declare REA as their direct analysis dependency.
+Discovery skills can query REA directly for domain analysis.
+The probe skill supplies shared experiment methods and capture provenance.
 Their metadata links to the [official repository](https://github.com/morluto/rea) and [setup guide](https://github.com/morluto/rea/blob/main/docs/installation.md).
 The Agent Skills format permits custom string metadata.
 The metadata does not install or connect an MCP server.

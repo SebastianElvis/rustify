@@ -9,6 +9,7 @@ The installed skill bundle, temporary agent workspace, and generated target proj
 The figure separates the reconstruction phases, shared investigation, and target project.
 The phase sequence runs from left to right.
 One shared relation connects all phases to the probe skill.
+Separate relations show direct REA access from discovery and probing.
 The figure omits individual helper connections.
 The component table records those responsibilities.
 
@@ -29,7 +30,7 @@ The component table records those responsibilities.
 | `parity.py` | The helper derives requirement results from the ledger, evidence, and captures, and runs the reflexion check. | `skills/rustify-validate/scripts/parity.py` |
 | `fuzz.py` | The helper searches for inputs that make the original and the Rust implementation differ. | `skills/rustify-probe/scripts/fuzz.py` |
 | Standards guide | The guide sets the writing rules, glossary, EARS form, and architecture viewpoints. | `skills/rustify/references/standards.md` |
-| REA | The external backend supplies binary and runtime evidence through the probe skill. | `skills/rustify-probe/references/rea.md` |
+| REA | The external backend supplies binary and runtime evidence to the probe and discovery skills. | `skills/rustify-probe/references/rea.md` |
 | Target project | The directory contains recovered/, implementation/, and verification/. | `skills/rustify/references/project.md` |
 
 ## Flow and boundaries
@@ -46,6 +47,8 @@ The host runs discovery sequentially when parallel agents are unavailable.
 Workers write shards in the agent workspace and coordinate access to shared REA sessions.
 Discovery, planning, implementation, and validation request captures and traces from the probe skill.
 The probe skill exports REA evidence into the target project.
+Discovery skills also query REA directly for domain analysis.
+The probe skill supplies shared experiment methods and capture provenance.
 The validator also requests independent challenges after the freeze.
 REA remains an external investigation backend.
 
