@@ -1,19 +1,18 @@
 ---
 name: rustify-validate
-description: This skill validates strict product, UX, component, data, and behavior parity against an original program. This skill applies to Rustify acceptance and regression checks. Unknown or unmapped surfaces remain incomplete.
+description: Validate product, UX, component, data, and behavior parity against an original program with differential tests, fuzzing, and a ledger-driven gate. Use for Rustify slice checks, acceptance, and regression checks.
 ---
 
 # Validate original-to-Rust parity
 
-The agent assesses the full original product by default.
-Unknown, unmapped, and untested surfaces do not pass.
-The agent does not infer a full clone from a partial dataset.
+The agent uses the original as the test oracle.
+The agent writes with [the standards guide](../rustify/references/standards.md).
+Unknown, unmapped, and untested items do not pass.
 
-- The agent reads [the parity workflow](references/workflow.md) for acceptance and repairs.
-- The agent reads [the CLI comparison contract](references/comparison.md) for deterministic process checks.
-- The agent reads [the reporting contract](references/reporting.md) for matrices, claims, and copyable assets.
+- The agent reads [the validation workflow](references/workflow.md) for slice checks, acceptance, and repairs.
+- The agent reads [the comparison contract](references/comparison.md) for process comparisons and fuzzing.
+- The agent reads [the reporting contract](references/reporting.md) for the gate and the assurance case.
 - The agent follows [the shared project contract](../rustify/references/project.md) for paths and checkpoints.
 
-The agent checks original evidence, exact expectations, and current implementation results.
-Only an explicit user contract can permit a difference or reduced scope.
+Only an explicit user instruction can permit a difference or a reduced scope.
 A machine comparison pass does not establish full product parity.

@@ -6,16 +6,25 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import subprocess
 import tempfile
+import time
 
 
 PHASES = ("prepare", "discover", "plan", "implement", "validate")
 REQUIRED = {
     "prepare": ("recovered/contract.json",),
-    "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.json", "recovered/scenarios.json", "recovered/tests.json", "recovered/roadmap.md"),
-    "plan": ("rust-design.md", "plan.json"),
+    "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.json", "recovered/scenarios.json", "recovered/tests.json", "recovered/roadmap.md", "recovered/model.json#inventory,requirements,components,edges"),
+    "plan": ("recovered/model.json#correspondences,slices,exceptions", "implementation/docs/design.md"),
     "implement": ("implementation/Cargo.toml", "implementation/Cargo.lock", "verification/checks.json"),
-    "validate": ("verification/comparison.json", "verification/compatibility.md"),
+    "validate": ("verification/comparison.json", "verification/parity.json", "verification/compatibility.md"),
+}
+CHECKS = {
+    "fmt": ["cargo", "fmt", "--check"],
+    "clippy": ["cargo", "clippy", "--locked", "--all-targets", "--", "-D", "warnings"],
+    "test": ["cargo", "test", "--locked"],
+    "deny": ["cargo", "deny", "check"],
+    "mutants": ["cargo", "mutants", "--output"],
 }
 
 
@@ -59,6 +68,66 @@ def artifact(root, name, check_content=True):
     return path
 
 
+def section(root, name):
+    path, _, keys = name.partition("#")
+    if not keys:
+        return digest(artifact(root, path))
+    value = json.loads(artifact(root, path).read_text())
+    keys = keys.split(",")
+    if not isinstance(value, dict) or any(value.get(key) is None for key in keys):
+        raise ValueError(f"The artifact lacks a required section: {name}")
+    return hashlib.sha256(json.dumps({key: value[key] for key in keys}, sort_keys=True).encode()).hexdigest()
+
+
+def tree(root, name):
+    hashes = {}
+    base = root / name
+    for directory, folders, files in os.walk(base):
+        if name == "implementation":
+            folders[:] = [folder for folder in folders if folder != ".git" and (Path(directory) != base or folder != "target")]
+        if Path(directory).is_symlink() or any((Path(directory) / folder).is_symlink() for folder in folders):
+            raise ValueError("An input directory cannot be a symlink.")
+        for filename in files:
+            path = Path(directory) / filename
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("Inputs must use regular files without symlinks.")
+            hashes[path.relative_to(root).as_posix()] = digest(path)
+    return hashes
+
+
+def combined(hashes):
+    return hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
+
+
+def check_plan(model):
+    requirements = {item["id"]: item for item in model["requirements"]}
+    components = {item["id"] for item in model["components"]}
+    slices = {item["id"]: item for item in model["slices"]}
+    if not slices or len(slices) != len(model["slices"]):
+        raise ValueError("The plan needs slices with unique identifiers.")
+    skeletons = [item for item in slices.values() if item["kind"] == "skeleton"]
+    if len(skeletons) != 1 or skeletons[0]["depends_on"]:
+        raise ValueError("The plan needs one walking skeleton without predecessors.")
+    for item in slices.values():
+        if item["kind"] not in {"skeleton", "slice"} or item["risk"] not in {"high", "medium", "low"} or not item["requirements"]:
+            raise ValueError(f"The slice has an invalid kind, risk, or requirement list: {item['id']}")
+        if set(item["requirements"]) - set(requirements) or set(item["depends_on"]) - set(slices) or (item["kind"] == "slice" and not item["depends_on"]):
+            raise ValueError(f"The slice has an invalid reference: {item['id']}")
+    ordered, pending = set(), dict(slices)
+    while pending:
+        ready = [identity for identity, item in pending.items() if set(item["depends_on"]) <= ordered]
+        if not ready:
+            raise ValueError("The slice dependencies contain a cycle.")
+        ordered.update(ready)
+        for identity in ready:
+            del pending[identity]
+    planned = {identity for item in slices.values() for identity in item["requirements"]}
+    if any(item.get("in_scope", True) and identity not in planned for identity, item in requirements.items()):
+        raise ValueError("Every scoped requirement needs a slice.")
+    if any(item["original"] not in components for item in model["correspondences"]):
+        raise ValueError("A correspondence names an unknown original component.")
+
+
 def save(root, state):
     directory = root / "recovered"
     if directory.is_symlink() or (directory / "state.json").is_symlink():
@@ -88,15 +157,15 @@ def init(project, target, profile, work_dir=None):
             raise ValueError("A project directory cannot use a symlink.")
         path.mkdir(parents=True, exist_ok=True)
     workspace.mkdir(parents=True, exist_ok=True)
-    state = {"version": 2, "profile": profile, "target": {"path": str(binary.resolve()), "sha256": digest(binary)}, "work_dir": str(workspace), "checkpoints": {}}
+    state = {"version": 3, "profile": profile, "target": {"path": str(binary.resolve()), "sha256": digest(binary)}, "work_dir": str(workspace), "checkpoints": {}}
     save(root, state)
     return state
 
 
 def load(root):
     state = json.loads(artifact(root, "recovered/state.json").read_text())
-    if state["version"] != 2 or not Path(state["work_dir"]).is_absolute():
-        raise ValueError("The project state must use version 2 and an absolute agent workspace.")
+    if state["version"] != 3 or not Path(state["work_dir"]).is_absolute():
+        raise ValueError("The project state must use version 3 and an absolute agent workspace.")
     work_root(root, state["work_dir"])
     target = Path(state["target"]["path"])
     if target.is_symlink() or not target.is_file() or digest(target) != state["target"]["sha256"]:
@@ -105,43 +174,31 @@ def load(root):
 
 
 def files_for(root, phase, state):
-    names = set(REQUIRED[phase])
-    base = work_root(root, state["work_dir"]) if phase == "plan" else root
-    hashes = {name: digest(artifact(base, name)) for name in sorted(names)}
-    if phase in {"implement", "discover"}:
-        tree = root / ("implementation" if phase == "implement" else "recovered/evidence")
-        for directory, folders, files in os.walk(tree):
-            if phase == "implement":
-                folders[:] = [name for name in folders if name != ".git" and (Path(directory) != tree or name != "target")]
-            if Path(directory).is_symlink() or any((Path(directory) / name).is_symlink() for name in folders):
-                raise ValueError("An input directory cannot be a symlink.")
-            for name in files:
-                path = Path(directory) / name
-                if path.is_symlink() or not path.is_file():
-                    raise ValueError("Inputs must use regular files without symlinks.")
-                hashes[path.relative_to(root).as_posix()] = digest(path)
+    hashes = {name: section(root, name) for name in REQUIRED[phase]}
+    if phase == "discover":
+        hashes.update(tree(root, "recovered/evidence"))
+    if phase == "plan":
+        check_plan(json.loads((root / "recovered/model.json").read_text()))
     if phase == "implement":
-        if not any(name.endswith(".rs") for name in hashes):
+        inputs = tree(root, "implementation")
+        if not any(name.endswith(".rs") for name in inputs):
             raise ValueError("The implementation must contain Rust source.")
+        hashes.update(inputs)
         checks = json.loads((root / "verification/checks.json").read_text())
-        latest = {}
-        for record in checks.get("commands", []):
-            command = record.get("command", record.get("args", []))
-            if len(command) >= 2 and command[0] == "cargo":
-                latest[command[1]] = record.get("returncode")
-        if checks.get("status") != "passed" or any(latest.get(name) != 0 for name in ("fmt", "clippy", "test")):
-            raise ValueError("The latest format, clippy, and test checks must pass.")
+        latest = {record.get("name"): record for record in checks.get("commands", [])}
+        if checks.get("status") != "passed" or checks.get("inputs_sha256") != combined(inputs) or any(latest.get(name, {}).get("returncode") != 0 for name in ("fmt", "clippy", "test")):
+            raise ValueError("The latest format, clippy, and test checks must pass for the current implementation.")
+        if any(digest(artifact(root, record["log"], False)) != record["log_sha256"] for record in latest.values()):
+            raise ValueError("A check log differs from its record.")
     if phase == "validate":
         contract = json.loads((root / "recovered/contract.json").read_text())
-        if all(isinstance(contract.get(key), dict) for key in ("compatibility", "scope")) and contract["compatibility"].get("mode") == "faithful" and contract["scope"].get("mode") == "full_product":
-            path = artifact(root, "verification/parity.json")
-            parity = json.loads(path.read_text())
-            if parity.get("status") != "passed" or parity.get("full_parity_gate_pass") is not True or parity.get("errors") != [] or parity.get("gaps") != [] or parity.get("target_sha256") != state["target"]["sha256"]:
-                raise ValueError("The full-product parity evidence gate must pass.")
-            inputs = parity.get("inputs", {})
-            if not inputs or any(digest(artifact(root, name, False)) != value for name, value in inputs.items()):
-                raise ValueError("The parity evidence changed after the gate.")
-            hashes["verification/parity.json"] = digest(path)
+        parity = json.loads((root / "verification/parity.json").read_text())
+        expected = "scoped_pass" if contract["scope"]["mode"] == "subset" else "full_parity_pass"
+        if parity.get("assessment") != expected or parity.get("errors") != [] or parity.get("target_sha256") != state["target"]["sha256"] or (expected == "full_parity_pass" and parity.get("gaps") != []):
+            raise ValueError(f"The parity gate must report {expected}.")
+        inputs = parity.get("inputs", {})
+        if not inputs or any(digest(artifact(root, name, False)) != value for name, value in inputs.items()):
+            raise ValueError("The parity evidence changed after the gate.")
         report = json.loads((root / "verification/comparison.json").read_text())
         cases = report.get("cases", [])
         if report.get("status") != "passed" or report.get("failed") != 0 or not cases or report.get("passed") != len(cases):
@@ -156,6 +213,36 @@ def files_for(root, phase, state):
         if hashes[name] != candidate["sha256"]:
             raise ValueError("The candidate changed after the comparison.")
     return hashes
+
+
+def check(project, extra=()):
+    root = project_root(project)
+    load(root)
+    path = root / "verification/checks.json"
+    records = json.loads(path.read_text()).get("commands", []) if path.is_file() else []
+    inputs = tree(root, "implementation")
+    status = "passed"
+    for name in ("fmt", "clippy", "test", *extra):
+        stamp = f"{name}-{time.time_ns()}"
+        log = root / "verification/logs" / f"{stamp}.log"
+        command = CHECKS[name] + ([str(log.with_suffix(""))] if name == "mutants" else [])
+        log.parent.mkdir(parents=True, exist_ok=True)
+        with log.open("wb") as stream:
+            returncode = subprocess.run(command, cwd=root / "implementation", stdout=stream, stderr=subprocess.STDOUT).returncode
+        record = {"name": name, "command": command, "returncode": returncode, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
+        if name == "mutants":
+            outcomes = log.with_suffix("") / "mutants.out/outcomes.json"
+            counts = json.loads(outcomes.read_text()) if outcomes.is_file() else {}
+            record["mutation"] = {key: counts.get(key) for key in ("caught", "missed", "timeout", "unviable")}
+            tested = sum(counts.get(key, 0) for key in ("caught", "missed", "timeout"))
+            record["mutation"]["score"] = counts["caught"] / tested if tested else None
+        elif returncode:
+            status = "failed"
+        records.append(record)
+    if tree(root, "implementation") != inputs:
+        status = "failed"
+    path.write_text(json.dumps({"status": status, "inputs_sha256": combined(inputs), "commands": records}, indent=2) + "\n")
+    return {"status": status, "commands": [{key: record[key] for key in ("name", "returncode")} for record in records[-len(extra) - 3:]]}
 
 
 def freshness(root, state):
@@ -203,6 +290,10 @@ def main():
     create.add_argument("--profile", choices=("cli", "desktop", "service", "game"), default="cli")
     create.add_argument("--work-dir")
     commands.add_parser("status").add_argument("project")
+    verify = commands.add_parser("check")
+    verify.add_argument("project")
+    verify.add_argument("--deny", action="store_true")
+    verify.add_argument("--mutants", action="store_true")
     record = commands.add_parser("checkpoint")
     record.add_argument("project")
     record.add_argument("phase", choices=PHASES)
@@ -212,6 +303,8 @@ def main():
             result = init(args.project, args.target, args.profile, args.work_dir)
         elif args.command == "status":
             result = status(args.project)
+        elif args.command == "check":
+            result = check(args.project, [name for name in ("deny", "mutants") if getattr(args, name)])
         else:
             result = checkpoint(args.project, args.phase)
         print(json.dumps(result, indent=2))

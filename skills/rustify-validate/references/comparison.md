@@ -35,3 +35,17 @@ Timeouts and execution errors fail even when both processes fail alike.
 The helper does not provide OS-level containment for hostile binaries.
 The agent verifies that a deliberately wrong candidate fails the comparison.
 The agent checks that resume detection rejects changed target, source, or artifacts.
+
+## Differential fuzzing
+
+The fuzz helper mutates scenario inputs and keeps each input that makes the two programs differ.
+It also keeps each input that produces a new pair of exit status and diagnostic classes.
+This steering follows NEZHA (Petsios et al., IEEE S&P 2017).
+
+```sh
+python3 <rustify-validate>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEMENTATION --seeds PROJECT/recovered/scenarios.json --report PROJECT/verification/fuzz.json --name PROGRAM --iterations 500 --seed 0
+```
+
+The report lists each divergence with both captures.
+The helper returns a failure status when it finds a divergence.
+The agent records the seed and the iteration count so that another run reproduces the search.

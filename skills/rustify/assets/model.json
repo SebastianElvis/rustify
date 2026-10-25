@@ -1,0 +1,71 @@
+{
+  "inventory": {
+    "complete": false,
+    "basis": [
+      "{{INVENTORY_EVIDENCE_ID}}"
+    ]
+  },
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "dimension": "behavior",
+      "pattern": "event",
+      "statement": "When {{TRIGGER}}, the {{SYSTEM}} shall {{RESPONSE}}.",
+      "classification": "unknown",
+      "evidence": [
+        "{{EVIDENCE_ID}}"
+      ],
+      "verification": "test",
+      "tests": [
+        "{{TEST_ID}}"
+      ],
+      "records": [],
+      "components": [
+        "C-001"
+      ],
+      "in_scope": true
+    }
+  ],
+  "components": [
+    {
+      "id": "C-001",
+      "name": "{{COMPONENT_NAME}}",
+      "level": "component",
+      "responsibility": "{{RESPONSIBILITY}}",
+      "classification": "unknown",
+      "evidence": [
+        "{{EVIDENCE_ID}}"
+      ]
+    }
+  ],
+  "edges": [],
+  "correspondences": [
+    {
+      "original": "C-001",
+      "rust": "implementation/src/main.rs"
+    }
+  ],
+  "slices": [
+    {
+      "id": "SLICE-001",
+      "kind": "skeleton",
+      "requirements": [
+        "REQ-001"
+      ],
+      "depends_on": [],
+      "risk": "high"
+    }
+  ],
+  "exceptions": [],
+  "gaps": [
+    {
+      "id": "GAP-001",
+      "items": [
+        "REQ-001"
+      ],
+      "kind": "unknown",
+      "status": "open",
+      "closure": "{{CLOSURE_CHECK}}"
+    }
+  ]
+}

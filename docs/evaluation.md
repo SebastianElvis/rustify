@@ -22,7 +22,7 @@ A passing subset does not establish full-product parity.
 12. The final report states source access, repairs, measured coverage, and remaining gaps.
 
 The target project separates `recovered/`, `implementation/`, and `verification/`.
-The agent keeps temporary design and task plans outside the target project.
+The target project keeps the Rust design and decision records in `implementation/docs/`.
 The recovered test specifications record observable expectations and their origin.
 The verification folder records execution results.
 
@@ -137,6 +137,49 @@ Later runs use local inputs and loopback HTTP.
 The dataset requires macOS and the reference binaries' CPU support.
 The skill bundle remains host-neutral.
 
+## Agent evaluation
+
+The scorers above grade one project. The agent evaluation also produces the projects.
+`scripts/agent_eval.py` runs the current skill bundle with an agent command on each track.
+
+1. The harness downloads the pinned reference with the track's `run.py` pin.
+2. For each trial, it creates a workspace with the installed skills and a copy of the binary.
+3. It sends a blind prompt on standard input. The prompt forbids the original source, tests, and documentation.
+4. It records the time, the return code, and the token use and cost when the agent reports them.
+5. It freezes the hash of each project file after the agent exits.
+6. The `grade` step rejects a project that changed after the freeze.
+7. It runs the track scorer, the parity gate, and the quality measures on each trial.
+
+```sh
+python3 scripts/agent_eval.py run --agent "claude -p --output-format json --dangerously-skip-permissions" --trials 3
+python3 scripts/agent_eval.py grade work/agent-eval/<stamp>
+```
+
+The harness never repairs a project. Every score is a blind score.
+The default tracks are base64, b3sum, and xh. The desktop track needs an operator.
+
+### Held-out tracks
+
+The public tracks are well-known programs. A model can know their source from training.
+Their scores can therefore overstate blind reconstruction.
+The evaluator keeps private held-out tracks outside the repository.
+
+- A private track is a folder with `run.py`, `grading.json`, and its cases.
+- Its `run.py` adds the repository `evaluations/` folder to `sys.path` and calls `harness.run`.
+- The evaluator writes small programs that are not public, builds them without symbols at two optimization levels, and pins their hashes.
+- The evaluator includes at least one program with persistent state and one network service.
+- The evaluator never commits the program, its source, or its cases.
+
+```sh
+python3 scripts/agent_eval.py run --agent "AGENT COMMAND" --track /private/tracks/ledger-tool
+```
+
+### Grading data
+
+Each track has `grading.json` with the subset scope, feature patterns, and component patterns.
+The patterns come from the original source and its documentation.
+The agent never sees `grading.json`.
+
 ## Evaluation checks
 
 - The original passes a repeatability comparison against itself.
@@ -149,27 +192,27 @@ The skill bundle remains host-neutral.
 
 ## Scores
 
-| Dimension | Evidence |
-| --- | --- |
-| Product coverage | The feature inventory maps to source-defined capabilities and tests. |
-| Experience coverage | Recovered interface states map to observed commands or interactions. |
-| Architecture recovery | Recovered components and flows map to source components. |
-| Behavioral compatibility | Exact comparisons pass for the declared scenario set. |
-| Rust quality | Formatting, lint, unit, and E2E checks pass. |
-| Evidence quality | Each conclusion has an origin and a stated limitation. |
+| Dimension | Measure | Oracle |
+| --- | --- | --- |
+| Blind behavior | Passed cases divided by all scored cases, without repairs. | The track cases and upstream vectors. |
+| Reliability | pass@k and pass^k over the trials. A trial passes when its scorer passes. | The track scorer. |
+| Product recall | Feature patterns found in the requirements, divided by all feature patterns. | `grading.json` |
+| Architecture recall | Component patterns found in the recovered components, divided by all component patterns. | `grading.json` |
+| Structural fidelity | Original components with their own Rust module, divided by all original components. | The reflexion check. |
+| Edge convergence | Converged original edges, divided by converged and absent edges. | The reflexion check. |
+| Parity gate | The assessment, errors, and gap count. | `parity.py` |
+| Test adequacy | The mutation score from `cargo mutants`. | `verification/checks.json` |
+| Rust quality | Clippy pedantic warnings and `unsafe` uses. | Clippy and the source. |
+| Cost | Wall time, tokens, and cost. | The agent output. |
 
-The architecture assessment maps original components to Rust components.
-Each mapping preserves responsibilities, interfaces, state ownership, and execution boundaries where evidence permits them.
-The report keeps unknown and different mappings open.
-The agent stores its report in `verification/compatibility.md` of its project.
+Pattern recall is a coarse measure. A match does not prove a correct requirement.
+The evaluator audits a sample of requirements against the source to estimate precision.
 
-## Strict parity gate
+## Parity gate
 
-The full-product workflow records its inventory and mappings in `verification/parity-matrix.json`.
-The validation skill provides the matrix asset and its field definitions.
-The checker rejects known gaps, incomplete inventories, differing dimensions, and stale inputs.
-The checker verifies recorded assertions against both original and Rust captures.
-The checker records its result in `verification/parity.json`.
+The parity gate reads the ledger `recovered/model.json`.
+It computes each requirement result from evidence and captures and runs the reflexion check.
+It checks that the documents name every requirement, component, and open gap.
 A passing machine gate does not prove that the declared inventory covers every original feature.
 The agent must justify that inventory with evidence.
 
