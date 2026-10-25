@@ -36,6 +36,7 @@ class DistinguishTests(unittest.TestCase):
     def test_game_results_require_blind_paired_observations(self):
         for name, candidate, agent, budget, expected in [
             ("same", self.echo, AGENT, 10, ("passed", 2, 0, None)),
+            ("search-error", self.echo, AGENT + "python3 -c 'import os,yaml; p=yaml.safe_load(open(os.environ[\"DISTINGUISH_CONFIG\"]))[\"log\"]; rows=list(yaml.safe_load_all(open(p))); open(p,\"w\").write(yaml.safe_dump_all([dict(r,view={\"error\":\"sandbox denied\"}) for r in rows],explicit_start=True))'\n", 10, ("invalid", 2, 0, None)),
             ("different", self.upper, AGENT, 10, ("failed", 2, 2, 2)),
             ("budget", self.upper, AGENT, 1, ("invalid", 1, 2, None)),
             ("concurrent", self.write("slow.sh", '#!/bin/sh\nsleep 0.2\nprintf "%s\\n" "$1"\n'), AGENT.replace("case.yaml > /dev/null\n", "case.yaml > /dev/null &\n") + "wait\n", 1, ("invalid", 1, 0, None)),

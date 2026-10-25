@@ -16,6 +16,8 @@ The agent does not describe those constraints as observations of the original.
 | Maintainability | The agent runs format, lint, tests, dependency checks, and applicable unsafe-code checks. |
 
 The agent selects applicable workloads from the product and its failure history.
+The agent matches crash and resource report identities to executable hashes or build UUIDs before attribution.
+A process name alone does not identify the original or the reconstruction.
 The agent records each budget, its basis, workload size, duration, environment, and executable hash before acceptance.
 The original supplies a measured baseline where its behavior informs the budget.
 The user can impose a stricter host protection limit.
@@ -30,7 +32,8 @@ A crash, unexplained resource growth, budget violation, or missing applicable me
 
 The probe supervisor enforces time, memory, process, and output limits before it runs untrusted workloads.
 The supervisor bounds its own captures and concurrency.
-The supervisor terminates its owned process group when a limit fails.
+The supervisor terminates its observed descendants when a limit fails.
+The agent tests detached child groups before it relies on a parent budget.
 A limit termination is a failed or incomplete measurement, never a parity pass.
 Sampled limits can miss brief peaks.
 RSS alone also misses compressed memory on some hosts.

@@ -52,7 +52,7 @@ The agent records the seed and the iteration count so that another run reproduce
 
 ## Supervisor limits
 
-The helper preserves pipe streams and kills its owned process group after a limit failure.
+The helper preserves pipe streams and tracks observed descendants across process groups and terminates them after a limit failure.
 The default limits are 512 MiB sampled memory, 64 processes, and 16 MiB of captured stream data.
 The API caller can set measured workload limits with `execute` parameters.
 The helper records resource peaks separately from exact behavior comparisons.
@@ -61,3 +61,7 @@ These limits protect probe execution. They do not establish the absence of a pro
 On macOS, the helper also checks physical footprint to include compressed memory.
 The helper uses `proc_pid_rusage` with `rusage_info_v2` from the host SDK.
 The file capture limit is 64 MiB. A larger capture produces an execution error.
+
+The supervisor follows parent process IDs and preserves observed process identities through reparenting.
+The supervisor can miss a process that detaches and loses its parent between samples.
+The evaluator uses OS containment for workloads that can exploit that observation gap.

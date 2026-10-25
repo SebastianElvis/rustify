@@ -56,7 +56,7 @@ class CompareTests(unittest.TestCase):
     def test_supervisor_limits_memory_children_and_streams(self):
         programs = [
             ("allocate", "import time\nx=[]\nwhile True:\n x.append(bytearray(1024*1024))\n time.sleep(.005)\n", {"memory_mib": 48}, "memory"),
-            ("children", "import subprocess,time\np=subprocess.Popen(['/bin/sleep','10'])\ntime.sleep(10)\n", {"process_limit": 1}, "process"),
+            ("children", "import subprocess,time\np=subprocess.Popen(['/bin/sleep','10'],start_new_session=True)\ntime.sleep(10)\n", {"process_limit": 1}, "process"),
             ("output", "import os\nwhile True: os.write(1,b'x'*65536)\n", {"output_mib": 1}, "output"),
         ]
         for name, body, limits, message in programs:
@@ -69,7 +69,7 @@ class CompareTests(unittest.TestCase):
 
     def test_oversized_files_do_not_enter_memory(self):
         program = self.program("large-file", "with open('out', 'wb') as stream: stream.truncate(1024**3)\n")
-        result = compare.run(program, "large-file", {"id": "large-file", "args": []}, 3)
+        result = compare.run(program, "large-file", {"id": "large-file", "args": []}, 30)
         self.assertEqual(result["error"], "The files exceeded the capture limit.")
         self.assertEqual(result["files"], {})
 
@@ -115,11 +115,11 @@ class CompareTests(unittest.TestCase):
 
     def test_timeout_kills_descendants(self):
         marker = self.root / "escaped"
-        body = "import subprocess, sys, time\nsubprocess.Popen([sys.executable, '-c', \"import time; time.sleep(0.5); open(\" + repr(str(marker)) + \", 'w').write('leak')\"])\ntime.sleep(10)\n"
+        body = "import subprocess, sys, time\nsubprocess.Popen([sys.executable, '-c', \"import time; time.sleep(0.8); open(\" + repr(str(marker)) + \", 'w').write('leak')\"], start_new_session=True)\ntime.sleep(10)\n"
         slow = self.program("descendants", body)
-        report = compare.compare(slow, self.reference, [self.case], timeout=0.1)
+        report = compare.compare(slow, self.reference, [self.case], timeout=0.5)
         self.assertEqual(report["status"], "failed")
-        time.sleep(0.6)
+        time.sleep(1)
         self.assertFalse(marker.exists())
 
     def test_invalid_cases_fail(self):
