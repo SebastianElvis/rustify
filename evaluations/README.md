@@ -38,8 +38,9 @@ Each track declares its view channels. The common channels are:
 | Interface | GUI screenshots, accessibility trees, window titles, focus, and timing of visible state changes. |
 | Persistence | Configuration, logs, caches, and databases that later runs read. |
 
-Wall time and memory use are not part of the functional view.
-The scorer reports them separately with a tolerance.
+The evaluator checks wall time and memory use as separate software quality conditions.
+The evaluator records measured budgets before acceptance.
+Functional equality does not excuse a resource failure.
 
 ### Distinguishers and witnesses
 
@@ -72,6 +73,21 @@ A claim holds only for the probes that the scorer ran.
 It never proves equivalence for all inputs.
 A passing automatic case report does not close a manual coverage gap. The full scorer fails while the gap stays open.
 The Doom renderer and interface checks need separate operator evidence.
+
+## Software quality acceptance
+
+The evaluator follows [the quality acceptance guide](../skills/rustify-validate/references/quality.md).
+The evaluation requires resource, reliability, data integrity, input safety, responsiveness, and maintainability evidence for applicable workloads.
+The evaluator checks long runs and repeated operations after initialization.
+An unexplained leak, crash, budget violation, or missing measurement blocks acceptance.
+The evaluator preserves the resource samples, workload, duration, limits, and executable hashes.
+
+The comparison helper and Doom runner supervise process groups with memory, process, stream, and time limits.
+The shared Cargo checks use an 8 GiB memory budget and a 900-second deadline.
+The evaluator also supervises custom runners and mutation commands before execution.
+The evaluator limits concurrent probes against the available host capacity.
+A supervisor limit produces an execution error, even when both programs reach the same limit.
+Sampled limits can miss brief peaks. The evaluator uses OS containment when the workload needs stronger protection.
 
 ## Distinguisher classes
 
