@@ -126,7 +126,7 @@ def grade_trial(workspace, directory, grading):
     gate_path = (workspace / ".agents/skills" if skills is not None else ROOT / "skills") / "rustify-validate/scripts/parity.py"
     gate = load("trial_parity", gate_path).check(project)
     result["success"] = result["success"] and gate["full_parity_gate_pass"] and score.get("checkpoints", {}).get("completed") == ["discover", "plan", "implement", "validate"]
-    result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"]), "helper_sha256": harness.digest(gate_path.read_bytes())}
+    result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"]), "helper_sha256": harness.digest(gate_path)}
     result["structural_fidelity"] = result["edge_convergence"] = None
     if structure := gate.get("reflexion"):
         model = yaml.safe_load((project / "recovered/model.yaml").read_text())

@@ -2,6 +2,7 @@
 """Keep reconstruction checkpoints and detect stale evidence."""
 
 import argparse
+from contextlib import nullcontext
 import hashlib
 import importlib.util
 import json
@@ -35,7 +36,8 @@ CHECKS = {
 
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    with path.open("rb") if isinstance(path, Path) else nullcontext(path) as stream:
+        return (hashlib.file_digest(stream, "sha256") if isinstance(path, Path) else hashlib.sha256(stream)).hexdigest()
 
 
 def project_root(project):

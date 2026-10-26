@@ -84,7 +84,7 @@ class HarnessTests(unittest.TestCase):
             binary = Path(directory) / "reference"
             binary.write_bytes(b"unchanged")
             with self.assertRaisesRegex(ValueError, "operating system build"):
-                harness.reference("system", {"path": str(binary), "sha256": harness.digest(binary.read_bytes()), "os_build": "old"})
+                harness.reference("system", {"path": str(binary), "sha256": harness.digest(binary), "os_build": "old"})
 
     def test_quality_controls_and_witness_reports(self):
         harness = zenity.harness

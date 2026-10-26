@@ -9,7 +9,7 @@ The goal is software that you can inspect, build, and maintain without the origi
 
 ## Installation
 
-The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3 with PyYAML, and Rust with Cargo.
+The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3.11 or later with PyYAML, and Rust with Cargo.
 The Rustify helpers read and write YAML with PyYAML.
 You install it with `python3 -m pip install pyyaml`.
 

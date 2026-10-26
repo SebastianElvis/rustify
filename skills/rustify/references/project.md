@@ -1,5 +1,7 @@
 # Project format and state
 
+The helper scripts use Python 3.11 or later with PyYAML.
+
 ## Fidelity rule
 
 Rustify always reconstructs the full product with one-to-one compatibility.

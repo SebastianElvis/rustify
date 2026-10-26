@@ -1,7 +1,6 @@
 """Score one agent-generated project for an evaluation track."""
 
 import argparse
-import hashlib
 import importlib.util
 import io
 import json, os
@@ -18,10 +17,6 @@ import yaml
 REPOSITORY = Path(__file__).resolve().parents[1]
 
 
-def digest(data):
-    return hashlib.sha256(data).hexdigest()
-
-
 def load(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
@@ -32,6 +27,7 @@ def load(name, path):
 
 compare = load("rustify_compare", REPOSITORY / "skills/rustify-probe/scripts/compare.py")
 project_helper = load("rustify_project", REPOSITORY / "skills/rustify/scripts/project.py")
+digest = project_helper.digest
 
 
 def save(path, value):
@@ -40,8 +36,8 @@ def save(path, value):
 
 
 def freeze(project, ignored=(), binaries=()):
-    hashes = {path.relative_to(project).as_posix(): digest(path.read_bytes()) for path in sorted(project.rglob("*")) if path.is_file() and not set(ignored).intersection(path.relative_to(project).parts) and path.relative_to(project).parts[:2] != ("implementation", "target")}
-    return {**hashes, **{str(path): [digest(path.read_bytes()), path.stat().st_mode, any(item.is_symlink() for item in (path, *path.parents))] for path in binaries}}
+    hashes = {path.relative_to(project).as_posix(): digest(path) for path in sorted(project.rglob("*")) if path.is_file() and not set(ignored).intersection(path.relative_to(project).parts) and path.relative_to(project).parts[:2] != ("implementation", "target")}
+    return {**hashes, **{str(path): [digest(path), path.stat().st_mode, any(item.is_symlink() for item in (path, *path.parents))] for path in binaries}}
 
 
 def extract(data, member):
@@ -61,18 +57,18 @@ def extract(data, member):
 def reference(track, pin):
     if "path" in pin:
         path = Path(pin["path"])
-        if digest(path.read_bytes()) != pin["sha256"] or subprocess.check_output(["sw_vers", "-buildVersion"], text=True).strip() != pin["os_build"]:
+        if digest(path) != pin["sha256"] or subprocess.check_output(["sw_vers", "-buildVersion"], text=True).strip() != pin["os_build"]:
             raise ValueError(f"The system reference differs from the pin. Use the operating system build {pin['os_build']}.")
         return path
     if "build" in pin:
         path = REPOSITORY / "work/references" / track / Path(pin["binary"]).name
-        if not path.is_file() or digest(path.read_bytes()) != pin["sha256"]:
+        if not path.is_file() or digest(path) != pin["sha256"]:
             load("build_reference", REPOSITORY / "scripts/build_reference.py").build(track)
-        if digest(path.read_bytes()) != pin["sha256"]:
+        if digest(path) != pin["sha256"]:
             raise ValueError(f"The hardened build differs from the pin. Use {pin['compiler']}.")
         return path
     path = REPOSITORY / "work/downloads" / track
-    if path.is_file() and not path.is_symlink() and digest(path.read_bytes()) == pin["sha256"]:
+    if path.is_file() and not path.is_symlink() and digest(path) == pin["sha256"]:
         return path
     command = ["curl", "-fsSL", "--retry", "2", "--max-time", "120", pin["url"]]
     config = None
@@ -138,7 +134,7 @@ def run(track, pin, score):
             raise ValueError(f"The project is missing. Reconstruct {executable} into {project}.")
         identity = yaml.safe_load((project / "verification/comparison.yaml").read_text())["executables"] if args.frozen else None
         candidate = project_helper.artifact(project, (project / identity["candidate"]["path"]).relative_to(project).as_posix(), False) if args.frozen else None
-        if args.frozen and (identity["reference"]["sha256"] != pin["sha256"] or digest(candidate.read_bytes()) != identity["candidate"]["sha256"] or candidate_failures(executable, candidate, pin)):
+        if args.frozen and (identity["reference"]["sha256"] != pin["sha256"] or digest(candidate) != identity["candidate"]["sha256"] or candidate_failures(executable, candidate, pin)):
             raise ValueError("The frozen executable identity or eligibility check failed.")
         binaries = (candidate, executable) if args.frozen else ()
         report["freeze"] = freeze(project, binaries=binaries)
@@ -147,7 +143,7 @@ def run(track, pin, score):
         except (OSError, ValueError, KeyError) as error:
             report["checkpoints"] = {"error": str(error)}
         candidate, report["rust"] = rust(project, output / "logs", candidate)
-        report["candidate_sha256"] = digest(candidate.read_bytes())
+        report["candidate_sha256"] = digest(candidate)
         failures = [f"The {item['command'][1]} check failed. Read {item['log']}." for item in report["rust"].get("commands", []) if item["returncode"]] + candidate_failures(executable, candidate, pin)
         if args.frozen and freeze(project, binaries=binaries) != report["freeze"]:
             raise ValueError("The frozen project or executable changed during the quality checks.")
