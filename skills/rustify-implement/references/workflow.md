@@ -34,6 +34,7 @@ The agent adds no module without an original component.
 The agent puts file, clock, network, and terminal access in the modules that own those boundaries in the original.
 
 The agent preserves persistence formats, protocols, execution order, and failure behavior.
+The agent checks compiler runtime setup for differences in startup, signals, and allocation failure.
 The agent preserves concurrency and resource-lifetime semantics where they affect the product.
 The agent preserves original quirks.
 The agent does not replace blocking execution with async execution for convenience.
