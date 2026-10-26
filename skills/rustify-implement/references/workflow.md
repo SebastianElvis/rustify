@@ -54,7 +54,7 @@ A language adaptation needs an ADR and compatibility evidence.
 
 ## Repairs
 
-The agent takes repair work from `rustify-validate` with its original evidence, reproducer, and ledger mapping.
+The agent starts a repair only from a `rustify-validate` handoff with original evidence, a reproducer, and a ledger mapping.
 The agent repairs the cause within the mapped Rust modules without a product change.
 The agent returns the changed slice to `rustify-validate` for regression checks and acceptance.
 The agent records a separate code budget for each repair before it combines patches.
