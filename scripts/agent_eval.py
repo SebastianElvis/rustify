@@ -2,16 +2,12 @@
 """Run the current Rustify skills with an agent on blind tracks and grade each trial."""
 
 import argparse
-import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
 import re
 import shlex
 import shutil
-import signal
-import subprocess
 import sys
 import time
 
@@ -19,6 +15,10 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "evaluations"))
+import harness
+
+load, save, freeze = harness.load, harness.save, harness.freeze
 PROMPT = """Use the rustify skill to reconstruct {binary} in Rust.
 Write the target project to {project}.
 Create an open replacement for the complete product.
@@ -29,26 +29,6 @@ Do not download, search for, or read the source code, tests, or documentation of
 Complete every phase, run the parity gate, and report the remaining gaps.
 """
 RESUME = "Continue the reconstruction from where you stopped. Follow the same rules. Complete every phase, run the parity gate, and report the remaining gaps.\n"
-
-
-def load(name, path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    exec(compile(path.read_bytes(), str(path), "exec"), module.__dict__)
-    return module
-
-
-harness = load("harness", ROOT / "evaluations/harness.py")
-
-
-def save(path, value):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(value, sort_keys=False))
-
-
-def freeze(project, ignored=()):
-    return {path.relative_to(project).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(project.rglob("*")) if path.is_file() and not set(ignored).intersection(path.relative_to(project).parts) and path.relative_to(project).parts[:2] != ("implementation", "target")}
 
 
 def reference(directory):
@@ -83,15 +63,9 @@ def run(directories, agent, trials, output, timeout):
 def attempt(workspace, record, command, prompt, timeout):
     """The helper records one attempt and freezes its project."""
     start = time.monotonic()
-    process = subprocess.Popen(command, cwd=workspace, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True, env={**os.environ, "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"})
-    try:
-        stdout, stderr = process.communicate(prompt, timeout=timeout)
-        returncode = process.returncode
-    except subprocess.TimeoutExpired:
-        os.killpg(process.pid, signal.SIGKILL)
-        stdout, stderr = process.communicate()
-        returncode, stderr = None, stderr + "The agent exceeded the time limit."
-    record.update(agent=shlex.join(command), returncode=returncode, seconds=round(record["seconds"] + time.monotonic() - start, 1), error="agent_failed" if returncode != 0 else None)
+    process, error, resources = harness.compare.execute(command, cwd=workspace, stdin=prompt.encode(), env={**os.environ, "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"}, timeout=timeout, memory_mib=2048, process_limit=32, output_mib=16)
+    stdout, stderr = process.stdout.decode(errors="replace"), process.stderr.decode(errors="replace") + (error or "")
+    record.update(agent=shlex.join(command), returncode=None if error else process.returncode, seconds=round(record["seconds"] + time.monotonic() - start, 1), error="agent_failed" if error or process.returncode != 0 else None, execution_error=error, resources=resources)
     with (workspace / "agent.log").open("a") as log:
         log.write(stdout + stderr + "\n")
     try:
@@ -138,18 +112,21 @@ def grade_trial(workspace, directory, grading):
     if skills is not None and any(freeze(workspace / name, ("__pycache__",)) != hashes for name, hashes in skills.items()):
         return {**result, "error": "The installed skills changed during the trial."}
     result["skills_verified"] = skills is not None
-    subprocess.run([sys.executable, str(directory / "run.py"), "--project", str(project), "--output", str(workspace / "score")], capture_output=True)
-    score = yaml.safe_load((workspace / "score/report.yaml").read_text())
+    output = workspace / "score" / str(time.time_ns())
+    _, error, result["scorer_resources"] = harness.compare.execute([sys.executable, str(directory / "run.py"), "--project", str(project), "--output", str(output), "--frozen"], timeout=3600, memory_mib=2048, process_limit=32, output_mib=16)
+    if error or not (output / "report.yaml").is_file():
+        return {**result, "error": error or "The scorer did not write its report."}
+    score = yaml.safe_load((output / "report.yaml").read_text())
     reports = [value for name, value in score.get("reports", {}).items() if name not in {"repeatability", "parsers-format", "parse-outputs"}]
     total = sum(value["passed"] + value["failed"] for value in reports)
-    result.update(success=score["status"] == "passed", scorer_status=score["status"], scorer_error=score.get("error"), expected_failures=len(score.get("failures", [])))
+    result.update(score_report=str(output / "report.yaml"), success=score["status"] == "passed", scorer_status=score["status"], scorer_error=score.get("error"), expected_failures=len(score.get("failures", [])))
     result["blind_pass_rate"] = round(sum(value["passed"] for value in reports) / total, 3) if total and score["status"] != "invalid" else None
     result["product_recall"] = recall(grading["features"], text(project, ("recovered/product.md", "recovered/ux.md"), "requirements", ("statement",)))
     result["architecture_recall"] = recall(grading["components"], text(project, ("recovered/architecture.md",), "components", ("name", "responsibility")))
     gate_path = (workspace / ".agents/skills" if skills is not None else ROOT / "skills") / "rustify-validate/scripts/parity.py"
     gate = load("trial_parity", gate_path).check(project)
     result["success"] = result["success"] and gate["full_parity_gate_pass"] and score.get("checkpoints", {}).get("completed") == ["discover", "plan", "implement", "validate"]
-    result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"]), "helper_sha256": hashlib.sha256(gate_path.read_bytes()).hexdigest()}
+    result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"]), "helper_sha256": harness.digest(gate_path.read_bytes())}
     result["structural_fidelity"] = result["edge_convergence"] = None
     if structure := gate.get("reflexion"):
         model = yaml.safe_load((project / "recovered/model.yaml").read_text())
@@ -160,10 +137,7 @@ def grade_trial(workspace, directory, grading):
     checks = project / "verification/checks.yaml"
     mutation = [item["mutation"] for item in yaml.safe_load(checks.read_text()).get("commands", []) if "mutation" in item] if checks.is_file() else []
     result["mutation_score"] = mutation[-1]["score"] if mutation else None
-    if (project / "implementation/Cargo.toml").is_file():
-        lint = subprocess.run(["cargo", "clippy", "--locked", "--", "-W", "clippy::pedantic"], cwd=project / "implementation", env={**os.environ, "CARGO_TARGET_DIR": str(workspace / "build")}, capture_output=True, text=True)
-        result["pedantic_warnings"] = len(re.findall(r"^warning: (?!.*generated \d+ warning)", lint.stderr, re.M))
-        result["unsafe_uses"] = sum(len(re.findall(r"\bunsafe\b", path.read_text(errors="replace"))) for path in (project / "implementation/src").rglob("*.rs"))
+    result.update({name: score.get("rust", {}).get(name) for name in ("pedantic_warnings", "unsafe_uses")})
     return result
 
 

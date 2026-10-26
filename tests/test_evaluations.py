@@ -106,10 +106,10 @@ class HarnessTests(unittest.TestCase):
     def test_quality_failure_does_not_block_release_build(self):
         harness = zenity.harness
         messages = b'{"executable": "candidate", "target": {"kind": ["bin"]}}\n'
-        runs = [mock.Mock(returncode=code, stdout=output, stderr=b"") for code, output in ((0, b""), (0, b""), (0, b"test result: ok. 2 passed"), (0, messages))]
+        runs = [mock.Mock(returncode=code, stdout=output, stderr=b"") for code, output in ((0, b""), (0, b""), (0, b"test result: ok. 2 passed"), (0, b""), (0, messages))]
         with tempfile.TemporaryDirectory() as directory, mock.patch.object(harness.compare, "execute", side_effect=[(result, "The process group exceeded the memory limit." if index == 0 else None, {}) for index, result in enumerate(runs)]):
             binary, checks = harness.rust(Path(directory), Path(directory) / "logs")
-        self.assertEqual((binary, checks["rust_tests"], [item["returncode"] for item in checks["commands"]]), (Path("candidate"), 2, [1, 0, 0, 0]))
+        self.assertEqual((binary, checks["rust_tests"], [item["returncode"] for item in checks["commands"]]), (Path("candidate"), 2, [1, 0, 0, 0, 0]))
 
     def test_doom_rejects_a_changed_resource(self):
         scorer = zenity.harness.load("doom_score", ROOT / "evaluations/open/doom/run.py")

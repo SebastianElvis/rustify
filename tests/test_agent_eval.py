@@ -10,7 +10,7 @@ import struct
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import yaml
 
@@ -22,9 +22,10 @@ TRACK = f"rustify-test-upper-{agent_eval.os.getpid()}"
 PROJECT = {
     "recovered/product.md": "REQ-1: The upper program shall write uppercase bytes.\n",
     "recovered/architecture.md": "C-1 is the entry component.\n",
+    "verification/bin/upper": "#!" + sys.executable + "\nimport sys\nsys.stdout.buffer.write(sys.stdin.buffer.read().upper())\n",
     "implementation/Cargo.toml": '[package]\nname = "upper"\nversion = "0.1.0"\nedition = "2021"\n',
     "implementation/Cargo.lock": 'version = 3\n\n[[package]]\nname = "upper"\nversion = "0.1.0"\n',
-    "implementation/src/main.rs": "use std::io::{Read, Write};\n\nfn main() {\n    let mut data = Vec::new();\n    std::io::stdin().read_to_end(&mut data).unwrap();\n    std::io::stdout()\n        .write_all(&data.to_ascii_uppercase())\n        .unwrap();\n}\n",
+    "implementation/src/main.rs": "use std::io::{Read, Write};\n\nfn main() {\n    let mut data = Vec::new();\n    std::io::stdin().read_to_end(&mut data).unwrap();\n    std::io::stdout()\n        .write_all(&data.to_ascii_lowercase())\n        .unwrap();\n}\n",
 }
 AGENT = f"""import re, sys
 from pathlib import Path
@@ -32,6 +33,8 @@ project = Path(re.search(r"Write the target project to (.+)[.]", sys.stdin.read(
 for name, text in {PROJECT!r}.items():
     (project / name).parent.mkdir(parents=True, exist_ok=True)
     (project / name).write_text(text)
+(project / "verification/bin/upper").chmod(0o755)
+(project / "verification/comparison.yaml").write_text({yaml.safe_dump({"executables": {"candidate": {"path": "verification/bin/upper", "sha256": hashlib.sha256(PROJECT["verification/bin/upper"].encode()).hexdigest()}, "reference": {"sha256": hashlib.sha256(PROJECT["verification/bin/upper"].encode()).hexdigest()}}})!r})
 """
 
 
@@ -43,7 +46,7 @@ class AgentEvaluationTests(unittest.TestCase):
         self.addCleanup(lambda: (ROOT / "work/downloads" / TRACK).unlink(missing_ok=True))
         self.root = Path(temporary.name)
         reference = self.root / "upper"
-        reference.write_text("#!" + sys.executable + "\nimport sys\nsys.stdout.buffer.write(sys.stdin.buffer.read().upper())\n")
+        reference.write_text(PROJECT["verification/bin/upper"])
         reference.chmod(0o755)
         self.track = self.root / TRACK
         self.track.mkdir()
@@ -114,11 +117,9 @@ class ResumeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             workspace = Path(temporary)
             record = {"seconds": 1, "session": "saved-session", "cost_usd": 2}
-            error = agent_eval.subprocess.TimeoutExpired(["agent"], 1)
-            with patch.object(agent_eval.subprocess, "Popen") as launch, patch.object(agent_eval.os, "killpg") as kill:
-                launch.return_value.communicate.side_effect = [error, ("partial output", "")]
+            with patch.object(agent_eval.harness.compare, "execute", return_value=(Mock(stdout=b"partial output", stderr=b"", returncode=-9), "The process group exceeded the time limit.", {"pid": 1})):
                 agent_eval.attempt(workspace, record, ["agent"], "continue", 1)
-            kill.assert_called_once_with(launch.return_value.pid, agent_eval.signal.SIGKILL)
+            self.assertEqual(record["execution_error"], "The process group exceeded the time limit.")
             self.assertIn("partial output", (workspace / "agent.log").read_text())
             self.assertEqual(record["session"], "saved-session")
             self.assertEqual(record["error"], "agent_failed")
@@ -126,9 +127,7 @@ class ResumeTests(unittest.TestCase):
     def test_success_clears_error_and_preserves_cost(self):
         with tempfile.TemporaryDirectory() as temporary:
             record = {"seconds": 1, "error": "usage_limit_reached", "session": "saved-session", "cost_usd": 2}
-            with patch.object(agent_eval.subprocess, "Popen") as launch:
-                launch.return_value.returncode = 0
-                launch.return_value.communicate.return_value = ('{"is_error": false, "total_cost_usd": 0.5}', "")
+            with patch.object(agent_eval.harness.compare, "execute", return_value=(Mock(returncode=0, stdout=b'{"is_error": false, "total_cost_usd": 0.5}', stderr=b""), None, {})):
                 agent_eval.attempt(Path(temporary), record, ["agent"], "continue", 1)
             self.assertIsNone(record["error"])
             self.assertEqual(record["session"], "saved-session")

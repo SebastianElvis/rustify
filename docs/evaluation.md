@@ -125,7 +125,7 @@ The desktop option also scores the zenity track.
 The scorer does not open dialogs.
 The operator replays the five cases with host-native CUA on both executables.
 The operator saves the captures and a visual review in `verification/gui-captures/` of the project.
-The scorer accepts only captures of the reference and of the executable that it builds.
+The scorer accepts only captures of the reference and the selected candidate.
 
 ```sh
 make evaluate
@@ -147,9 +147,22 @@ The scorers above grade one project. The agent evaluation also produces the proj
 2. For each trial, it creates a workspace with the installed skills and a copy of the binary.
 3. It sends a blind prompt on standard input. The prompt forbids the original source, tests, and documentation.
 4. It records the time, the return code, and the token use and cost when the agent reports them.
-5. It freezes the hash of each project file after the agent exits.
-6. The `grade` step rejects a project that changed after the freeze.
-7. It runs the track scorer, the parity gate, and the quality measures on each trial.
+5. The supervisor finishes observed agent descendants before the evaluator freezes project inputs.
+6. The grader rejects changed project inputs or installed skills.
+7. The scorer uses `--frozen` to select the executable from `verification/comparison.yaml`.
+8. The scorer checks executable identities, permissions, library restrictions, and project inputs before comparisons.
+9. The scorer checks executable identities and project inputs again after comparisons.
+10. The grader runs the parity gate and quality measures on each trial.
+
+The comparison report declares the candidate path and SHA-256.
+The candidate stays inside the project.
+Frozen scoring requires an output directory outside the project.
+Frozen scoring omits the release build.
+The format, Clippy, Rust test, and pedantic checks use a separate Cargo output directory.
+The standalone scorer builds a release executable when the command omits `--frozen`.
+The Cargo checks use one build job and a 2 GiB memory limit.
+The grader preserves each score under `trial-N/score/<timestamp>/`.
+The grade result names its score report.
 
 A successful trial requires the scorer and the full parity gate to pass.
 The trial must also complete all four phase checkpoints.

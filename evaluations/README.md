@@ -83,7 +83,7 @@ An unexplained leak, crash, budget violation, or missing measurement blocks acce
 The evaluator preserves the resource samples, workload, duration, limits, and executable hashes.
 
 The comparison helper and Doom runner supervise process groups with memory, process, stream, and time limits.
-The shared Cargo checks use an 8 GiB memory budget and a 900-second deadline.
+The shared Cargo checks use one build job, a 2 GiB memory budget, and a 900-second deadline.
 The evaluator also supervises custom runners and mutation commands before execution.
 The evaluator limits concurrent probes against the available host capacity.
 A supervisor limit produces an execution error, even when both programs reach the same limit.
