@@ -25,6 +25,12 @@ The agent preserves variable outputs and their causes as evidence.
 The agent applies only the normalization rules in `recovered/product.md`.
 An unexplained variation remains a gap.
 
+The validator qualifies a variable score change with repeated original and frozen-candidate captures under the complete controlled setup.
+The validator records every result and the repetition count.
+Matching finite samples establish sampled equality only.
+The validator reduces a variable witness to fixed inputs when original captures support that reduction.
+The validator keeps an unqualified score change separate from a confirmed regression.
+
 Each exact expected assertion links to original evidence.
 The agent checks that assertion against both programs independently.
 Matching implementations can still fail an independent expected assertion.
