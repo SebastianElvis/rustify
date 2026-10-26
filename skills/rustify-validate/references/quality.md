@@ -26,6 +26,7 @@ The user can impose a stricter host protection limit.
 The agent records a conflict instead of changing product behavior silently.
 
 The agent measures resource use after initialization and across repeated lifecycle operations.
+The agent distinguishes submitted operations from completed operations through outputs, status, or traces.
 The agent distinguishes stable caches from retained growth that follows completed operations.
 A short run does not establish the absence of a leak.
 The agent preserves samples, process-tree identities, peaks, and the termination reason in YAML.
