@@ -15,6 +15,7 @@ The agent checks local symbols as well as exports before it declares symbols abs
 The agent selects scenarios from `recovered/product.md` and `recovered/ux.md`.
 The agent traces each scenario from its entry point to its result.
 The trace records calls, data transfer, state changes, storage, and external effects.
+The agent records transient data layouts, buffer bounds, ownership, and allocation lifetimes.
 The agent preserves call order, error paths, cancellation, retry rules, and recovery behavior.
 The agent records thread ownership, blocking behavior, scheduling, and synchronization when they affect the workflow.
 The agent tests a static hypothesis with a controlled runtime scenario.

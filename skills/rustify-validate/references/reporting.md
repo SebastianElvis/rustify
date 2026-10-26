@@ -55,6 +55,8 @@ The structure follows the GSN Community Standard and ISO/IEC/IEEE 15026-2.
 The report gives the result before any source-assisted repair first.
 The report gives the repaired result and each repair second.
 The report counts the same inventory as the ledger.
+The report lists gaps and evidence limits separately.
+Each gap names a missing or failed requirement, mapping, workflow, or applicable quality check.
 The agent does not replace an unknown denominator with a favorable percentage.
 The agent leaves no unresolved token in a completed report.
 The validator checks each required artifact and output format before delivery.

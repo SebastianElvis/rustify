@@ -5,6 +5,7 @@
 The agent reads the recovered product, UX, architecture, ledger, evidence, and tests.
 The plan preserves original features, controls, layouts, defaults, errors, formats, protocols, and state transitions.
 The plan preserves original execution and component boundaries when evidence establishes them.
+The plan maps buffering, storage bounds, and allocation failure paths before it selects Rust data structures.
 The agent does not substitute a cleaner product or architecture.
 
 ## Map original components to Rust modules
