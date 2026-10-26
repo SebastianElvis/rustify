@@ -314,7 +314,7 @@ def main():
         else:
             result = checkpoint(args.project, args.phase)
         print(yaml.safe_dump(result, sort_keys=False), end="")
-        return 0
+        return int(result.get("status") == "failed")
     except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as error:
         parser.exit(1, f"{error}\n")
 

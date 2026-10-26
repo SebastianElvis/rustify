@@ -210,10 +210,10 @@ class ProjectTests(unittest.TestCase):
         self.through("plan")
         self.artifacts("implement")
         completed = type("Completed", (), {"returncode": 0, "stdout": b"", "stderr": b""})()
-        with patch.object(project.supervisor, "execute", return_value=(completed, "The process group exceeded the memory limit.", {})):
-            self.assertEqual(project.check(self.root, ["mutants"])["status"], "failed")
+        with patch.object(project.supervisor, "execute", return_value=(completed, "The process group exceeded the memory limit.", {})), patch("sys.argv", ["project.py", "check", str(self.root), "--mutants"]):
+            self.assertEqual(project.main(), 1)
         checks = yaml.safe_load((self.root / "verification/checks.yaml").read_text())
-        self.assertTrue(all(record["returncode"] == 1 and record["error"] for record in checks["commands"][-4:]))
+        self.assertTrue(checks["status"] == "failed" and all(record["returncode"] == 1 and record["error"] for record in checks["commands"][-4:]))
 
     def test_plan_needs_one_skeleton_an_acyclic_graph_and_full_coverage(self):
         self.through("discover")
