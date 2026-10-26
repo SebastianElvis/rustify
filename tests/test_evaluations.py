@@ -93,10 +93,10 @@ class HarnessTests(unittest.TestCase):
             (root / "implementation").mkdir()
             binary = root / "implementation/Cargo.toml"
             binary.write_bytes(b"binary")
-            for quality, controls, reference_failure in (({}, ["The negative control passes."], None), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, [], None), ({}, [], None), ({}, [], "repeatability"), ({}, [], "capture")):
+            for quality, controls, reference_failure in (({}, ["The negative control passes."], None), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, [], None), ({}, [], None), ({}, [], "repeatability"), ({}, [], "upstream"), ({}, [], "capture")):
                 reports = {"replay": {"status": "passed" if quality or controls else "failed", "passed": int(bool(quality or controls)), "failed": 0 if quality or controls else 3, "cases": [] if quality or controls else [{"input": {"id": "shared/case"}, "passed": False}, {"id": "custom/case", "passed": False}, {"id": "timeout/case", "passed": False, "differences": ["execution_error"], "reference": {"error": "timeout" if reference_failure == "capture" else None}}]}}
-                if reference_failure == "repeatability":
-                    reports["repeatability"] = {"status": "failed", "passed": 0, "failed": 1, "cases": [{"id": "original/timeout", "passed": False, "differences": ["execution_error"]}]}
+                if reference_failure in {"repeatability", "upstream"}:
+                    reports[reference_failure] = {"status": "failed" if reference_failure == "repeatability" else "invalid", "passed": 0, "failed": 1, "cases": [{"id": "original/timeout", "passed": False, "differences": ["execution_error"]}]}
                 with mock.patch.multiple(harness, reference=lambda *args: binary, rust=lambda *args: (binary, quality)), mock.patch.object(harness.project_helper, "status", return_value={}), mock.patch.object(harness.subprocess, "run", return_value=mock.Mock(stdout="")), mock.patch.object(sys, "argv", ["score", "--project", directory, "--output", str(root / "score")]), mock.patch("builtins.print"):
                     self.assertEqual(harness.run("control", {"sha256": "pin"}, lambda *args: (reports, controls)), 1)
                 result = yaml.safe_load((root / "score/report.yaml").read_text())
@@ -150,6 +150,13 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(runner.sessions(None, None, [{"id": "bytes"}])["failed"], 1)
         with mock.patch.multiple(runner, reset=lambda *args: None, invoke=lambda *args: step), mock.patch.object(runner, "snapshot", side_effect=files):
             self.assertEqual(runner.crossread(None, None, [{"id": "bytes", "write": "", "read": ""}])["failed"], 1)
+
+    def test_sqlite_bounds_output_capture(self):
+        runner = zenity.harness.load("sqlite_output_limit", ROOT / "evaluations/open/sqlite/runner.py")
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(runner, "SANDBOX", Path(directory)):
+            result = runner.invoke(Path("/usr/bin/printf"), ["%017825792d", "0"], timeout=3)
+        self.assertIn("output limit", result["error"])
+        self.assertLessEqual(len(result["stdout"]), 16 * 1024 * 1024)
 
     def test_ninja_yaml_driver_keeps_the_first_failure(self):
         with mock.patch.dict(sys.modules, runner=zenity.harness.load("ninja_runner", ROOT / "evaluations/open/ninja/runner.py")):

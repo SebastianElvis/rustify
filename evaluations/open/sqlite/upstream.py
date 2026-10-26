@@ -344,4 +344,4 @@ def evaluate(reference, candidate, name, text):
         passed = a == c
         rows.append({"id": f"{feature}/{name}/{action['name']}", "passed": passed, **({} if passed else {"input": {key: action[key] for key in action if key not in ("expected",)}, "expected": action["expected"], "reference": a, "candidate": c})})
     failed = sum(not row["passed"] for row in rows)
-    return {"status": "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, "tests": len(TESTS.findall(text)), "converted": len(rows), **counts, "cases": rows}
+    return {"status": "invalid" if any(row and row.get("error") for row in first + second) else "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, "tests": len(TESTS.findall(text)), "converted": len(rows), **counts, "cases": rows}

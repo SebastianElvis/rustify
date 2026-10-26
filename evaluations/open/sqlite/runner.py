@@ -4,8 +4,8 @@ import base64
 import os
 from pathlib import Path
 import shutil
-import signal
-import subprocess
+
+import harness
 
 EVALUATIONS = next(path for path in Path(__file__).resolve().parents if (path / "harness.py").is_file())
 SANDBOX = EVALUATIONS.parent / "work/sandbox/sqlite"  # A fixed path keeps paths in the output stable.
@@ -26,15 +26,8 @@ def reset(files=None):
 
 def invoke(binary, args, stdin=b"", merge=False, timeout=30):
     """Run the binary in the sandbox. A merged run sends stderr into the stdout stream."""
-    process = subprocess.Popen(["sqlite3", *args], executable=str(binary), cwd=SANDBOX, env=environment(), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if merge else subprocess.PIPE, start_new_session=True)
-    error = None
-    try:
-        stdout, stderr = process.communicate(stdin, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        os.killpg(process.pid, signal.SIGKILL)
-        stdout, stderr = process.communicate()
-        error = "timeout"
-    return {"returncode": process.returncode, "stdout": stdout, "stderr": stderr or b"", "error": error, "file_modes": {path.relative_to(SANDBOX).as_posix(): path.stat().st_mode & 0o7777 for path in SANDBOX.rglob("*") if path.is_file()}}
+    result, error, _ = harness.compare.execute(["sqlite3", *args], executable=str(binary), cwd=SANDBOX, env=environment(), stdin=stdin, preexec_fn=(lambda: os.dup2(1, 2)) if merge else None, timeout=timeout)
+    return {"returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr, "error": error, "file_modes": {path.relative_to(SANDBOX).as_posix(): path.stat().st_mode & 0o7777 for path in SANDBOX.rglob("*") if path.is_file()}}
 
 
 def snapshot():

@@ -136,7 +136,7 @@ def run(track, pin, score):
         report["reports"] = {name: {key: value[key] for key in ("status", "passed", "failed")} for name, value in reports.items()}
         report["witnesses"] = {name: [{"id": identity, "feature": identity.split("/")[0], "differences": case.get("differences", case.get("failures")), "report": str(output / f"{name}.yaml")} for case in value.get("cases", []) if not case.get("passed", True) and "execution_error" not in (case.get("differences") or []) and (identity := case.get("id", case.get("input", {}).get("id")))] for name, value in reports.items() if name != "repeatability"}
         report["failures"] = failures + score_failures
-        reference_error = any(isinstance(case.get("reference"), dict) and case["reference"].get("error") for value in reports.values() for case in value.get("cases", []))
+        reference_error = any(value["status"] == "invalid" for value in reports.values()) or any(isinstance(case.get("reference"), dict) and case["reference"].get("error") for value in reports.values() for case in value.get("cases", []))
         report["status"] = "invalid" if reference_error or reports.get("repeatability", {"status": "passed"})["status"] != "passed" else "passed" if reports and all(value["status"] == "passed" for value in reports.values()) and not report["failures"] else "failed"
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
         report["error"] = str(error)
