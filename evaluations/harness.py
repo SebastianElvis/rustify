@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import importlib.util
 import io
-import json
+import json, os
 from pathlib import Path
 import re
 import subprocess
@@ -107,7 +107,7 @@ def rust(project, logs):
 
 def candidate_failures(reference, candidate, pin):
     linked = subprocess.run(["otool", "-L", str(candidate)], capture_output=True, text=True).stdout
-    return [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked] + (["The candidate contains the reference path, so it can run the original."] if str(reference).encode() in candidate.read_bytes() else [])
+    return (["The candidate is not a runnable regular file."] if not candidate.is_file() or not os.access(candidate, os.X_OK) else []) + [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked] + (["The candidate contains the reference path, so it can run the original."] if str(reference).encode() in candidate.read_bytes() else [])
 
 
 def run(track, pin, score):
