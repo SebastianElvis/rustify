@@ -61,6 +61,7 @@ The agent workspace in `work_dir` holds only temporary worker shards and progres
    The validator returns confirmed defects to `rustify-implement` and recovery gaps to discovery and planning.
    The agent repeats implementation and validation until acceptance passes or no permitted next step remains.
    The agent keeps unresolved gaps open and completes checkpoints only when their checks pass.
+
    The agent joins all workers before the final checks.
    The agent reports measured coverage, artifact locations, source access, and remaining gaps.
    The agent does not claim equivalence for arbitrary inputs.
