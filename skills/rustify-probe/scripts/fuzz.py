@@ -38,9 +38,9 @@ def mutate(case, corpus, rng):
     return case
 
 
-def fuzz(reference, candidate, seeds, iterations=200, seed=0, name="program", timeout=5):
+def fuzz(reference, candidate, seeds, iterations=200, seed=0, name=None, timeout=5):
     compare.validate(seeds)
-    rng = random.Random(seed)
+    rng, name = random.Random(seed), Path(reference).name if name is None else name
     paths = {"reference": Path(reference).resolve(strict=True), "candidate": Path(candidate).resolve(strict=True)}
     corpus, classes, divergences, errors = list(seeds), set(), [], []
     for index in range(iterations):
@@ -57,7 +57,7 @@ def fuzz(reference, candidate, seeds, iterations=200, seed=0, name="program", ti
             classes.add(behavior)
             corpus.append(case)
     return {
-        "status": "invalid" if errors or iterations <= 0 else "failed" if divergences else "passed", "iterations": iterations, "seed": seed,
+        "status": "invalid" if errors or iterations <= 0 else "failed" if divergences else "passed", "iterations": iterations, "seed": seed, "program_name": name,
         "behavior_classes": len(classes), "corpus": len(corpus), "divergences": divergences, "errors": errors,
         "executables": {label: {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for label, path in paths.items()},
     }
@@ -72,7 +72,7 @@ def main():
     parser.add_argument("--iterations", type=int, default=200)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--timeout", type=float, default=5)
-    parser.add_argument("--name", default="program")
+    parser.add_argument("--name", help="The default is the original filename.")
     args = parser.parse_args()
     report = fuzz(args.reference, args.candidate, yaml.safe_load(Path(args.seeds).read_text()), args.iterations, args.seed, args.name, args.timeout)
     destination = Path(args.report)

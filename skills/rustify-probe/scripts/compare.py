@@ -201,14 +201,14 @@ def differ(results):
     return differences
 
 
-def compare(reference, candidate, cases, timeout=5, name="base64"):
+def compare(reference, candidate, cases, timeout=5, name=None):
     validate(cases)
     if not math.isfinite(timeout) or timeout <= 0:
         raise ValueError("The time limit must be positive and finite.")
+    name = Path(reference).name if name is None else name
     if not isinstance(name, str) or not name or "\0" in name:
         raise ValueError("The program name must be nonempty and contain no NUL bytes.")
-    report = {"status": "passed", "passed": 0, "failed": 0, "executables": {}, "cases": []}
-    paths = {}
+    report, paths = {"status": "passed", "passed": 0, "failed": 0, "program_name": name, "executables": {}, "cases": []}, {}
     for label, value in (("reference", reference), ("candidate", candidate)):
         path = Path(value).resolve(strict=True)
         if not path.is_file() or not os.access(path, os.X_OK):
@@ -233,7 +233,7 @@ def main():
     parser.add_argument("--cases", required=True)
     parser.add_argument("--report", required=True)
     parser.add_argument("--timeout", type=float, default=5)
-    parser.add_argument("--name", default="base64")
+    parser.add_argument("--name", help="The default is the original filename.")
     args = parser.parse_args()
     try:
         cases = yaml.safe_load(Path(args.cases).read_text())

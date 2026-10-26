@@ -156,13 +156,13 @@ class CompareTests(unittest.TestCase):
                 compare.compare(self.reference, self.reference, [self.case], timeout=timeout)
         self.assertTrue(all(fuzz.fuzz(self.reference, self.reference, [self.case], iterations=count)["status"] == "invalid" for count in (0, -1)))
 
-    def test_cli_writes_report_and_returns_failure(self):
-        cases = self.root / "cases.yaml"
-        report = self.root / "report.yaml"
-        cases.write_text("[]")
-        result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-probe/scripts/compare.py"), "--reference", str(self.reference), "--candidate", str(self.reference), "--cases", str(cases), "--report", str(report)], capture_output=True)
-        self.assertEqual(result.returncode, 1)
-        self.assertEqual(yaml.safe_load(report.read_text())["status"], "error")
+    def test_cli_checks_cases_and_program_name(self):
+        cases, report = self.root / "cases.yaml", self.root / "report.yaml"
+        case = {"id": "name", "args": ["-c", 'printf "%s" "$0"']}
+        for rows, name, expected in [([], None, None), ([case], None, b"sh"), ([case], "alias", b"alias")]:
+            cases.write_text(yaml.safe_dump(rows))
+            result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-probe/scripts/compare.py"), "--reference", "/bin/sh", "--candidate", "/bin/sh", "--cases", str(cases), "--report", str(report), *(["--name", name] if name else [])], capture_output=True)
+            self.assertEqual((result.returncode, (data := yaml.safe_load(report.read_text()))["status"], data.get("program_name"), data["cases"][0]["reference"]["stdout_b64"] if data["cases"] else None), (0 if expected else 1, "passed" if expected else "error", expected.decode() if expected else None, encoded(expected) if expected else None))
 
     def test_fuzz_finds_divergence_and_keeps_reproducer(self):
         candidate = self.program("candidate", "import sys\ndata = sys.stdin.buffer.read()\nsys.stdout.buffer.write(data + (b'!' if len(data) > 4 else b''))\n")
