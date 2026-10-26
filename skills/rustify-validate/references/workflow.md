@@ -71,6 +71,7 @@ When the host supports separate agents, a different agent writes the challenge c
 
 The evaluator freezes source, recovered models, and the executable before outside challenges or source reveal.
 The evaluator scores the frozen executable without a rebuild.
+The evaluator retains reference pins, dependency restrictions, and negative controls during frozen scoring.
 Changed executable bytes require a new freeze and fresh comparisons.
 The evaluator records original-source access and source-assisted changes separately.
 Finite tests do not prove every possible execution.

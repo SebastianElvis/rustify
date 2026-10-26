@@ -93,14 +93,14 @@ class HarnessTests(unittest.TestCase):
             (root / "implementation").mkdir()
             binary = root / "implementation/Cargo.toml"
             binary.write_bytes(b"binary")
-            for quality, controls, reference_failure in (({}, ["The negative control passes."], None), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, [], None), ({}, [], None), ({}, [], "repeatability"), ({}, [], "upstream"), ({}, [], "capture")):
+            for quality, controls, reference_failure in (({}, ["The negative control passes."], None), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, [], None), ({}, [], None), ({}, [], "repeatability"), ({}, [], "upstream"), ({}, [], "capture"), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 0, "log": "fmt.log"}]}, [], "closure")):
                 reports = {"replay": {"status": "passed" if quality or controls else "failed", "passed": int(bool(quality or controls)), "failed": 0 if quality or controls else 3, "cases": [] if quality or controls else [{"input": {"id": "shared/case"}, "passed": False}, {"id": "custom/case", "passed": False}, {"id": "timeout/case", "passed": False, "differences": ["execution_error"], "reference": {"error": "timeout" if reference_failure == "capture" else None}}]}}
                 if reference_failure in {"repeatability", "upstream"}:
                     reports[reference_failure] = {"status": "failed" if reference_failure == "repeatability" else "invalid", "passed": 0, "failed": 1, "cases": [{"id": "original/timeout", "passed": False, "differences": ["execution_error"]}]}
-                with mock.patch.multiple(harness, reference=lambda *args: binary, rust=lambda *args: (binary, quality)), mock.patch.object(harness.project_helper, "status", return_value={}), mock.patch.object(harness.subprocess, "run", return_value=mock.Mock(stdout="")), mock.patch.object(sys, "argv", ["score", "--project", directory, "--output", str(root / "score")]), mock.patch("builtins.print"):
-                    self.assertEqual(harness.run("control", {"sha256": "pin"}, lambda *args: (reports, controls)), 1)
+                with mock.patch.multiple(harness, reference=lambda *args: binary, rust=lambda *args: (binary, quality)), mock.patch.object(harness.project_helper, "status", return_value={}), mock.patch.object(harness.subprocess, "run", return_value=mock.Mock(stdout="/System/Library/Frameworks/Disallowed.framework/Disallowed" if reference_failure == "closure" else "")), mock.patch.object(sys, "argv", ["score", "--project", directory, "--output", str(root / "score")]), mock.patch("builtins.print"):
+                    self.assertEqual(harness.run("control", {"sha256": "pin", "forbidden_libraries": ["Disallowed"]}, lambda *args: (reports, controls)), 1)
                 result = yaml.safe_load((root / "score/report.yaml").read_text())
-                self.assertEqual((result["status"], result["reports"]["replay"]["passed"]), ("invalid" if reference_failure else "failed", int(bool(quality or controls))))
+                self.assertEqual((result["status"], result["reports"]["replay"]["passed"]), ("invalid" if reference_failure and reference_failure != "closure" else "failed", int(bool(quality or controls))))
                 self.assertEqual([(item["id"], Path(item["report"]).name, Path(item["report"]).is_file()) for rows in result["witnesses"].values() for item in rows], [] if quality or controls else [("shared/case", "replay.yaml", True), ("custom/case", "replay.yaml", True)])
 
     def test_quality_failure_does_not_block_release_build(self):

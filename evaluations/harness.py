@@ -105,6 +105,11 @@ def rust(project, logs):
     return Path(binaries[0]), {"commands": commands, "rust_tests": tests}
 
 
+def candidate_failures(reference, candidate, pin):
+    linked = subprocess.run(["otool", "-L", str(candidate)], capture_output=True, text=True).stdout
+    return [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked] + (["The candidate contains the reference path, so it can run the original."] if str(reference).encode() in candidate.read_bytes() else [])
+
+
 def run(track, pin, score):
     parser = argparse.ArgumentParser(description=f"Score a {track} reconstruction against the pinned reference.")
     parser.add_argument("--project", type=Path, default=REPOSITORY / "work/projects" / track)
@@ -125,10 +130,7 @@ def run(track, pin, score):
             report["checkpoints"] = {"error": str(error)}
         candidate, report["rust"] = rust(project, output / "logs")
         report["candidate_sha256"] = digest(candidate.read_bytes())
-        linked = subprocess.run(["otool", "-L", str(candidate)], capture_output=True, text=True).stdout
-        failures = [f"The {item['command'][1]} check failed. Read {item['log']}." for item in report["rust"].get("commands", []) if item["returncode"]] + [f"The candidate links the forbidden library {name}." for name in pin.get("forbidden_libraries", []) if f"/{name}.framework/" in linked or f"/lib{name}." in linked]
-        if str(executable).encode() in candidate.read_bytes():
-            failures.append("The candidate contains the reference path, so it can run the original.")
+        failures = [f"The {item['command'][1]} check failed. Read {item['log']}." for item in report["rust"].get("commands", []) if item["returncode"]] + candidate_failures(executable, candidate, pin)
         reports, score_failures = score(executable, candidate, project)
         for name, value in reports.items():
             value["cases"] = [case if not case.get("passed", True) else {"id": case.get("id", case.get("input", {}).get("id")), "passed": True} for case in value.get("cases", [])]
