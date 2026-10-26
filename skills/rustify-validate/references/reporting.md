@@ -57,6 +57,8 @@ The report gives the repaired result and each repair second.
 The report counts the same inventory as the ledger.
 The agent does not replace an unknown denominator with a favorable percentage.
 The agent leaves no unresolved token in a completed report.
+The validator checks each required artifact and output format before delivery.
+A checkpoint pass does not establish a missing artifact.
 
 A `full_parity_pass` does not replace [software quality acceptance](quality.md).
 The delivery claim also needs current resource, lifecycle, and other applicable quality evidence.
