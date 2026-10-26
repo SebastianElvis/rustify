@@ -11,11 +11,12 @@ The runner applies only the equivalence rules that the README declares:
 import os
 from pathlib import Path
 import re
-import signal
 import struct
-import subprocess
+import threading
 import tempfile
 import time
+
+import harness
 
 BASE = 946684800  # The runner gives every written fixture file the mtime 2000-01-01T00:00:00Z.
 SLACK = 3600 * 10**9
@@ -99,35 +100,34 @@ def execute(executable, root, step, window, timeout):
     """Run one Ninja step and return its normalized view."""
     env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": str(root), "PATH": "/usr/bin:/bin", "TERM": "dumb", **step.get("env", {})}
     command = ["/usr/bin/script", "-q", "/dev/null", str(executable)] if step.get("tty") else ["ninja"]
-    stdin, hold = os.pipe()
-    result = {"returncode": None, "stdout": "", "stderr": "", "error": None}
-    process = subprocess.Popen([*command, *step["args"]], executable=None if step.get("tty") else str(executable), cwd=root, env=env, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if step.get("merge") else subprocess.PIPE, start_new_session=True)
-    os.close(stdin)
-    try:
-        if "signal" in step:
-            deadline = time.monotonic() + timeout
-            while not (root / step["wait"]).exists() and time.monotonic() < deadline and process.poll() is None:
-                time.sleep(0.01)
-            time.sleep(0.1)
-            process.send_signal(step["signal"])
-        stdout, stderr = process.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except OSError:
-            process.kill()
-        stdout, stderr = process.communicate()
-        result["error"] = "The step exceeded the time limit."
-    finally:
-        os.close(hold)
-        try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except OSError:
+    watcher, done, marker = None, threading.Event(), [False]
+
+    def interrupt(process):
+        deadline = time.monotonic() + timeout
+        while not (root / step["wait"]).exists() and time.monotonic() < deadline and process.poll() is None and not done.wait(0.01):
             pass
-    for label, data in (("stdout", stdout), ("stderr", stderr or b"")):
-        result[label] = pointers(wall(rooted(decode(data), root), window))
-    result["returncode"] = process.returncode
-    return result
+        marker[0] = (root / step["wait"]).exists()
+        if not done.wait(0.1):
+            process.send_signal(step["signal"])
+
+    def started(process):
+        nonlocal watcher
+        watcher = threading.Thread(target=interrupt, args=(process,))
+        watcher.start()
+
+    try:
+        completed, error, resources = harness.compare.execute(
+            [*command, *step["args"]], executable=None if step.get("tty") else str(executable),
+            cwd=root, env=env, timeout=timeout, keep_stdin_open=True,
+            preexec_fn=(lambda: os.dup2(1, 2)) if step.get("merge") else None,
+            on_spawn=started if "signal" in step else None,
+        )
+    finally:
+        done.set()
+        if watcher:
+            watcher.join()
+    streams = {label: pointers(wall(rooted(decode(data), root), window)) for label, data in (("stdout", completed.stdout), ("stderr", completed.stderr))}
+    return {"returncode": completed.returncode, "error": error or ("The signal marker was not observed." if "signal" in step and not marker[0] else None), "resources": resources, **streams}
 
 
 def play(executables, scenario, timeout=15):

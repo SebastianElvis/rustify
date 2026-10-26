@@ -55,7 +55,10 @@ The agent records the seed and the iteration count so that another run reproduce
 The helper preserves pipe streams and tracks observed descendants across process groups and terminates them after a limit failure.
 The default limits are 512 MiB sampled memory, 64 processes, and 16 MiB of captured stream data.
 The API caller can set measured workload limits with `execute` parameters.
+The API caller can set `keep_stdin_open=True` when the target must inherit a pipe without end-of-file.
+The API caller can use `on_spawn(process)` to start a signal watcher within the helper cleanup scope.
 The helper records resource peaks separately from exact behavior comparisons.
+The peak-memory sample includes process IDs, start times, parent IDs, and process commands.
 A limit failure always produces an execution error, even when both programs reach the same limit.
 These limits protect probe execution. They do not establish the absence of a product leak.
 On macOS, the helper also checks physical footprint to include compressed memory.

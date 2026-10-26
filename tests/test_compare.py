@@ -66,12 +66,30 @@ class CompareTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertLessEqual(len(result.stdout), limits.get("output_mib", 16) * 1024 * 1024)
                 self.assertGreaterEqual(metrics["peak_processes"], 1)
+                self.assertTrue(any(row["pid"] == metrics["pid"] and row["command"] and row["started"] for row in metrics["peak_memory_processes"]))
 
     def test_oversized_files_do_not_enter_memory(self):
         program = self.program("large-file", "with open('out', 'wb') as stream: stream.truncate(1024**3)\n")
         result = compare.run(program, "large-file", {"id": "large-file", "args": []}, 30)
         self.assertEqual(result["error"], "The files exceeded the capture limit.")
         self.assertEqual(result["files"], {})
+
+    def test_stdin_can_stay_open_after_delivery(self):
+        program = self.program("stdin-policy", "import os,select,sys\nif len(sys.argv)>1: os.read(0,1)\nprint(bool(select.select([0],[],[],.1)[0]))\n")
+        for data in (b"", b"x"):
+            for keep in (False, True):
+                result, error, _ = compare.execute([str(program), *(["read"] if data else [])], stdin=data, keep_stdin_open=keep, timeout=3)
+                self.assertEqual((result.returncode, error, result.stdout), (0, None, b"False\n" if keep else b"True\n"))
+
+    def test_failed_spawn_hook_cleans_up_the_process(self):
+        started = []
+        def reject(process):
+            started.append(process.pid)
+            raise RuntimeError("The watcher did not start.")
+        with self.assertRaisesRegex(RuntimeError, "watcher"):
+            compare.execute([str(self.program("hook", "import time\ntime.sleep(10)\n"))], on_spawn=reject, timeout=3)
+        with self.assertRaises(ProcessLookupError):
+            os.kill(started[0], 0)
 
     def test_binary_data_and_fixture_files_match(self):
         self.case["env"] = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC0"}

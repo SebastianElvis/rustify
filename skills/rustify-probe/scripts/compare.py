@@ -87,7 +87,7 @@ def capture_files(root):
     return files
 
 
-def execute(command, *, timeout, stdin=b"", memory_mib=512, output_mib=16, process_limit=64, **options):
+def execute(command, *, timeout, stdin=b"", keep_stdin_open=False, on_spawn=None, memory_mib=512, output_mib=16, process_limit=64, **options):
     """Run observed descendants with sampled limits and bounded pipe captures."""
     if not math.isfinite(timeout) or timeout <= 0 or any(type(value) is not int or value <= 0 for value in (memory_mib, output_mib, process_limit)):
         raise ValueError("Resource limits must be positive and finite.")
@@ -98,32 +98,40 @@ def execute(command, *, timeout, stdin=b"", memory_mib=512, output_mib=16, proce
     output = {"stdout": bytearray(), "stderr": bytearray()}
     remaining, size = memoryview(stdin), 0
     process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True, **options)
-    start, sample, owned = time.monotonic(), 0, {}
+    start, sample, owned, details, peak_details = time.monotonic(), 0, {}, {}, []
     def members():
-        rows = subprocess.check_output(["/bin/ps", "-axo", "pid=,ppid=,pgid=,rss=,lstart="], text=True)
-        tasks = {int(pid): (int(parent), int(group), int(rss), born) for pid, parent, group, rss, born in (row.split(maxsplit=4) for row in rows.splitlines())}
-        active = {pid for pid, (_, group, _, born) in tasks.items() if group == process.pid or owned.get(pid) == born}
-        while active != (expanded := active | {pid for pid, (parent, _, _, _) in tasks.items() if parent in active}):
+        rows = subprocess.check_output(["/bin/ps", "-axo", "pid=,ppid=,pgid=,rss=,lstart=,comm="], text=True)
+        parts = [row.split(maxsplit=9) for row in rows.splitlines()]
+        tasks = {int(p[0]): (int(p[1]), int(p[2]), int(p[3]), " ".join(p[4:9]), p[9] if len(p) > 9 else "") for p in parts}
+        active = {pid for pid, (_, group, _, born, _) in tasks.items() if group == process.pid or owned.get(pid) == born}
+        while active != (expanded := active | {pid for pid, (parent, _, _, _, _) in tasks.items() if parent in active}):
             active = expanded
-        owned.update({pid: tasks[pid][-1] for pid in active})
+        owned.update({pid: tasks[pid][3] for pid in active})
+        details.clear()
+        details.update({pid: {"pid": pid, "parent_pid": tasks[pid][0], "started": tasks[pid][3], "command": tasks[pid][4]} for pid in active})
         return [(pid, tasks[pid][2]) for pid in active]
     with process, selectors.DefaultSelector() as selector:
         for stream, mode, name in ((process.stdin, selectors.EVENT_WRITE, "stdin"), (process.stdout, selectors.EVENT_READ, "stdout"), (process.stderr, selectors.EVENT_READ, "stderr")):
             os.set_blocking(stream.fileno(), False)
             if name != "stdin" or remaining:
                 selector.register(stream, mode, name)
-            else:
+            elif not keep_stdin_open:
                 stream.close()
         try:
+            if on_spawn is not None:
+                on_spawn(process)
             while selector.get_map() or process.poll() is None:
                 now = time.monotonic()
                 if now >= sample:
                     current = members()
-                    memory = 0
+                    memory, sampled = 0, []
                     for pid, rss in current:
                         info = ctypes.create_string_buffer(160)
                         physical = struct.unpack_from("=Q", info, 72)[0] // 1024 if usage and usage(pid, 2, info) == 0 else 0
                         memory += max(rss, physical)
+                        sampled.append({**details[pid], "rss_kib": rss, "memory_kib": max(rss, physical)})
+                    if memory > footprint:
+                        peak_details = sampled
                     peak, footprint, count = max(peak, sum(rss for _, rss in current)), max(footprint, memory), max(count, len(current))
                     sample = now + 0.05
                 for value, limit, label in ((memory, memory_mib * 1024, "memory"), (len(current), process_limit, "process"), (now - start, timeout, "time")):
@@ -146,7 +154,8 @@ def execute(command, *, timeout, stdin=b"", memory_mib=512, output_mib=16, proce
                     except BrokenPipeError:
                         pass
                     selector.unregister(key.fileobj)
-                    key.fileobj.close()
+                    if key.data != "stdin" or not keep_stdin_open:
+                        key.fileobj.close()
         finally:
             process.kill()
             for pid, _ in members():
@@ -155,7 +164,7 @@ def execute(command, *, timeout, stdin=b"", memory_mib=512, output_mib=16, proce
                 except ProcessLookupError:
                     pass
     result = subprocess.CompletedProcess(command, process.returncode, bytes(output["stdout"]), bytes(output["stderr"]))
-    return result, error, {"peak_rss_kib": peak, "peak_memory_kib": footprint, "memory_method": "RSS and physical footprint" if usage else "RSS", "peak_processes": count, "memory_mib": memory_mib, "output_mib": output_mib, "process_limit": process_limit}
+    return result, error, {"pid": process.pid, "peak_rss_kib": peak, "peak_memory_kib": footprint, "peak_memory_processes": peak_details, "memory_method": "RSS and physical footprint" if usage else "RSS", "peak_processes": count, "memory_mib": memory_mib, "output_mib": output_mib, "process_limit": process_limit}
 
 
 def run(executable, name, case, timeout):

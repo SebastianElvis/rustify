@@ -54,6 +54,8 @@ The scorer runs each upstream test once.
 - The default `-j` value in the usage text is the CPU count plus 2. The scorer does not change it, because both programs run on the same host.
 - The `NINJA_STATUS` placeholders `%e`, `%w`, `%E`, `%W`, `%o`, and `%c` print elapsed time and rates. The cases do not use them, and `-d stats` prints timings. These features stay in scope without an exact case.
 - The interrupt cases send the signal 0.1 seconds after the command creates a marker file.
+- The runner keeps stdin open and preserves merged streams and PTYs.
+- The supervisor applies one total deadline to each step. A missing signal marker makes the capture incomplete.
 - The reference build has no Python at build time, so `-t browse` prints `ninja: python is required for the browse tool`.
 
 ## Scope
