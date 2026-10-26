@@ -66,7 +66,10 @@ The validator links the failure to its requirement, evidence, test, and original
 The validator sends a confirmed Rust defect to `rustify-implement`.
 The validator sends a recovery error or unknown mapping to discovery and planning before implementation.
 The validator reruns affected checks, complete workflows, and acceptance after each repair.
-The agent repeats this cycle within the execution constraints and keeps unresolved gaps open.
+The validator records which checks an execution constraint blocks.
+The agent continues the cycle for other permitted checks and repairs.
+The agent stops only when acceptance passes or no permitted next step remains.
+The agent keeps unresolved gaps open.
 
 Independent versions can fail in the same way (Knight and Leveson).
 The original, not the Rust implementation, supplies every expected result.
