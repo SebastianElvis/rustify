@@ -50,4 +50,6 @@ The `.bz2` format uses the Burrows-Wheeler transform, move-to-front coding, run-
 - The view has no variable field. The same input, flags, and file layout give the same bytes on stdout, stderr, and files.
 - The exit status is fixed. The repeatability report confirms all three channels.
 - The `perror` line after an unexpected end of input shows the last `errno`. With a pipe on stdin, the reference prints `Inappropriate ioctl for device` on every run. The scorer compares this line exactly.
-- The reference copies the mode and the modification time of the input to the output file. `compare.py` does not capture modes or times, so the scorer does not measure them.
+- The reference restores input file attributes on the output. The final mode also depends on ownership changes and buffered writes.
+- `compare.py` captures file modes, owner IDs, group IDs, and modification times. Its default fixtures use mode `0644`.
+- Owned fixtures can test permitted group changes without root access. These tests do not establish UID 0 behavior.

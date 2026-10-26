@@ -7,6 +7,8 @@ The agent states the unknown and the observation that can resolve it.
 The agent derives cases from the binary surface, input partitions, boundaries, diagnostics, and persistent states.
 The agent includes omitted options, explicit defaults, malformed inputs, and failure paths.
 The agent checks the existing captures before it repeats an experiment.
+The agent uses owned fixtures and permitted group changes when they test the required effect without root access.
+Credential-dependent behavior stays unmeasured when the host cannot run it.
 
 ## Combine binary analysis and behavior
 
@@ -36,6 +38,10 @@ The agent preserves external export formats and REA Evidence IDs.
 The agent writes authored records in YAML and interpretations in Markdown.
 
 The agent checks repeatability on the original before it defines a rule for variable fields.
+The agent compares instrumented runs with an uninstrumented control.
+The agent records the failure injection layer.
+A library fault and a kernel denial can produce different metadata.
+Missing trace events do not prove that a call did not occur.
 An unexplained variation remains an open question.
 An execution error leaves the probe incomplete.
 The agent preserves each repeatable difference and its smallest reproducer.
