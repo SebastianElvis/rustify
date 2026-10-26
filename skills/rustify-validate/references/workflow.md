@@ -17,6 +17,8 @@ The agent prefers `test`. The other methods need evidence records with captures.
 ## Original expectations
 
 The agent runs the original against itself under the same controlled conditions.
+An original execution error invalidates the affected batch.
+The agent does not discard that error as variable output.
 The agent preserves variable outputs and their causes as evidence.
 The agent applies only the normalization rules in `recovered/product.md`.
 An unexplained variation remains a gap.

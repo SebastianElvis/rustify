@@ -41,6 +41,7 @@ The agent writes authored records in YAML and interpretations in Markdown.
 The agent checks repeatability on the original before it defines a rule for variable fields.
 The agent compares instrumented runs with an uninstrumented control.
 The agent records the failure injection layer.
+The agent verifies the injected failure with a control on each binary before acceptance.
 A library fault and a kernel denial can produce different metadata.
 Missing trace events do not prove that a call did not occur.
 An unexplained variation remains an open question.
