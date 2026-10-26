@@ -36,7 +36,7 @@ The `sqlite3` program is the command-line shell with the engine linked in.
 | `replay-core`, `replay-extended`, `replay-complete` | `D-replay` | Milestones: shell basics and core SQL; output modes, dot commands, and advanced SQL; JSON, virtual tables, shell extensions, WAL, and the remaining surface. |
 | `generate-full` | `D-generate` | Seeded probes for option combinations, every output mode with mode options, SQL expressions, malformed SQL, dot commands, and CSV import. |
 | `metamorphic-crossread` | `D-metamorphic` | Each program reads the database file that the other writes. |
-| `upstream-tests` | `D-upstream` | One row for each upstream test file, with test, converted, unstable, and unmatched counts. |
+| `upstream-tests` | `D-upstream` | One row for each upstream test file, with test counts and unsupported connection commands. |
 | `upstream-<file>` | `D-upstream` | The converted probes of one upstream test file. |
 
 - Each case id is `<feature-id>/<name>`. The feature ids come from `grading.yaml`.
@@ -46,6 +46,7 @@ The `sqlite3` program is the command-line shell with the engine linked in.
 ## Upstream conversion
 
 - `upstream.py` keeps tests that use `execsql`, `db eval`, `catchsql`, `catchcmd`, `do_execsql_test`, `do_catchsql_test`, and `integrity_check` with literal arguments.
+- The converter stops at an unsupported connection command. The report preserves that command and marks the remaining scope `incomplete`.
 - The SQL of one Tcl connection runs in one shell process in `.mode quote`. A marker query separates the steps. Standard error goes into the same stream, so each error stays at its step.
 - The Tcl expectation validates each probe on the reference. A probe that disagrees with its expectation is `unmatched`. Usually an earlier unconverted test changed the state.
 - The gate compares the candidate view with the reference view byte for byte.
@@ -55,7 +56,7 @@ The `sqlite3` program is the command-line shell with the engine linked in.
 
 - The scorer never normalizes output. It fixes the variable inputs or does not probe them.
 - `random()`, `randomblob()`, the `'now'` time value, `.timer`, `.stats`, `-stats`, `.scanstats`, and the WAL salts give different views on each run of the reference. The hidden cases do not use them.
-- An upstream probe whose two reference runs differ, or that exceeds the 30-second limit, is `unstable`. The scorer reports it and does not compare it.
+- An upstream probe whose two complete reference runs differ is `unstable`. A reference execution error makes the report `invalid`.
 - Absolute paths appear in `.databases`, `PRAGMA database_list`, and some errors. Multi-step probes run in the fixed folder `work/sandbox/sqlite`, so these paths are equal for both programs. Single-step replay cases do not print paths.
 
 ## Scope

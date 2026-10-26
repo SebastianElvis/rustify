@@ -172,7 +172,7 @@ class Converter:
     """Turn the Tcl commands of one test file into probe actions."""
 
     def __init__(self):
-        self.actions, self.prefix, self.db, self.stop = [], "", "test.db", False
+        self.actions, self.prefix, self.db, self.stop, self.unsupported = [], "", "test.db", False, []
 
     def name(self, word):
         name = literal(word) or word[1]
@@ -206,16 +206,9 @@ class Converter:
         if head in ("forcedelete", "delete_file") and None not in args:
             self.actions.append({"kind": "delete", "files": [arg for arg in args if not arg.startswith("-")]})
             return True
-        if head == "db" and args == ["close"]:
-            self.actions.append({"kind": "close"})
-            return True
-        if head == "sqlite3" and len(args) == 2 and args[0] == "db" and args[1]:
-            self.actions.append({"kind": "close"})
-            self.db = args[1]
-            return True
-        if head == "reset_db":
-            self.actions += [{"kind": "close"}, {"kind": "delete", "files": ["test.db", "test.db-journal", "test.db-wal"]}]
-            self.db = "test.db"
+        if head == "reset_db" or (head == "db" and args == ["close"]) or (head == "sqlite3" and len(args) == 2 and args[0] == "db" and args[1]):
+            self.actions += [{"kind": "close"}] + ([{"kind": "delete", "files": ["test.db", "test.db-journal", "test.db-wal"]}] if head == "reset_db" else [])
+            self.db = "test.db" if head == "reset_db" else args[1] if head == "sqlite3" else self.db
             return True
         if head == "ifcapable" and len(command) >= 3 and command[2][0] == "brace":
             if not (args[0] or "").startswith("!"):
@@ -227,6 +220,8 @@ class Converter:
         if action:
             self.actions.append({**action, "db": self.db})
             return True
+        if head == "db":
+            self.unsupported.append([word[1] for word in command])
         return False
 
     def test(self, command):
@@ -244,7 +239,7 @@ class Converter:
 
     def walk(self, text):
         for command in words(text):
-            if self.stop:
+            if self.stop or self.unsupported:
                 return
             found = self.test(command)
             if found and found[2] is not None and found[1]:
@@ -264,7 +259,7 @@ class Converter:
 def convert(text):
     converter = Converter()
     converter.walk(text)
-    return converter.actions
+    return converter.actions + [{"kind": "unsupported", "command": command} for command in converter.unsupported]
 
 
 def run(binary, actions):
@@ -330,7 +325,7 @@ def evaluate(reference, candidate, name, text):
     actions = convert(text)
     feature = next((feature for pattern, feature in FEATURES if re.search(pattern, name)), "sql-engine")
     first, second, other = run(reference, actions), run(reference, actions), run(candidate, actions)
-    rows, counts = [], {"unstable": 0, "unmatched": 0}
+    rows, counts = [], {"unstable": 0, "unmatched": 0, "unsupported": [action["command"] for action in actions if action["kind"] == "unsupported"]}
     for action, a, b, c in zip(actions, first, second, other):
         if "name" not in action:
             continue
@@ -344,4 +339,4 @@ def evaluate(reference, candidate, name, text):
         passed = a == c and not (a.get("error") or b.get("error"))
         rows.append({"id": f"{feature}/{name}/{action['name']}", "passed": passed, **({} if passed else {"input": {key: action[key] for key in action if key not in ("expected",)}, "expected": action["expected"], "reference": a, "repeat": b, "candidate": c, "differences": ["execution_error"] if a.get("error") or b.get("error") or c.get("error") else ["result"]})})
     failed = sum(not row["passed"] for row in rows)
-    return {"status": "invalid" if any(row and row.get("error") for row in first + second) else "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, "tests": len(TESTS.findall(text)), "converted": len(rows), **counts, "cases": rows}
+    return {"status": "invalid" if any(row and row.get("error") for row in first + second) else "incomplete" if counts["unsupported"] else "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, "tests": len(TESTS.findall(text)), "converted": len(rows), **counts, "cases": rows}

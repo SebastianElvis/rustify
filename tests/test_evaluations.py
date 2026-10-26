@@ -151,6 +151,11 @@ class HarnessTests(unittest.TestCase):
         with mock.patch.multiple(runner, reset=lambda *args: None, invoke=lambda *args: step), mock.patch.object(runner, "snapshot", side_effect=files):
             self.assertEqual(runner.crossread(None, None, [{"id": "bytes", "write": "", "read": ""}])["failed"], 1)
 
+    def test_sqlite_preserves_supported_state_and_stops_at_unknown_state(self):
+        with mock.patch.dict(sys.modules, runner=zenity.harness.load("sqlite_state_runner", ROOT / "evaluations/open/sqlite/runner.py")):
+            upstream = zenity.harness.load("sqlite_state_converter", ROOT / "evaluations/open/sqlite/upstream.py")
+        self.assertEqual(upstream.convert("db close\nsqlite3 db other.db\nexecsql {SELECT 1}\nreset_db\nexecsql {SELECT 2}\ndb unknown_state 1\nexecsql {SELECT 3}"), [{"kind": "close"}, {"kind": "close"}, {"kind": "sql", "sql": "SELECT 1", "check": "list", "db": "other.db"}, {"kind": "close"}, {"kind": "delete", "files": ["test.db", "test.db-journal", "test.db-wal"]}, {"kind": "sql", "sql": "SELECT 2", "check": "list", "db": "test.db"}, {"kind": "unsupported", "command": ["db", "unknown_state", "1"]}])
+
     def test_sqlite_bounds_output_capture(self):
         runner = zenity.harness.load("sqlite_output_limit", ROOT / "evaluations/open/sqlite/runner.py")
         with tempfile.TemporaryDirectory() as directory, mock.patch.object(runner, "SANDBOX", Path(directory)):
