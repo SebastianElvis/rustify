@@ -222,7 +222,9 @@ The principles come from the literature review. The last section lists the most 
    The closed-source tier and private held-out tracks reduce this risk.
 7. **Every track targets the full product.**
    No track excludes a feature. Large products earn milestone credit, as Cybench subtasks do.
-   A witness is a skill defect. The fix goes into the skills, not into a narrower scope.
+   A confirmed witness supplies feedback for [the skill improvement loop](../docs/evaluation.md#agent-evaluation).
+   The evaluator changes shared skills and starts a fresh reconstruction.
+   Guided product patches do not establish skill gains.
 8. **Text similarity is not a score.**
    The output language differs from the original language, so the dataset does not score edit similarity or CodeBLEU.
 
