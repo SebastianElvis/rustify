@@ -198,13 +198,13 @@ class ProjectTests(unittest.TestCase):
         environment = {"PATH": f"{tools}:{os.environ['PATH']}"}
         with patch.dict(os.environ, environment):
             result = project.check(self.root, ["mutants"])
-        self.assertEqual(result["status"], "passed")
+        self.assertEqual(result["status"], "failed")
         checks = yaml.safe_load((self.root / "verification/checks.yaml").read_text())
         self.assertEqual(checks["commands"][-1]["mutation"], {"caught": 3, "missed": 1, "timeout": 0, "unviable": 2, "score": 0.75})
-        project.checkpoint(self.root, "implement")
+        with self.assertRaisesRegex(ValueError, "current implementation"):
+            project.checkpoint(self.root, "implement")
         with patch.dict(os.environ, {**environment, "FAKE_STATUS": "1"}):
             self.assertEqual(project.check(self.root)["status"], "failed")
-        self.assertEqual(project.status(self.root)["stale"], "implement")
 
     def test_resource_limit_blocks_a_check_with_zero_exit_status(self):
         self.through("plan")

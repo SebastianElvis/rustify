@@ -194,7 +194,7 @@ def files_for(root, phase, state):
         checks = yaml.safe_load((root / "verification/checks.yaml").read_text())
         latest = {record.get("name"): record for record in checks.get("commands", [])}
         if checks.get("status") != "passed" or checks.get("inputs_sha256") != combined(inputs) or any(latest.get(name, {}).get("returncode") != 0 for name in ("fmt", "clippy", "test")):
-            raise ValueError("The latest format, clippy, and test checks must pass for the current implementation.")
+            raise ValueError("The latest requested checks must pass for the current implementation.")
         if any(digest(artifact(root, record["log"], False)) != record["log_sha256"] for record in latest.values()):
             raise ValueError("A check log differs from its record.")
     if phase == "validate":
@@ -236,7 +236,7 @@ def check(project, extra=()):
         returncode = result.returncode or int(error is not None)
         log.write_bytes(result.stdout + result.stderr + (error.encode() if error else b""))
         record = {"name": name, "command": command, "returncode": returncode, "error": error, "resources": resources, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
-        if error:
+        if returncode:
             status = "failed"
         if name == "mutants":
             outcomes = log.with_suffix("") / "mutants.out/outcomes.json"
@@ -244,8 +244,6 @@ def check(project, extra=()):
             record["mutation"] = {key: counts.get(key) for key in ("caught", "missed", "timeout", "unviable")}
             tested = sum(counts.get(key, 0) for key in ("caught", "missed", "timeout"))
             record["mutation"]["score"] = counts["caught"] / tested if tested else None
-        elif returncode:
-            status = "failed"
         records.append(record)
     if tree(root, "implementation") != inputs:
         status = "failed"
