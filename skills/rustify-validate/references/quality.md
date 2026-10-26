@@ -16,7 +16,7 @@ The agent does not describe those constraints as observations of the original.
 | Maintainability | The agent runs format, lint, tests, dependency checks, and applicable unsafe-code checks. |
 
 The agent selects applicable workloads from the product and its failure history.
-The agent records inherited signal handlers and stream types for shutdown tests.
+The agent verifies inherited signal handlers, stream types, and descriptor numbers before it accepts a test of shutdown or descriptor boundaries.
 The agent matches crash and resource report identities to executable hashes or build UUIDs before attribution.
 A process name alone does not identify the original or the reconstruction.
 The agent records each budget, its basis, workload size, duration, environment, and executable hash before acceptance.
