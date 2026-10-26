@@ -90,6 +90,8 @@ A provider failure becomes a documented limitation.
 ## Turn findings into requirements
 
 An observed requirement links to an original capture or exported evidence.
+The agent retracts a rule that an original counterexample disproves.
+The agent preserves every original assertion and keeps the unresolved behavior open.
 An inferred requirement records its uncertainty and its next confirmation probe.
 A proposed test can introduce a new input. The original must supply its expected result before it becomes a requirement.
 A known original-to-Rust difference stays open even when the Rust behavior seems better.
