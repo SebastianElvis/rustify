@@ -6,6 +6,7 @@ The caller names the requirement, surface item, component, edge, or gap under in
 The agent states the unknown and the observation that can resolve it.
 The agent derives cases from the binary surface, input partitions, boundaries, diagnostics, and persistent states.
 The agent includes omitted options, explicit defaults, malformed inputs, and failure paths.
+For encoded data, the agent partitions valid precision, channel models, and compression modes when the format exposes them.
 The agent checks the existing captures before it repeats an experiment.
 The agent uses owned fixtures and permitted group changes when they test the required effect without root access.
 Credential-dependent behavior stays unmeasured when the host cannot run it.
@@ -34,6 +35,7 @@ The agent records resource samples and limit terminations.
 The agent follows [software quality acceptance](../../rustify-validate/references/quality.md) for resource and lifecycle probes.
 Each capture identifies the binary, resources, inputs, environment, commands, and observation method.
 The agent preserves raw outputs, files, status, protocol bytes, GUI captures, and trace exports for the channels under test.
+The agent checks directory effects and file identity when replacement behavior affects the workflow.
 The evidence record binds each capture through its path and SHA-256.
 The agent preserves external export formats and REA Evidence IDs.
 The agent writes authored records in YAML and interpretations in Markdown.
