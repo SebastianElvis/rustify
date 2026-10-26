@@ -4,7 +4,7 @@
 
 The caller names the requirement, surface item, component, edge, or gap under investigation.
 The agent states the unknown and the observation that can resolve it.
-The agent verifies that each case reaches its intended operation before it claims coverage.
+The agent verifies each case's decoded values and intended operation before it claims coverage.
 The agent derives cases from the binary surface, input partitions, boundaries, diagnostics, and persistent states.
 The agent includes omitted options, explicit defaults, malformed inputs, and failure paths.
 For encoded data, the agent partitions valid precision, channel models, and compression modes when the format exposes them.
