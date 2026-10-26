@@ -36,6 +36,7 @@ The agent records resource samples and limit terminations.
 The agent follows [software quality acceptance](../../rustify-validate/references/quality.md) for resource and lifecycle probes.
 Each capture identifies the binary, resources, inputs, environment, commands, and observation method.
 The agent preserves raw outputs, files, status, protocol bytes, GUI captures, and trace exports for the channels under test.
+The agent preserves exact file timestamps and persistent log bytes before normalization.
 The agent checks directory effects and file identity when replacement behavior affects the workflow.
 The evidence record binds each capture through its path and SHA-256.
 The agent preserves external export formats and REA Evidence IDs.

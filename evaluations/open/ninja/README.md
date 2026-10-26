@@ -43,6 +43,8 @@ The scorer runs each upstream test once.
 ## Variable fields
 
 `runner.py` applies only these equivalence rules. Every other difference is a witness.
+The runner preserves raw streams and file bytes before normalization.
+The `raw_files` records keep exact timestamps, ownership, and filesystem identity.
 
 | Field | Rule | Evidence |
 | --- | --- | --- |

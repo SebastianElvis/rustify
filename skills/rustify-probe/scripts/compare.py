@@ -67,22 +67,22 @@ def validate(cases):
     return cases
 
 
-def capture_files(root):
+def capture_files(root, metadata=None):
     files, size = {}, 0
     for path in sorted(root.rglob("*")):
-        mode = path.lstat().st_mode
-        if stat.S_ISDIR(mode):
-            continue
-        if not stat.S_ISREG(mode):
-            raise ValueError("A process produced a symlink or a special file.")
         status = path.lstat()
+        if stat.S_ISDIR(status.st_mode):
+            continue
+        if not stat.S_ISREG(status.st_mode):
+            raise ValueError("A process produced a symlink or a special file.")
         size += status.st_size
         if size > 64 * 1024 * 1024:
             raise ValueError("The files exceeded the capture limit.")
-        data = path.read_bytes()
+        if metadata is not None:
+            metadata[path.relative_to(root).as_posix()] = {"mtime_ns": status.st_mtime_ns, "ctime_ns": status.st_ctime_ns, "atime_ns": status.st_atime_ns, "device": status.st_dev, "inode": status.st_ino, "links": status.st_nlink}
         files[path.relative_to(root).as_posix()] = {
-            "sha256": hashlib.sha256(data).hexdigest(), "data_b64": base64.b64encode(data).decode("ascii"),
-            "mode": format(stat.S_IMODE(status.st_mode), "o"), "mtime": "fixture" if int(status.st_mtime) == FIXTURE_TIME else "new", "uid": status.st_uid, "gid": status.st_gid,
+            "sha256": hashlib.sha256(data := path.read_bytes()).hexdigest(), "data_b64": base64.b64encode(data).decode("ascii"),
+            "mode": format(stat.S_IMODE(status.st_mode), "o"), "mtime": "fixture" if status.st_mtime_ns == FIXTURE_TIME * 10**9 else "new", "uid": status.st_uid, "gid": status.st_gid,
         }
     return files
 
@@ -168,7 +168,7 @@ def execute(command, *, timeout, stdin=b"", keep_stdin_open=False, on_spawn=None
 
 
 def run(executable, name, case, timeout):
-    result = {"returncode": None, "stdout_b64": "", "stderr_b64": "", "files": {}, "error": None}
+    result = {"returncode": None, "stdout_b64": "", "stderr_b64": "", "files": {}, "file_metadata": {}, "error": None}
     with tempfile.TemporaryDirectory(prefix="rustify-") as directory:
         root = Path(directory)
         for filename, data in case.get("files", {}).items():
@@ -188,7 +188,7 @@ def run(executable, name, case, timeout):
         except OSError as error:
             result["error"] = str(error)
         try:
-            result["files"] = capture_files(root)
+            result["files"] = capture_files(root, result["file_metadata"])
         except (OSError, ValueError) as error:
             result["error"] = str(error)
     return result

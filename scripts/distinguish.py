@@ -21,7 +21,7 @@ Your goal is to find probes on which A and B give different views.
 Run `{python} probe.py LABEL CASE_FILE` to execute one probe. LABEL is A or B.
 CASE_FILE is a YAML mapping with `id`, `args` (a list of strings), and optional `stdin_b64`, `files` (relative path to base64 content), and `env`.
 The tool prints the view: return code, standard output, standard error, and the files after the run.
-The `resources` field records supervisor measurements. It is not part of the functional view.
+The `resources` and `file_metadata` fields preserve measurements. The exact comparison view excludes these fields.
 You have {budget} probe runs in total. Each run on A or B counts as one.
 The program name (argument zero) is `{name}`. Start with `--help`, `--version`, and invalid options, then target edge cases, rare options, malformed inputs, large inputs, and option combinations.
 

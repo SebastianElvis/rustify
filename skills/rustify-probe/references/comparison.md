@@ -30,6 +30,7 @@ Here, `<rustify-probe>` means this installed skill folder.
 The helper gives both processes the same argv[0] and deterministic environment.
 The helper uses separate temporary directories and compares output bytes, errors, status, and regular files.
 The file view includes content, mode, owner, group, and kept input time.
+The `file_metadata` record preserves exact timestamps, device, inode, and link count outside that comparison view.
 The report preserves inputs, raw captures, and executable hashes.
 Timeouts and execution errors fail even when both processes fail alike.
 The helper does not provide OS-level containment for hostile binaries.

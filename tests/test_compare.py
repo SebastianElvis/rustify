@@ -39,7 +39,7 @@ class CompareTests(unittest.TestCase):
     def test_file_ownership_mode_and_kept_time_are_part_of_the_view(self):
         keep = self.program("keep", "import shutil\nshutil.copy2('in', 'out')\n")
         case = {"id": "copy", "args": [], "files": {"in": encoded(b"data")}}
-        for field, call, before, after in [("mtime", "utime('out', None)", "fixture", "new"),
+        for field, call, before, after in [("mtime", f"utime('out', ns=({compare.FIXTURE_TIME * 10**9 + 1}, {compare.FIXTURE_TIME * 10**9 + 1}))", "fixture", "new"),
                 *[("gid", f"chown('out', -1, {gid})", os.getgid(), gid) for gid in os.getgroups() if gid != os.getgid()][:1]]:
             touch = self.program("touch", f"import os,shutil\nshutil.copy2('in', 'out')\nos.{call}\n")
             report = compare.compare(keep, touch, [case], name="copy", timeout=30)
@@ -94,10 +94,10 @@ class CompareTests(unittest.TestCase):
     def test_binary_data_and_fixture_files_match(self):
         self.case["env"] = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC0"}
         self.case["files"] = {"nested/data": encoded(b"\x00\xff")}
-        report = compare.compare(self.reference, self.reference, [self.case], timeout=30)
-        self.assertEqual(report["status"], "passed", report)
-        self.assertEqual(report["cases"][0]["reference"]["stdout_b64"], self.case["stdin_b64"])
-        self.assertEqual(report["cases"][0]["reference"]["files"]["nested/data"]["data_b64"], encoded(b"\x00\xff"))
+        reference, candidate = [self.program(f"time-{offset}", f"import os\nos.utime('nested/data', ns=({compare.FIXTURE_TIME * 10**9 + offset}, {compare.FIXTURE_TIME * 10**9 + offset}))\n" + self.reference.read_text().split("\n", 1)[1]) for offset in (1234, 5678)]
+        report = compare.compare(reference, candidate, [self.case], timeout=30)
+        row = report["cases"][0]
+        self.assertEqual((report["status"], row["reference"]["stdout_b64"], row["reference"]["files"]["nested/data"]["data_b64"], *[row[label]["file_metadata"]["nested/data"]["mtime_ns"] for label in ("reference", "candidate")]), ("passed", self.case["stdin_b64"], encoded(b"\x00\xff"), compare.FIXTURE_TIME * 10**9 + 1234, compare.FIXTURE_TIME * 10**9 + 5678), report)
 
     def test_differences_are_separate(self):
         candidates = {

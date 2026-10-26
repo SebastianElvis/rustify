@@ -67,17 +67,16 @@ def deps_log(data, window):
     return decode(bytes(data))
 
 
-def snapshot(root, window):
-    files = {}
+def snapshot(root, window, raw=None):
+    files, raw = {}, {} if raw is None else raw
     for path in sorted(root.rglob("*")):
         name = path.relative_to(root).as_posix()
         if path.is_symlink() or not (path.is_file() or path.is_dir()):
             raise ValueError(f"The build produced a special file: {name}")
-        if path.is_dir():
-            files[name + "/"] = (path.stat().st_mode & 0o7777, None)
-            continue
-        data = path.read_bytes()
-        files[name] = (path.stat().st_mode & 0o7777, build_log(data, window) if path.name == ".ninja_log" else deps_log(data, window) if path.name == ".ninja_deps" else rooted(decode(data), root))
+        status = path.stat()
+        data = None if path.is_dir() else path.read_bytes()
+        raw[name] = {"data": data, "mtime_ns": status.st_mtime_ns, "ctime_ns": status.st_ctime_ns, "atime_ns": status.st_atime_ns, "mode": status.st_mode, "uid": status.st_uid, "gid": status.st_gid, "device": status.st_dev, "inode": status.st_ino, "links": status.st_nlink}
+        files[name + "/" if data is None else name] = (status.st_mode & 0o7777, None if data is None else build_log(data, window) if path.name == ".ninja_log" else deps_log(data, window) if path.name == ".ninja_deps" else rooted(decode(data), root))
     return files
 
 
@@ -126,8 +125,8 @@ def execute(executable, root, step, window, timeout):
         done.set()
         if watcher:
             watcher.join()
-    streams = {label: pointers(wall(rooted(decode(data), root), window)) for label, data in (("stdout", completed.stdout), ("stderr", completed.stderr))}
-    return {"returncode": completed.returncode, "error": error or ("The signal marker was not observed." if "signal" in step and not marker[0] else None), "resources": resources, **streams}
+    streams = {label: decode(data) for label, data in (("stdout", completed.stdout), ("stderr", completed.stderr))}
+    return {"returncode": completed.returncode, "error": error or ("The signal marker was not observed." if "signal" in step and not marker[0] else None), "resources": resources, "raw_streams": streams, **{label: pointers(wall(rooted(data, root), window)) for label, data in streams.items()}}
 
 
 def play(executables, scenario, timeout=15):
@@ -142,7 +141,7 @@ def play(executables, scenario, timeout=15):
             prepare(root, step)
             record = {"executable": label, **execute(executable, root, step, window, timeout)}
             try:
-                record["files"] = snapshot(root, window)
+                record["files"] = snapshot(root, window, record.setdefault("raw_files", {}))
             except (OSError, ValueError) as error:
                 record["error"] = record["error"] or str(error)
             steps.append(record)
