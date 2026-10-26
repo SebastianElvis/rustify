@@ -17,6 +17,7 @@ Credential-dependent behavior stays unmeasured when the host cannot run it.
 The agent uses REA to inspect entry points, symbols, imports, strings, references, functions, and data structures.
 The agent follows one workflow through its relevant calls and state changes.
 The agent tests inferred lifetime rules against original allocation and release behavior.
+The agent captures allocation identities and release histories across the growth interval when it attributes retained memory.
 The agent uses decompilation to form hypotheses about branches, buffer limits, formats, and component boundaries.
 The agent tests those hypotheses through original behavior or a focused runtime trace.
 A static reference does not establish that a user can reach a path.
@@ -33,6 +34,7 @@ The agent continues supported probes when one analysis method fails.
 The agent uses separate experiment data and a known initial state.
 The agent selects new capture and report paths for each experiment.
 The agent sets supervisor limits for time, memory, process count, output, and concurrent probes before execution.
+The agent places bounded trace windows around the measured transition.
 The agent records resource samples and limit terminations.
 The agent follows [software quality acceptance](../../rustify-validate/references/quality.md) for resource and lifecycle probes.
 Each capture identifies the binary, resources, inputs, environment, commands, and observation method.
