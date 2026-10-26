@@ -45,6 +45,7 @@ The agent does not replace an OS script boundary or a native interface for conve
 The agent follows the [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/checklist.html).
 The agent expresses recovered rules with ownership, enums, and typed errors.
 The agent uses byte containers for undecoded paths, tokens, and diagnostics when the original preserves those bytes.
+The agent preserves code units that cannot form Unicode scalar values when the original retains them.
 The agent keeps compatibility diagnostics at the original interface boundary.
 The agent excludes compiler artifacts and decompiler register names from the Rust model.
 
