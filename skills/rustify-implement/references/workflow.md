@@ -58,6 +58,7 @@ The agent starts a repair only from a `rustify-validate` handoff with original e
 The agent repairs the cause within the mapped Rust modules without a product change.
 The agent returns the changed slice to `rustify-validate` for regression checks and acceptance.
 The agent records a separate code budget for each repair before it combines patches.
+The budget counts physical and nonblank lines in source, tests, test fixtures, and build files.
 A fix or refactor adds no more code than it removes.
 
 ## Checks
