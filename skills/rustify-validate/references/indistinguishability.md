@@ -35,7 +35,10 @@ The agent plays each distinguisher against its own Rust program before acceptanc
 | Metamorphic | Probe pairs related by a product property, such as a round trip. |
 | Adaptive | A separate agent with access to the two programs only through the comparison helper. It does not read the implementation. |
 
-When the host has no separate agent, the agent writes its adaptive hypotheses before it runs them.
+The adaptive challenger starts with a fresh context.
+The challenger receives only the binaries, comparison interface, environment, limits, and output path.
+The agent records inherited implementation details or repair hints as a limit on independence.
+When the host has no separate agent, the agent records that limit and writes its adaptive hypotheses before it runs them.
 
 ## Surface checklist
 

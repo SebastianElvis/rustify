@@ -58,6 +58,8 @@ The agent workspace in `work_dir` holds only temporary worker shards and progres
    The agent starts the next slice only after the current slice passes.
    The agent returns new original behavior to the affected discovery skill and to planning.
 6. **Accept.** The agent invokes `rustify-validate` for full acceptance.
+   The coordinator sends outside failures to the validator for confirmation.
+   The coordinator does not prescribe product repairs.
    The validator returns confirmed defects to `rustify-implement` and recovery gaps to discovery and planning.
    The agent repeats implementation and validation until acceptance passes or no permitted next step remains.
    The agent keeps unresolved gaps open and completes checkpoints only when their checks pass.
