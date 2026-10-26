@@ -20,17 +20,15 @@ import harness
 
 BASE = 946684800  # The runner gives every written fixture file the mtime 2000-01-01T00:00:00Z.
 SLACK = 3600 * 10**9
-NUMBER = re.compile(r"\b\d{16,20}\b")
-POINTER = re.compile(r'"0x[0-9a-f]+"')
 
 
 def wall(text, window):
-    return NUMBER.sub(lambda match: "<wall>" if window[0] - SLACK <= int(match.group()) <= time.time_ns() + SLACK else match.group(), text)
+    return re.sub(r"\b\d{16,20}\b", lambda match: "<wall>" if window[0] - SLACK <= int(match.group()) <= time.time_ns() + SLACK else match.group(), text)
 
 
 def pointers(text):
     names = {}
-    return POINTER.sub(lambda match: '"node%d"' % names.setdefault(match.group(), len(names)), text)
+    return re.sub(r'"0x[0-9a-f]+"', lambda match: '"node%d"' % names.setdefault(match.group(), len(names)), text)
 
 
 def rooted(text, root):

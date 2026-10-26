@@ -30,6 +30,9 @@ The `sqlite3` program is the command-line shell with the engine linked in.
 
 ## Reports
 
+The reports store process streams, SQL output, and file contents as YAML binary values.
+The converter decodes each stream separately when it checks a Tcl expectation.
+
 | Report | Class | Content |
 | --- | --- | --- |
 | `repeatability` | Control | The reference against itself on every replay, generated, session, and cross-read probe. |

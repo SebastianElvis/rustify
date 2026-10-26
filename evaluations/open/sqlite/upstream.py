@@ -275,7 +275,7 @@ def run(binary, actions):
         parts = re.split(rb"^'@@(\d+|end)'\n", output["stdout"], flags=re.M)
         found = {int(parts[k]): parts[k + 1] for k in range(1, len(parts) - 1, 2) if parts[k] != b"end"}
         for index in batch:
-            results[index] = {"output": runner.text(found.get(index, b"<missing marker>")), "error": output["error"]}
+            results[index] = {"output": found.get(index, b"<missing marker>"), "error": output["error"]}
         batch.clear()
 
     for index, action in enumerate(actions):
@@ -292,7 +292,7 @@ def run(binary, actions):
                     path.unlink()
         elif action["kind"] == "cli":
             output = runner.invoke(binary, action["args"], action["stdin"].encode())
-            results[index] = {key: runner.text(value) if isinstance(value, bytes) else value for key, value in output.items()}
+            results[index] = output
     flush()
     return results
 
@@ -300,13 +300,13 @@ def run(binary, actions):
 def tcl_result(action, result):
     """Rebuild the Tcl value of a probe from its shell view."""
     if action["kind"] == "cli":
-        message = result["stdout"] + result["stderr"]
+        message = result["stdout"].decode("utf-8", "surrogateescape") + result["stderr"].decode("utf-8", "surrogateescape")
         if result["returncode"] and not result["stderr"]:
             message += "child process exited abnormally"
         if not action["keep"] and message.endswith("\n"):
             message = message[:-1]
         return tcl_list(["1" if result["returncode"] or result["stderr"] else "0", message])
-    segment = result["output"]
+    segment = result["output"].decode("utf-8", "surrogateescape")
     if action["check"] == "catch" and error(segment) is not None:
         return tcl_list(["1", error(segment)])
     rows = values(segment)

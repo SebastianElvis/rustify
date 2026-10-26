@@ -34,10 +34,6 @@ def snapshot():
     return {path.relative_to(SANDBOX).as_posix(): path.read_bytes() for path in sorted(SANDBOX.rglob("*")) if path.is_file()}
 
 
-def text(data):
-    return data.decode("utf-8", "surrogateescape")
-
-
 def play(binary, scenario):
     """Run each step of a scenario. A step is an argument list and its standard input."""
     reset({name: base64.b64decode(value) for name, value in scenario.get("files", {}).items()})
@@ -45,19 +41,14 @@ def play(binary, scenario):
     return steps, snapshot()
 
 
-def outcome(steps, files):
-    """The view keeps the exact process result and file bytes."""
-    return {"steps": [{key: text(value) if isinstance(value, bytes) else value for key, value in step.items()} for step in steps], "files": {name: base64.b64encode(data).decode("ascii") for name, data in files.items()}}
-
-
 def sessions(reference, candidate, scenarios):
     """The comparison checks the steps and all file bytes."""
     report = {"status": "passed", "passed": 0, "failed": 0, "cases": []}
     for scenario in scenarios:
         expected, actual = (play(binary, scenario) for binary in (reference, candidate))
-        passed = outcome(*expected) == outcome(*actual) and not any(step["error"] for step in expected[0] + actual[0])
+        passed = expected == actual and not any(step["error"] for step in expected[0] + actual[0])
         report["passed" if passed else "failed"] += 1
-        report["cases"].append({"id": scenario["id"], "passed": passed, **({} if passed else {"input": scenario, "reference": outcome(*expected), "candidate": outcome(*actual)})})
+        report["cases"].append({"id": scenario["id"], "passed": passed, **({} if passed else {"input": scenario, "reference": {"steps": expected[0], "files": expected[1]}, "candidate": {"steps": actual[0], "files": actual[1]}})})
     report["status"] = "failed" if report["failed"] else "passed"
     return report
 
@@ -68,14 +59,14 @@ def crossread(reference, candidate, scenarios):
 
     def read(binary, data, script):
         reset({"x.db": data})
-        return outcome([invoke(binary, ["x.db"], script.encode())], {})["steps"][0]
+        return invoke(binary, ["x.db"], script.encode())
 
     for scenario in scenarios:
         written = {}
         for label, binary in (("reference", reference), ("candidate", candidate)):
             reset()
             step = invoke(binary, ["x.db"], scenario["write"].encode())
-            written[label] = (snapshot().get("x.db", b""), text(step["stdout"]), text(step["stderr"]), step.get("file_modes", {}))
+            written[label] = (snapshot().get("x.db", b""), step["stdout"], step["stderr"], step.get("file_modes", {}))
         check = "PRAGMA integrity_check;\n" + scenario["read"]
         dump = check + ".dump\n"
         records = {
@@ -85,7 +76,7 @@ def crossread(reference, candidate, scenarios):
             "writer-output": (written["candidate"][1:], written["reference"][1:]),
         }
         failures = [name for name, (actual, expected) in records.items() if actual != expected]
-        if not records["candidate-written"][0]["stdout"].startswith("ok\n"):
+        if not records["candidate-written"][0]["stdout"].startswith(b"ok\n"):
             failures.append("integrity_check")
         report["passed" if not failures else "failed"] += 1
         report["cases"].append({"id": scenario["id"], "passed": not failures, **({"failures": failures, "input": scenario, "records": records} if failures else {})})

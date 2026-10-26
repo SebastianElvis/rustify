@@ -144,10 +144,12 @@ class HarnessTests(unittest.TestCase):
 
     def test_sqlite_rejects_different_database_bytes(self):
         runner = zenity.harness.load("sqlite_runner", ROOT / "evaluations/open/sqlite/runner.py")
-        step = {"returncode": 0, "stdout": b"ok\n", "stderr": b"", "error": None}
+        step = {"returncode": 0, "stdout": b"\xff\\xff", "stderr": b"", "error": None}
         files = [{"x.db": b"SQLite format 3\0" + suffix} for suffix in (b"one", b"two")]
         with mock.patch.object(runner, "play", side_effect=[([step], data) for data in files]):
-            self.assertEqual(runner.sessions(None, None, [{"id": "bytes"}])["failed"], 1)
+            report = runner.sessions(None, None, [{"id": "bytes"}])
+            self.assertEqual(report["failed"], 1)
+            self.assertEqual(yaml.load(yaml.safe_dump(report), Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))["cases"][0]["reference"], {"steps": [step], "files": files[0]})
         with mock.patch.multiple(runner, reset=lambda *args: None, invoke=lambda *args: step), mock.patch.object(runner, "snapshot", side_effect=files):
             self.assertEqual(runner.crossread(None, None, [{"id": "bytes", "write": "", "read": ""}])["failed"], 1)
 
@@ -155,6 +157,8 @@ class HarnessTests(unittest.TestCase):
         with mock.patch.dict(sys.modules, runner=zenity.harness.load("sqlite_state_runner", ROOT / "evaluations/open/sqlite/runner.py")):
             upstream = zenity.harness.load("sqlite_state_converter", ROOT / "evaluations/open/sqlite/upstream.py")
         self.assertEqual(upstream.convert("db close\nsqlite3 db other.db\nexecsql {SELECT 1}\nreset_db\nexecsql {SELECT 2}\ndb unknown_state 1\nexecsql {SELECT 3}"), [{"kind": "close"}, {"kind": "close"}, {"kind": "sql", "sql": "SELECT 1", "check": "list", "db": "other.db"}, {"kind": "close"}, {"kind": "delete", "files": ["test.db", "test.db-journal", "test.db-wal"]}, {"kind": "sql", "sql": "SELECT 2", "check": "list", "db": "test.db"}, {"kind": "unsupported", "command": ["db", "unknown_state", "1"]}])
+        self.assertEqual(upstream.tcl_result({"kind": "sql", "check": "list"}, {"output": b"'a'\n", "error": None}), "a")
+        self.assertEqual(upstream.tcl_result({"kind": "cli", "keep": False}, {"stdout": b"\xc3", "stderr": b"\xa9", "returncode": 0}), "1 \udcc3\udca9")
 
     def test_sqlite_bounds_output_capture(self):
         runner = zenity.harness.load("sqlite_output_limit", ROOT / "evaluations/open/sqlite/runner.py")
@@ -177,10 +181,9 @@ class HarnessTests(unittest.TestCase):
     def test_ninja_capture_preserves_binary_bytes(self):
         runner = zenity.harness.load("ninja_binary_runner", ROOT / "evaluations/open/ninja/runner.py")
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
             for name in (b".ninja_deps", b"artifact"):
-                (root / name.decode("utf-8", "surrogateescape")).write_bytes(b"\xff\\xff")
-            self.assertEqual({name: row[1] for name, row in yaml.load(yaml.safe_dump(runner.snapshot(root, (0,))), Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader)).items()}, dict.fromkeys((b".ninja_deps", b"artifact"), b"\xff\\xff"))
+                (Path(directory) / name.decode("utf-8", "surrogateescape")).write_bytes(b"\xff\\xff")
+            self.assertEqual({name: row[1] for name, row in yaml.load(yaml.safe_dump(runner.snapshot(Path(directory), (0,))), Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader)).items()}, dict.fromkeys((b".ninja_deps", b"artifact"), b"\xff\\xff"))
 
     def test_grading_patterns_compile(self):
         for path in (ROOT / "evaluations").rglob("grading.yaml"):
