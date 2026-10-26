@@ -80,7 +80,8 @@ Independent versions can fail in the same way (Knight and Leveson).
 The original, not the Rust implementation, supplies every expected result.
 When the host supports separate agents, a different agent writes the challenge cases.
 
-The evaluator freezes source, recovered models, and the executable before outside challenges or source reveal.
+The evaluator finishes project writes and checkpoint updates before it freezes source, recovered models, and the executable.
+The evaluator completes the freeze before outside challenges or source reveal.
 The evaluator scores the frozen executable without a rebuild.
 The evaluator verifies the frozen executable's file type and execute permission before it starts comparisons.
 The evaluator retains reference pins, dependency restrictions, and negative controls during frozen scoring.
