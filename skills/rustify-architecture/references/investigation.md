@@ -57,5 +57,7 @@ Each claim is `observed`, `inferred`, or `unknown`.
 The agent states high, medium, or low confidence with a reason.
 Confidence does not replace evidence classification.
 The agent records provider limits, omitted paths, indirect calls, and unresolved boundaries.
-The agent blocks a dependent implementation task when a missing fact prevents faithful reconstruction.
+The agent separates provider limits from unknown product facts.
+The agent names each missing fact, its dependent behavior or mapping, and the evidence that can resolve it.
+The agent blocks only work that needs that fact.
 Original goals and future plans remain inferred or unknown unless direct evidence establishes them.
