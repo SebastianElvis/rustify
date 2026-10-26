@@ -57,7 +57,10 @@ The agent workspace in `work_dir` holds only temporary worker shards and progres
    For each slice, the agent invokes `rustify-implement` and then `rustify-validate` in partial mode.
    The agent starts the next slice only after the current slice passes.
    The agent returns new original behavior to the affected discovery skill and to planning.
-6. **Accept.** The agent runs the full validation and completes the `implement` and `validate` checkpoints.
+6. **Accept.** The agent invokes `rustify-validate` for full acceptance.
+   The validator returns confirmed defects to `rustify-implement` and recovery gaps to discovery and planning.
+   The agent repeats implementation and validation until acceptance passes or an execution constraint prevents further work.
+   The agent keeps unresolved gaps open and completes checkpoints only when their checks pass.
    The agent joins all workers before the final checks.
    The agent reports measured coverage, artifact locations, source access, and remaining gaps.
    The agent does not claim equivalence for arbitrary inputs.

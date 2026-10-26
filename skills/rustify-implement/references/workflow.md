@@ -51,8 +51,9 @@ A language adaptation needs an ADR and compatibility evidence.
 
 ## Repairs
 
-The agent preserves each failing comparison before a repair.
-The agent repairs the cause without a product change.
+The agent takes repair work from `rustify-validate` with its original evidence, reproducer, and ledger mapping.
+The agent repairs the cause within the mapped Rust modules without a product change.
+The agent returns the changed slice to `rustify-validate` for regression checks and acceptance.
 A fix or refactor adds no more code than it removes.
 
 ## Checks

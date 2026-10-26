@@ -60,10 +60,13 @@ The agent does not invent a tolerance because both applications use native contr
 
 ## Repairs and independence
 
-The agent preserves each failure and its smallest reproducer.
-The agent classifies it as a Rust defect, a recovery error, or unknown.
-The agent repairs defects without a product change.
-The agent reruns affected checks and complete workflows after repairs.
+The validator preserves each failure and its smallest reproducer.
+The validator confirms the original result through `rustify-probe` before it requests a product repair.
+The validator links the failure to its requirement, evidence, test, and original-to-Rust mapping in `recovered/model.yaml`.
+The validator sends a confirmed Rust defect to `rustify-implement`.
+The validator sends a recovery error or unknown mapping to discovery and planning before implementation.
+The validator reruns affected checks, complete workflows, and acceptance after each repair.
+The agent repeats this cycle within the execution constraints and keeps unresolved gaps open.
 
 Independent versions can fail in the same way (Knight and Leveson).
 The original, not the Rust implementation, supplies every expected result.

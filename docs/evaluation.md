@@ -175,6 +175,10 @@ The harness lets Claude workers finish within the outer time limit.
 The harness stops the agent process group when that limit expires.
 
 The harness never repairs a project.
+The reconstruction agent uses its frozen skills to validate, implement repairs, and repeat validation before the freeze.
+The validator supplies original evidence and ledger mappings for each repair.
+The evaluator supplies no target-specific repair hints during that cycle.
+
 The evaluator uses failed trials to diagnose the shared skills.
 The evaluator changes the skills and starts a fresh reconstruction from the original binary.
 The fresh agent receives no old implementation, recovered model, hidden case, or patch hint.
@@ -183,6 +187,7 @@ The evaluator records guided product repairs as diagnostic work.
 Those repairs do not establish a skill gain.
 The evaluator keeps reference bytes, scorers, tools, and budgets equal during a prompt comparison.
 The evaluator reports stochastic variation and unmatched conditions.
+
 The blind protocol relies on agent compliance.
 The harness does not isolate filesystem or network access.
 The default tracks are base64, b3sum, and xh. The desktop track needs an operator.
