@@ -14,6 +14,7 @@ Credential-dependent behavior stays unmeasured when the host cannot run it.
 
 The agent uses REA to inspect entry points, symbols, imports, strings, references, functions, and data structures.
 The agent follows one workflow through its relevant calls and state changes.
+The agent tests inferred lifetime rules against original allocation and release behavior.
 The agent uses decompilation to form hypotheses about branches, buffer limits, formats, and component boundaries.
 The agent tests those hypotheses through original behavior or a focused runtime trace.
 A static reference does not establish that a user can reach a path.

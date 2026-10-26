@@ -118,6 +118,11 @@ class HarnessTests(unittest.TestCase):
             (reference.parent / "freedoom1.wad").write_bytes(b"changed")
             scorer.score(reference, reference, Path(directory))
 
+    def test_doom_parses_a_final_glow_record(self):
+        runner = zenity.harness.load("doom_save_runner", ROOT / "evaluations/open/doom/runner.py")
+        data = bytearray(51) + b"\x06" + bytearray(28) + b"\x07\x1d"
+        self.assertEqual(runner.savegame(data, mock.Mock(map_sizes=lambda *args: (0, 0, 0))), data)
+
     def test_doom_manual_gaps_block_full_score(self):
         scorer = zenity.harness.load("doom_score", ROOT / "evaluations/open/doom/run.py")
         groups = {"replay-core": [], "replay-complete": []}

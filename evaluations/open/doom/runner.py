@@ -66,9 +66,10 @@ def savegame(data, wad):
         size = SPECIALS[data[position]]
         position += 1 + (-(position + 1) & 3)
         mask(position, (0, 4, 8))
-        status, old = struct.unpack_from("<ii", data, position + 36)
-        if size == SPECIALS[3] and 2 not in (status, old if status == 3 else status):
-            struct.pack_into("<i", data, position + 32, 0)  # EV_DoPlat leaves count uninitialized. T_PlatRaise reads it only while waiting.
+        if size == SPECIALS[3]:
+            status, old = struct.unpack_from("<ii", data, position + 36)
+            if 2 not in (status, old if status == 3 else status):
+                struct.pack_into("<i", data, position + 32, 0)  # EV_DoPlat leaves count uninitialized. T_PlatRaise reads it only while waiting.
         position += size
     if data[position:] != b"\x07\x1d":
         raise ValueError("The savegame has no valid end.")
@@ -86,15 +87,9 @@ def snapshot(root, wad):
             continue
         data = path.read_bytes()
         if path.suffix == ".dsg":
-            try:
-                data = savegame(data, wad)
-            except (ValueError, IndexError, struct.error) as error:
-                files[name] = (path.stat().st_mode & 0o7777, f"invalid savegame: {error}")
-                continue
-        if path.suffix in (".cfg", ".txt"):
-            files[name] = (path.stat().st_mode & 0o7777, data.decode("utf-8", "surrogateescape"))
-        else:
-            files[name] = (path.stat().st_mode & 0o7777, f"sha256:{hashlib.sha256(data).hexdigest()} size:{len(data)}")
+            data = savegame(data, wad)
+        value = data.decode("utf-8", "surrogateescape") if path.suffix in (".cfg", ".txt") else f"sha256:{hashlib.sha256(data).hexdigest()} size:{len(data)}"
+        files[name] = (path.stat().st_mode & 0o7777, value)
     return files
 
 
@@ -127,7 +122,7 @@ def execute(executable, wad, case):
             steps.append(result)
         try:
             files = snapshot(root, wad)
-        except (OSError, ValueError) as error:
+        except (OSError, ValueError, IndexError, struct.error) as error:
             files, steps[-1]["error"] = {}, str(error)
     return {"steps": steps, "files": files}
 
