@@ -30,7 +30,9 @@ The `lua` program is the standalone interpreter.
 - `replay-core`, `replay-extended`, and `replay-complete` hold the hidden milestone cases. Core is the command line, the language, and the base library. Extended is the `string`, `table`, `math`, `utf8`, `coroutine`, `io`, and `os` libraries. Complete is `debug`, binary chunks, the garbage collector, warnings, `LUA_INIT`, `package`, interactive mode, and limits.
 - `surface-manual` holds cases from the `lua.1` manual page and the usage text.
 - `generate-cli`, `generate-core`, and `generate-extended` hold seeded probes (seed in `generate.py`). They cover every ordered pair of command-line options, longer option sequences, environment variants, arithmetic expressions, mutated sources, numerals, constructors, patterns, formats, pack formats, UTF-8 bytes, sorting, dates, and math functions.
-- `upstream-<file>` runs one suite file in portable mode (`_port=true _soft=true`) and in full mode. `all.lua` runs in user mode (`_U=true`). `heavy.lua` runs once and needs about 3 GB of memory.
+- `upstream-<file>` runs one suite file in portable mode (`_port=true _soft=true`) and in full mode. `all.lua` runs in user mode (`_U=true`).
+- `heavy.lua` runs unchanged with a controlled Darwin allocator. The allocator rejects requests above 1 MiB with `ENOMEM`. Each interpreter must pass the allocation-failure control before the heavy test runs.
+- The heavy report records the allocation condition and the library hash. The process guard remains active. The test does not depend on host memory exhaustion.
 - `repeatability` runs the reference against itself on every replay, surface, and generate case.
 - A negative control replaces `print` and must fail a replay report and an upstream report.
 - Each case id has the form `<feature-id>/<case-name>`. The feature ids come from `grading.yaml`.

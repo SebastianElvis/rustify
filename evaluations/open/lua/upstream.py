@@ -1,8 +1,11 @@
 """Run each file of the official lua-5.5.1-tests suite on both programs."""
 
 import base64
+import hashlib
+import os
 from pathlib import Path
 import tarfile
+import tempfile
 
 from harness import REPOSITORY, compare, load
 
@@ -22,7 +25,7 @@ MODES = {
     "big": {"portable": [*PORTABLE, "big.lua"], "full": ["-e", "local f = coroutine.wrap(assert(loadfile('big.lua'))) assert(f() == 'b') assert(f() == 'a') print('OK')"]},
     "heavy": {"full": ["heavy.lua"]},
 }
-TIMEOUTS = {"heavy": 900}
+TIMEOUTS = {"heavy": 30}
 # The macOS reference fails these upstream checks for host reasons, so the scorer changes them.
 # BLANK removes the text from a start anchor through an end anchor and keeps the line count, so line numbers stay the same.
 BLANK = [
@@ -73,6 +76,22 @@ def trim(result):
     return keep
 
 
+def bounded_allocator():
+    """The heavy test receives a verified allocation-failure condition."""
+    source = Path(__file__).with_name("allocator.c")
+    directory = REPOSITORY / "work/evaluation-tools"
+    directory.mkdir(parents=True, exist_ok=True)
+    library = directory / ("lua-allocator-" + hashlib.sha256(source.read_bytes()).hexdigest() + ".dylib")
+    if not library.is_file():
+        with tempfile.TemporaryDirectory(dir=directory) as temporary:
+            output = Path(temporary) / "allocator.dylib"
+            result, error, _ = compare.execute(["clang", "-dynamiclib", "-O2", "-Wall", "-Wextra", "-Werror", str(source), "-o", str(output)], timeout=30)
+            if error or result.returncode:
+                raise RuntimeError("The allocation-failure library did not build.")
+            os.replace(output, library)
+    return {"DYLD_INSERT_LIBRARIES": str(library), "RUSTIFY_ALLOCATION_LIMIT": "1048576"}
+
+
 def evaluate(reference, candidate, stems=FILES):
     files = suite()
     reports = {}
@@ -82,7 +101,14 @@ def evaluate(reference, candidate, stems=FILES):
         for mode, args in MODES.get(stem, {"portable": [*PORTABLE, f"{stem}.lua"], "full": [f"{stem}.lua"]}).items():
             case = {"id": f"{feature}/{stem}-{mode}", "args": args, "files": files}
             row = {"id": case["id"], "args": args}
+            if stem == "heavy":
+                case["env"] = bounded_allocator()
+                row["allocation_failure"] = {"maximum_request_bytes": 1048576, "layer": "Darwin libc interposition", "library_sha256": hashlib.sha256(Path(case["env"]["DYLD_INSERT_LIBRARIES"]).read_bytes()).hexdigest()}
             for label, binary in (("reference", reference), ("candidate", candidate)):
+                if stem == "heavy":
+                    control = compare.run(binary, str(binary), {"id": "allocator-control", "args": ["-e", "local ok,e=pcall(table.create,200000); assert(not ok and e:find('not enough memory',1,true))"], "env": case["env"]}, 5)
+                    if control["error"] or control["returncode"]:
+                        raise RuntimeError("The allocation-failure control failed. The heavy test did not run.")
                 result = compare.run(binary, str(binary), case, TIMEOUTS.get(stem, 300))
                 row[label] = {**trim(result), "last_line": last_line(result)}
             row["passed"] = all(row[label]["returncode"] == 0 and row[label]["error"] is None for label in ("reference", "candidate")) and row["reference"]["last_line"] == row["candidate"]["last_line"]

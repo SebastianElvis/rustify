@@ -123,6 +123,17 @@ class HarnessTests(unittest.TestCase):
         data = bytearray(51) + b"\x06" + bytearray(28) + b"\x07\x1d"
         self.assertEqual(runner.savegame(data, mock.Mock(map_sizes=lambda *args: (0, 0, 0))), data)
 
+    def test_lua_rejects_a_missing_allocation_failure_condition(self):
+        upstream = zenity.harness.load("lua_allocation_test", ROOT / "evaluations/open/lua/upstream.py")
+        with tempfile.TemporaryDirectory() as directory:
+            library = Path(directory) / "allocator.dylib"
+            library.write_bytes(b"control")
+            with mock.patch.multiple(upstream, suite=lambda: {}, bounded_allocator=lambda: {"DYLD_INSERT_LIBRARIES": str(library)}), mock.patch.object(upstream.compare, "run", return_value={"error": None, "returncode": 1}) as run:
+                with self.assertRaisesRegex(RuntimeError, "heavy test did not run"):
+                    upstream.evaluate(Path("reference"), Path("candidate"), ["heavy"])
+                self.assertEqual(run.call_count, 1)
+                self.assertEqual(run.call_args.args[2]["id"], "allocator-control")
+
     def test_doom_manual_gaps_block_full_score(self):
         scorer = zenity.harness.load("doom_score", ROOT / "evaluations/open/doom/run.py")
         groups = {"replay-core": [], "replay-complete": []}
