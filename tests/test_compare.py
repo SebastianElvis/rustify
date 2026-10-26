@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
-import time
+import threading
 import unittest
 
 import yaml
@@ -54,19 +54,25 @@ class CompareTests(unittest.TestCase):
         return path
 
     def test_supervisor_limits_memory_children_and_streams(self):
-        programs = [
-            ("allocate", "import time\nx=[]\nwhile True:\n x.append(bytearray(1024*1024))\n time.sleep(.005)\n", {"memory_mib": 48}, "memory"),
-            ("children", "import subprocess,time\np=subprocess.Popen(['/bin/sleep','10'],start_new_session=True)\ntime.sleep(10)\n", {"process_limit": 1}, "process"),
-            ("output", "import os\nwhile True: os.write(1,b'x'*65536)\n", {"output_mib": 1}, "output"),
-        ]
-        for name, body, limits, message in programs:
+        marker, owner = self.root / "escaped", threading.get_ident()
+        def peer(process):
+            self.assertEqual(threading.get_ident(), owner)
+            subprocess.run([sys.executable, "-S", "-c", "import time; time.sleep(.5)"], timeout=.9, check=True)
+            if name != "output":
+                self.assertIsNotNone(process.poll())
+        for name, body, limits in [
+            ("memory", "import time\ntime.sleep(.8)\n", {"memory_mib": 1}),
+            ("process", f"import subprocess,sys,time\nsubprocess.Popen([sys.executable,'-S','-c', {('import time; time.sleep(.35); open(' + repr(str(marker)) + ', \"w\").write(\"leak\")')!r}],start_new_session=True)\ntime.sleep(.8)\n", {"process_limit": 1}),
+            ("time", "import time\ntime.sleep(.8)\n", {"timeout": .12}),
+            ("output", "import os,time\nos.write(1,b'x'*(1024**2+1))\ntime.sleep(.8)\n", {"output_mib": 1}),
+        ]:
             with self.subTest(name=name):
-                result, error, metrics = compare.execute([str(self.program(name, body))], timeout=3, **limits)
-                self.assertIn(message + " limit", error)
+                result, error, metrics = compare.execute([str(self.program(name, body))], **{"timeout": 1.5, **limits}, on_spawn=(lambda process: threading.Event().wait(.5)) if name == "process" else peer)
+                self.assertIn(name + " limit", error)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertLessEqual(len(result.stdout), limits.get("output_mib", 16) * 1024 * 1024)
-                self.assertGreaterEqual(metrics["peak_processes"], 1)
                 self.assertTrue(any(row["pid"] == metrics["pid"] and row["command"] and row["started"] for row in metrics["peak_memory_processes"]))
+        self.assertFalse(marker.exists())
 
     def test_oversized_files_do_not_enter_memory(self):
         program = self.program("large-file", "with open('out', 'wb') as stream: stream.truncate(1024**3)\n")
@@ -78,18 +84,16 @@ class CompareTests(unittest.TestCase):
         program = self.program("stdin-policy", "import os,select,sys\nif len(sys.argv)>1: os.read(0,1)\nprint(bool(select.select([0],[],[],.1)[0]))\n")
         for data in (b"", b"x"):
             for keep in (False, True):
-                result, error, _ = compare.execute([str(program), *(["read"] if data else [])], stdin=data, keep_stdin_open=keep, timeout=10)
+                result, error, _ = compare.execute([str(program), *(["read"] if data else [])], stdin=data, keep_stdin_open=keep, on_spawn=lambda process: self.assertEqual(threading.get_ident(), threading.main_thread().ident), timeout=1.5)
                 self.assertEqual((result.returncode, error, result.stdout), (0, None, b"False\n" if keep else b"True\n"))
 
     def test_failed_spawn_hook_cleans_up_the_process(self):
-        started = []
         def reject(process):
-            started.append(process.pid)
+            self.process = process
             raise RuntimeError("The watcher did not start.")
         with self.assertRaisesRegex(RuntimeError, "watcher"):
-            compare.execute([str(self.program("hook", "import time\ntime.sleep(10)\n"))], on_spawn=reject, timeout=3)
-        with self.assertRaises(ProcessLookupError):
-            os.kill(started[0], 0)
+            compare.execute([str(self.program("hook", "import time\ntime.sleep(.8)\n"))], on_spawn=reject, timeout=1.5)
+        self.assertEqual(self.process.returncode, -9)
 
     def test_binary_data_and_fixture_files_match(self):
         self.case["env"] = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC0"}
@@ -130,15 +134,6 @@ class CompareTests(unittest.TestCase):
                 self.assertEqual(report["errors"][0]["input"]["id"], "fuzz-0-0")
                 self.assertIn("execution_error", report["errors"][0]["differences"])
                 self.assertTrue(all(report["errors"][0][label]["error"] for label in ("reference", "candidate")))
-
-    def test_timeout_kills_descendants(self):
-        marker = self.root / "escaped"
-        body = "import subprocess, sys, time\nsubprocess.Popen([sys.executable, '-c', \"import time; time.sleep(0.8); open(\" + repr(str(marker)) + \", 'w').write('leak')\"], start_new_session=True)\ntime.sleep(10)\n"
-        slow = self.program("descendants", body)
-        report = compare.compare(slow, self.reference, [self.case], timeout=0.5)
-        self.assertEqual(report["status"], "failed")
-        time.sleep(1)
-        self.assertFalse(marker.exists())
 
     def test_invalid_cases_fail(self):
         invalid = [[], {}, [self.case, self.case], [{"id": "x", "args": [], "stdin_b64": "!"}], [{"id": "x", "args": "bad"}]]

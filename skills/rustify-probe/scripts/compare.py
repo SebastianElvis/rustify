@@ -4,6 +4,8 @@
 import argparse
 import base64
 import ctypes
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import suppress
 import hashlib
 import math
 import os
@@ -15,6 +17,7 @@ import subprocess
 import struct
 import sys
 import tempfile
+import threading
 import time
 
 import yaml
@@ -98,7 +101,7 @@ def execute(command, *, timeout, stdin=b"", keep_stdin_open=False, on_spawn=None
     output = {"stdout": bytearray(), "stderr": bytearray()}
     remaining, size = memoryview(stdin), 0
     process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True, **options)
-    start, sample, owned, details, peak_details = time.monotonic(), 0, {}, {}, []
+    start, owned, peak_details = time.monotonic(), {}, []
     def members():
         rows = subprocess.check_output(["/bin/ps", "-axo", "pid=,ppid=,pgid=,rss=,lstart=,comm="], text=True)
         parts = [row.split(maxsplit=9) for row in rows.splitlines()]
@@ -107,38 +110,43 @@ def execute(command, *, timeout, stdin=b"", keep_stdin_open=False, on_spawn=None
         while active != (expanded := active | {pid for pid, (parent, _, _, _, _) in tasks.items() if parent in active}):
             active = expanded
         owned.update({pid: tasks[pid][3] for pid in active})
-        details.clear()
-        details.update({pid: {"pid": pid, "parent_pid": tasks[pid][0], "started": tasks[pid][3], "command": tasks[pid][4]} for pid in active})
-        return [(pid, tasks[pid][2]) for pid in active]
-    with process, selectors.DefaultSelector() as selector:
+        return {pid: {"pid": pid, "parent_pid": tasks[pid][0], "started": tasks[pid][3], "command": tasks[pid][4], "rss_kib": tasks[pid][2]} for pid in active}
+    with process, selectors.DefaultSelector() as selector, ThreadPoolExecutor(max_workers=1) as workers:
         for stream, mode, name in ((process.stdin, selectors.EVENT_WRITE, "stdin"), (process.stdout, selectors.EVENT_READ, "stdout"), (process.stderr, selectors.EVENT_READ, "stderr")):
             os.set_blocking(stream.fileno(), False)
             if name != "stdin" or remaining:
                 selector.register(stream, mode, name)
             elif not keep_stdin_open:
                 stream.close()
+        stop = threading.Event()
+        def supervise():
+            nonlocal peak, footprint, count, peak_details, error
+            try:
+                while not stop.is_set():
+                    current = members()
+                    for pid, row in current.items():
+                        info = ctypes.create_string_buffer(160)
+                        physical = struct.unpack_from("=Q", info, 72)[0] // 1024 if usage and usage(pid, 2, info) == 0 else 0
+                        row["memory_kib"] = max(row["rss_kib"], physical)
+                    memory = sum(row["memory_kib"] for row in current.values())
+                    if memory > footprint:
+                        peak_details = list(current.values())
+                    peak, footprint, count = max(peak, sum(row["rss_kib"] for row in current.values())), max(footprint, memory), max(count, len(current))
+                    for value, limit, label in ((memory, memory_mib * 1024, "memory"), (len(current), process_limit, "process"), (time.monotonic() - start, timeout, "time")):
+                        if value > limit:
+                            error = error or f"The process exceeded the {label} limit."
+                    if error or stop.wait(0.05):
+                        break
+            finally:
+                process.kill()
+                for pid in members():
+                    with suppress(ProcessLookupError):
+                        os.kill(pid, signal.SIGKILL)
+        monitor = workers.submit(supervise)
         try:
             if on_spawn is not None:
                 on_spawn(process)
-            while selector.get_map() or process.poll() is None:
-                now = time.monotonic()
-                if now >= sample:
-                    current = members()
-                    memory, sampled = 0, []
-                    for pid, rss in current:
-                        info = ctypes.create_string_buffer(160)
-                        physical = struct.unpack_from("=Q", info, 72)[0] // 1024 if usage and usage(pid, 2, info) == 0 else 0
-                        memory += max(rss, physical)
-                        sampled.append({**details[pid], "rss_kib": rss, "memory_kib": max(rss, physical)})
-                    if memory > footprint:
-                        peak_details = sampled
-                    peak, footprint, count = max(peak, sum(rss for _, rss in current)), max(footprint, memory), max(count, len(current))
-                    sample = now + 0.05
-                for value, limit, label in ((memory, memory_mib * 1024, "memory"), (len(current), process_limit, "process"), (now - start, timeout, "time")):
-                    if value > limit:
-                        error = error or f"The process exceeded the {label} limit."
-                if error:
-                    break
+            while not (error or monitor.done()) and (selector.get_map() or process.poll() is None):
                 for key, _ in selector.select(0.05):
                     try:
                         if key.data == "stdin":
@@ -157,12 +165,8 @@ def execute(command, *, timeout, stdin=b"", keep_stdin_open=False, on_spawn=None
                     if key.data != "stdin" or not keep_stdin_open:
                         key.fileobj.close()
         finally:
-            process.kill()
-            for pid, _ in members():
-                try:
-                    os.kill(pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
+            stop.set()
+        monitor.result()
     result = subprocess.CompletedProcess(command, process.returncode, bytes(output["stdout"]), bytes(output["stderr"]))
     return result, error, {"pid": process.pid, "peak_rss_kib": peak, "peak_memory_kib": footprint, "peak_memory_processes": peak_details, "memory_method": "RSS and physical footprint" if usage else "RSS", "peak_processes": count, "memory_mib": memory_mib, "output_mib": output_mib, "process_limit": process_limit}
 

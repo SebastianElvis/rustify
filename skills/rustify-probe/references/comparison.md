@@ -59,6 +59,11 @@ The default limits are 512 MiB sampled memory, 64 processes, and 16 MiB of captu
 The API caller can set measured workload limits with `execute` parameters.
 The API caller can set `keep_stdin_open=True` when the target must inherit a pipe without end-of-file.
 The API caller can use `on_spawn(process)` to start a signal watcher within the helper cleanup scope.
+The callback runs on the calling thread and owns the streams until it returns.
+The supervisor monitors time, memory, and processes during the callback.
+The output limit bounds helper captures, not protocol data that the callback reads itself.
+The caller bounds callback protocol data and callback duration.
+The helper cannot cancel arbitrary callback code.
 The helper records resource peaks separately from exact behavior comparisons.
 The peak-memory sample includes process IDs, start times, parent IDs, and process commands.
 A limit failure always produces an execution error, even when both programs reach the same limit.
