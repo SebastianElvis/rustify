@@ -30,6 +30,11 @@ The agent checks that assertion against both programs independently.
 Matching implementations can still fail an independent expected assertion.
 A proposed case permits an experiment. It does not permit a product change.
 
+The validator preserves prior captures and assertions before a capture schema migration.
+The validator proves that every existing asserted value stays unchanged.
+The validator adds new fields only from repeatable original captures.
+The validator records the migration separately and reruns the affected checks.
+
 ## Slice checks
 
 After each slice, the agent compares the slice scenarios and runs the gate with `--allow-partial`.
