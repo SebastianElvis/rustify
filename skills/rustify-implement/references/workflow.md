@@ -58,8 +58,9 @@ A fix or refactor adds no more code than it removes.
 ## Checks
 
 The `check` command runs `cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, and `cargo test --locked`.
-The agent uses `cargo clean -p <package>` after a project move or copy.
+The agent cleans copied package artifacts for each Cargo target and profile before checks.
 Compiled tests can retain old executable and fixture paths.
+The agent verifies that rebuilt tests use the current executable and fixture paths.
 The agent adds `--deny` when `cargo-deny` is installed.
 The agent adds `--mutants` when `cargo-mutants` is installed. The mutation score shows test adequacy.
 A missed mutant in a requirement path needs a new test or a recorded gap.
