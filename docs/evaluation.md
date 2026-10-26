@@ -186,6 +186,11 @@ The fresh agent receives no old implementation, recovered model, hidden case, or
 
 The evaluator records guided product repairs as diagnostic work.
 Those repairs do not establish a skill gain.
+An optional post-score continuation uses a separate project and the validation skill to confirm outside witnesses.
+The implementation skill receives only confirmed failures and their ledger mappings.
+The evaluator records this continuation as case-assisted work.
+This continuation does not establish a fresh reconstruction gain.
+
 The evaluator keeps reference bytes, scorers, tools, and budgets equal during a prompt comparison.
 The evaluator reports stochastic variation and unmatched conditions.
 
