@@ -63,9 +63,13 @@ The agent does not invent a tolerance because both applications use native contr
 The validator preserves each failure and its smallest reproducer.
 The validator confirms the original result through `rustify-probe` before it requests a product repair.
 The validator links the failure to its requirement, evidence, test, and original-to-Rust mapping in `recovered/model.yaml`.
+
+The validator freezes the current Rust executable before a repair.
 The validator sends a confirmed Rust defect to `rustify-implement`.
 The validator sends a recovery error or unknown mapping to discovery and planning before implementation.
 The validator reruns affected checks, complete workflows, and acceptance after each repair.
+The validator probes differences between the frozen and repaired Rust executables.
+The original supplies expected results for every changed behavior.
 
 The validator records which checks an execution constraint blocks.
 The agent continues the cycle for other permitted checks and repairs.

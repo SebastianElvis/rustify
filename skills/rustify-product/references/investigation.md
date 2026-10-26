@@ -27,6 +27,9 @@ Each capture is a characterization test (Feathers): it records what the original
 The agent starts with a repeatable successful workflow.
 The agent changes one input or state per probe when practical.
 
+The agent probes disagreements between explicit options, embedded metadata, and detected input properties.
+The agent records the observed precedence.
+
 | Dimension | Probe questions |
 | --- | --- |
 | Inputs | Which types, encodings, units, limits, defaults, and empty values does the original accept? |

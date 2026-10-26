@@ -8,8 +8,11 @@ The Agent Skills format permits custom string metadata.
 The metadata does not install or connect an MCP server.
 
 The agent searches the host's connected and deferred tool catalogs before it declares REA absent.
-The host uses its available REA MCP tools or an existing REA CLI.
+The host uses available REA MCP tools or a permitted CLI from the installed REA workflow.
+The agent checks permitted headless CLI inspectors before it requests connection changes.
+The agent records decompilation and runtime tracing limits separately.
 REA setup connects the server to the selected host and installs its investigation workflow.
+
 The agent follows the installed REA workflow for target routing and provider limits.
 The agent reads each actual tool schema before use.
 The agent preserves exported evidence identifiers and limitations.
