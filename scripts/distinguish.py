@@ -60,19 +60,17 @@ def play(reference, candidate, agent, budget, name, output, timeout, seed):
     probes = list(yaml.safe_load_all((output / "probes.log").read_text())) if (output / "probes.log").exists() else []
     claimed = yaml.safe_load((workspace / "witnesses.yaml").read_text()) if (workspace / "witnesses.yaml").exists() else []
     key = lambda case: yaml.safe_dump({name: value for name, value in case.items() if name != "id"}, sort_keys=True)
-    first, cases = {}, {}
-    for index, case in enumerate([item["case"] for item in probes] + (claimed or [])):
-        if index < len(probes):
-            first.setdefault(key(case), {}).setdefault(probes[index]["label"], index + 1)
-        cases.setdefault(key(case), {**case, "id": f"probe-{len(cases) + 1}"})
-    report = compare.compare(reference, candidate, list(cases.values()), timeout, name) if cases else {"cases": []}
-    witnesses = [row["input"] for row in report["cases"] if not row["passed"] and "execution_error" not in row["differences"]]
+    first = {(key(item["case"]), item["label"]): index for index, item in reversed(list(enumerate(probes, 1)))}
+    cases = {}
+    for case in [item["case"] for item in probes] + (claimed or []): cases.setdefault(key(case), {**case, "id": f"probe-{len(cases) + 1}"})
+    rows = [{**row, "reference_repeat": (repeat := compare.run(reference, name, row["input"], timeout)), "repeatability_differences": (changed := compare.differ({"reference": row["reference"], "candidate": repeat})), "passed": row["passed"] and not changed} for row in (compare.compare(reference, candidate, list(cases.values()), timeout, name) if cases else {"cases": []})["cases"]]
+    witnesses = [row["input"] for row in rows if not row["passed"] and not row["repeatability_differences"] and "execution_error" not in row["differences"]]
     path_leak = any(path in result.stdout + result.stderr for path in secret.values())
     summary = {
         "class": "D-adaptive", "labels": {labels[0]: "original", labels[1]: "candidate"},
-        "budget": budget, "probes": len(probes), "replayed_cases": len(cases), "witnesses": len(witnesses),
-        "query_complexity": min((max(first[key(case)].values()) for case in witnesses if set(first.get(key(case), {})) == {"A", "B"}), default=None), "path_leak": path_leak,
-        "status": "invalid" if result.returncode or path_leak or len(probes) > budget or any("view" not in item or item["view"].get("error") is not None for item in probes) or any("execution_error" in row["differences"] for row in report["cases"]) or not any(set(pair) == {"A", "B"} for pair in first.values()) else "failed" if witnesses else "passed", "witness_cases": witnesses,
+        "budget": budget, "probes": len(probes), "replayed_cases": len(cases), "witnesses": len(witnesses), "inconclusive": len(inconclusive := [row["input"] for row in rows if row["repeatability_differences"] and "execution_error" not in row["repeatability_differences"]]),
+        "query_complexity": min((max(first[(key(case), label)] for label in ("A", "B")) for case in witnesses if {label for identity, label in first if identity == key(case)} == {"A", "B"}), default=None), "path_leak": path_leak,
+        "status": "invalid" if result.returncode or path_leak or len(probes) > budget or any("view" not in item or item["view"].get("error") is not None for item in probes) or any("execution_error" in row["differences"] + row["repeatability_differences"] for row in rows) or not any({label for identity, label in first if identity == token} == {"A", "B"} for token in cases) else "failed" if witnesses else "incomplete" if inconclusive else "passed", "witness_cases": witnesses, "inconclusive_cases": inconclusive, "replays": rows,
     }
     (output / "report.yaml").write_text(yaml.safe_dump(summary, sort_keys=False))
     return summary
@@ -90,7 +88,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     summary = play(args.reference, args.candidate, args.agent, args.budget, args.name, args.output.resolve(), args.timeout, args.seed)
-    print(yaml.safe_dump({key: value for key, value in summary.items() if key != "witness_cases"}, sort_keys=False), end="")
+    print(yaml.safe_dump({key: value for key, value in summary.items() if key not in {"witness_cases", "inconclusive_cases", "replays"}}, sort_keys=False), end="")
     return 0 if summary["status"] == "passed" else 1
 
 
