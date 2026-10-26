@@ -45,6 +45,8 @@ The scorer runs each upstream test once.
 `runner.py` applies only these equivalence rules. Every other difference is a witness.
 The runner preserves raw streams and file bytes before normalization.
 The `raw_files` records keep exact timestamps, ownership, and filesystem identity.
+The reports use YAML binary values for stream bytes, file bytes, and filenames.
+The representation preserves invalid UTF-8 bytes.
 
 | Field | Rule | Evidence |
 | --- | --- | --- |

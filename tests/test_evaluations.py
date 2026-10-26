@@ -174,6 +174,14 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(upstream.python_report(Path("reference"), Path("candidate"), files, "test.py")["failed"], 1)
             self.assertEqual(attempt.call_count, 2)
 
+    def test_ninja_capture_preserves_binary_bytes(self):
+        runner = zenity.harness.load("ninja_binary_runner", ROOT / "evaluations/open/ninja/runner.py")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in (b".ninja_deps", b"artifact"):
+                (root / name.decode("utf-8", "surrogateescape")).write_bytes(b"\xff\\xff")
+            self.assertEqual({name: row[1] for name, row in yaml.load(yaml.safe_dump(runner.snapshot(root, (0,))), Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader)).items()}, dict.fromkeys((b".ninja_deps", b"artifact"), b"\xff\\xff"))
+
     def test_grading_patterns_compile(self):
         for path in (ROOT / "evaluations").rglob("grading.yaml"):
             for rows in yaml.safe_load(path.read_text()).values():

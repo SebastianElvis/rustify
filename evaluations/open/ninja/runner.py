@@ -24,14 +24,6 @@ NUMBER = re.compile(r"\b\d{16,20}\b")
 POINTER = re.compile(r'"0x[0-9a-f]+"')
 
 
-def encode(text):
-    return text.encode("utf-8", "surrogateescape")
-
-
-def decode(data):
-    return data.decode("utf-8", "surrogateescape")
-
-
 def wall(text, window):
     return NUMBER.sub(lambda match: "<wall>" if window[0] - SLACK <= int(match.group()) <= time.time_ns() + SLACK else match.group(), text)
 
@@ -49,12 +41,12 @@ def rooted(text, root):
 
 def build_log(data, window):
     lines = []
-    for line in decode(data).split("\n"):
+    for line in data.decode("utf-8", "surrogateescape").split("\n"):
         fields = line.split("\t")
         if len(fields) == 5 and not line.startswith("#"):
             fields[:3] = ["*", "*", wall(fields[2], window)]
         lines.append("\t".join(fields))
-    return "\n".join(lines)
+    return "\n".join(lines).encode("utf-8", "surrogateescape")
 
 
 def deps_log(data, window):
@@ -64,19 +56,19 @@ def deps_log(data, window):
         if size >> 31 and offset + 16 <= len(data) and wall(str(struct.unpack_from("<Q", data, offset + 8)[0]), window) == "<wall>":
             data[offset + 8:offset + 16] = b"<wall>\0\0"
         offset += 4 + (size & 0x7FFFFFFF)
-    return decode(bytes(data))
+    return bytes(data)
 
 
 def snapshot(root, window, raw=None):
     files, raw = {}, {} if raw is None else raw
     for path in sorted(root.rglob("*")):
-        name = path.relative_to(root).as_posix()
+        name = os.fsencode(path.relative_to(root).as_posix())
         if path.is_symlink() or not (path.is_file() or path.is_dir()):
             raise ValueError(f"The build produced a special file: {name}")
         status = path.stat()
         data = None if path.is_dir() else path.read_bytes()
         raw[name] = {"data": data, "mtime_ns": status.st_mtime_ns, "ctime_ns": status.st_ctime_ns, "atime_ns": status.st_atime_ns, "mode": status.st_mode, "uid": status.st_uid, "gid": status.st_gid, "device": status.st_dev, "inode": status.st_ino, "links": status.st_nlink}
-        files[name + "/" if data is None else name] = (status.st_mode & 0o7777, None if data is None else build_log(data, window) if path.name == ".ninja_log" else deps_log(data, window) if path.name == ".ninja_deps" else rooted(decode(data), root))
+        files[name + b"/" if data is None else name] = (status.st_mode & 0o7777, None if data is None else build_log(data, window) if path.name == ".ninja_log" else deps_log(data, window) if path.name == ".ninja_deps" else rooted(data.decode("utf-8", "surrogateescape"), root).encode("utf-8", "surrogateescape"))
     return files
 
 
@@ -84,7 +76,7 @@ def prepare(root, step):
     for name, text in step.get("write", {}).items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(encode(text))
+        path.write_bytes(text.encode("utf-8", "surrogateescape"))
         os.utime(path, (BASE, BASE))
     for name in step.get("remove", []):
         (root / name).unlink(missing_ok=True)
@@ -125,8 +117,8 @@ def execute(executable, root, step, window, timeout):
         done.set()
         if watcher:
             watcher.join()
-    streams = {label: decode(data) for label, data in (("stdout", completed.stdout), ("stderr", completed.stderr))}
-    return {"returncode": completed.returncode, "error": error or ("The signal marker was not observed." if "signal" in step and not marker[0] else None), "resources": resources, "raw_streams": streams, **{label: pointers(wall(rooted(data, root), window)) for label, data in streams.items()}}
+    streams = {"stdout": completed.stdout, "stderr": completed.stderr}
+    return {"returncode": completed.returncode, "error": error or ("The signal marker was not observed." if "signal" in step and not marker[0] else None), "resources": resources, "raw_streams": streams, **{label: pointers(wall(rooted(data.decode("utf-8", "surrogateescape"), root), window)).encode("utf-8", "surrogateescape") for label, data in streams.items()}}
 
 
 def play(executables, scenario, timeout=15):
