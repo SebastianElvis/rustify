@@ -20,7 +20,7 @@ class ParityTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
-        self.root = Path(self.directory.name)
+        self.root = Path(self.directory.name).resolve()
         self.write("implementation/src/main.rs", "mod codec;\nfn main() { codec::run(); }\n")
         self.write("implementation/src/codec.rs", "pub fn run() {}\n")
         self.write("recovered/evidence/original.yaml", {"returncode": 0})
@@ -33,7 +33,7 @@ class ParityTests(unittest.TestCase):
         self.evidence = [{"id": "E1", "classification": "observed", "path": "recovered/evidence/original.yaml", "sha256": self.sha("recovered/evidence/original.yaml")}, {"id": "E2", "classification": "unknown"}]
         self.tests = [{"id": "T1", "origin": "observed", "evidence": ["E1"], "scenarios": ["S1"], "expect": {"returncode": 0, "stdout_b64": "YQ=="}}]
         result = {"returncode": 0, "stdout_b64": "YQ==", "stderr_b64": "", "error": None}
-        self.report = {"status": "passed", "passed": 1, "failed": 0, "executables": {"reference": {"sha256": "a" * 64}}, "cases": [{"input": {"id": "S1"}, "reference": result.copy(), "candidate": result.copy(), "passed": True, "differences": []}]}
+        self.report = {"status": "passed", "passed": 1, "failed": 0, "executables": {"reference": {"sha256": "a" * 64}, "candidate": {"path": str(self.root / "recovered/ux.md"), "sha256": self.sha("recovered/ux.md")}}, "cases": [{"input": {"id": "S1"}, "reference": result.copy(), "candidate": result.copy(), "passed": True, "differences": []}]}
         self.model = {
             "inventory": {"complete": True},
             "requirements": [{
@@ -67,12 +67,12 @@ class ParityTests(unittest.TestCase):
 
     def test_complete_records_pass_only_the_evidence_gate(self):
         result = self.run_check()
-        self.assertEqual(result["assessment"], "full_parity_pass")
-        self.assertEqual(result["status"], "passed")
+        self.assertEqual((result["assessment"], result["status"]), ("full_parity_pass", "passed"))
         self.assertIs(result["semantic_truth_verified"], False)
-        self.assertEqual(result["reflexion"]["convergences"], ["EDGE-1"])
-        self.assertEqual(result["slices"], {"SLICE-1": True})
+        self.assertEqual((result["reflexion"]["convergences"], result["slices"]), (["EDGE-1"], {"SLICE-1": True}))
         self.assertEqual(result["inputs"]["implementation/src/main.rs"], self.sha("implementation/src/main.rs"))
+        self.write("recovered/ux.md", "The candidate bytes change.\n")
+        self.assertIn("The comparison uses a different executable identity.", self.run_check()["errors"])
 
     def test_every_surface_item_needs_a_requirement(self):
         self.model["surface"].append({"id": "SURF-2", "kind": "condition", "text": "closed standard output", "requirements": []})

@@ -130,8 +130,8 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
         cases = {}
         for name in comparisons:
             report = read(root, name, inputs)
-            if report["executables"]["reference"]["sha256"] != target:
-                raise ValueError("The comparison uses a different original identity.")
+            if report["executables"]["reference"]["sha256"] != target or hashlib.sha256(file(root, Path((candidate := report["executables"]["candidate"])["path"]).relative_to(root).as_posix()).read_bytes()).hexdigest() != candidate["sha256"]:
+                raise ValueError("The comparison uses a different executable identity.")
             rows = records([{**case, "id": case.get("id", case.get("input", {}).get("id"))} for case in report["cases"]])
             if not rows or type(report["passed"]) is not int or report["passed"] + report["failed"] != len(rows) or report["passed"] != sum(case.get("passed") is True and case.get("differences") == [] for case in rows.values()):
                 raise ValueError("The comparison totals are inconsistent.")
