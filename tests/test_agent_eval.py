@@ -87,15 +87,15 @@ if __name__ == "__main__":
 
 
 class ResumeTests(unittest.TestCase):
-    def test_resume_uses_only_failed_sessions(self):
+    def test_resume_uses_failed_parity_and_error_sessions(self):
         with tempfile.TemporaryDirectory() as temporary:
             stamp = Path(temporary)
-            for trial, error, session in ((1, "usage_limit_reached", "saved-session"), (2, None, "done"), (3, "failed", None)):
+            for trial, error, session in ((1, "usage_limit_reached", "saved-session"), (2, None, "done"), (3, "failed", None), (4, None, "partial-session")):
                 agent_eval.save(stamp / TRACK / f"trial-{trial}/run.yaml", {"error": error, "session": session})
+            agent_eval.save(stamp / TRACK / "trial-4/project/verification/parity.yaml", {"full_parity_gate_pass": False})
             with patch.object(agent_eval, "attempt") as attempt:
                 agent_eval.resume(stamp, "agent -p", 30)
-            self.assertEqual(attempt.call_count, 1)
-            self.assertEqual(attempt.call_args.args[2], ["agent", "-p", "--resume", "saved-session"])
+            self.assertEqual([call.args[2] for call in attempt.call_args_list], [["agent", "-p", "--resume", session] for session in ("saved-session", "partial-session")])
             (stamp / TRACK / "trial-1/score").mkdir()
             with patch.object(agent_eval, "attempt") as attempt, self.assertRaisesRegex(ValueError, "new blind run"):
                 agent_eval.resume(stamp, "agent -p", 30)

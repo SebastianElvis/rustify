@@ -166,11 +166,12 @@ python3 scripts/agent_eval.py grade work/agent-eval/<stamp>
 python3 scripts/agent_eval.py resume work/agent-eval/<stamp> --agent "claude -p --output-format json --dangerously-skip-permissions" --no-grade
 ```
 
-The `resume` command continues failed trials in their saved agent sessions.
+The `resume` command continues saved sessions after agent errors or a failed parity report.
 The command keeps the installed skills and project files.
 The command records a new freeze after the agent exits.
 The command rejects a trial that already has a score folder.
 The `--no-grade` option delays grading until the blind work ends.
+
 The harness lets Claude workers finish within the outer time limit.
 The harness stops the agent process group when that limit expires.
 

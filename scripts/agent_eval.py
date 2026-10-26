@@ -105,10 +105,10 @@ def attempt(workspace, record, command, prompt, timeout):
 
 
 def resume(stamp, agent, timeout):
-    """The helper resumes each failed trial in its saved session."""
+    """The helper resumes saved sessions after agent errors or failed parity reports."""
     for workspace in sorted(stamp.glob("*/trial-*")):
-        record = yaml.safe_load((workspace / "run.yaml").read_text())
-        if record.get("error") and record.get("session"):
+        record, parity = yaml.safe_load((workspace / "run.yaml").read_text()), workspace / "project/verification/parity.yaml"
+        if (record.get("error") or (parity.is_file() and (yaml.safe_load(parity.read_text()) or {}).get("full_parity_gate_pass") is not True)) and record.get("session"):
             if (workspace / "score").exists():
                 raise ValueError("A scored trial needs a new blind run.")
             attempt(workspace, record, [*shlex.split(agent), "--resume", record["session"]], RESUME, timeout)
