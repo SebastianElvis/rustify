@@ -32,7 +32,7 @@ The agent continues supported probes when one analysis method fails.
 ## Preserve the experiment
 
 The agent uses separate experiment data and a known initial state.
-The agent selects new capture and report paths for each experiment.
+The agent selects new capture and report paths for each experiment and each writer.
 The agent sets supervisor limits for time, memory, process count, output, and concurrent probes before execution.
 The agent places bounded trace windows around the measured transition.
 The agent records resource samples and limit terminations.
