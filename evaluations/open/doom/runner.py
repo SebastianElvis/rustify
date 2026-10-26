@@ -76,7 +76,7 @@ def savegame(data, wad):
     return bytes(data)
 
 
-def snapshot(root, wad):
+def snapshot(root, wad, inputs):
     files = {}
     for path in sorted(root.rglob("*")):
         name = path.relative_to(root).as_posix()
@@ -86,7 +86,7 @@ def snapshot(root, wad):
             files[name + "/"] = (path.stat().st_mode & 0o7777, None)
             continue
         data = path.read_bytes()
-        if path.suffix == ".dsg":
+        if path.suffix == ".dsg" and data != inputs.get(name, b"").replace(b"{iwad}", bytes(wad.path)):
             data = savegame(data, wad)
         value = data.decode("utf-8", "surrogateescape") if path.suffix in (".cfg", ".txt") else f"sha256:{hashlib.sha256(data).hexdigest()} size:{len(data)}"
         files[name] = (path.stat().st_mode & 0o7777, value)
@@ -121,7 +121,7 @@ def execute(executable, wad, case):
             result["stdout"], result["stderr"] = normalize(stdout, stderr)
             steps.append(result)
         try:
-            files = snapshot(root, wad)
+            files = snapshot(root, wad, case.get("files", {}))
         except (OSError, ValueError, IndexError, struct.error) as error:
             files, steps[-1]["error"] = {}, str(error)
     return {"steps": steps, "files": files}
