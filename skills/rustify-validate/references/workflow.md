@@ -69,6 +69,8 @@ Independent versions can fail in the same way (Knight and Leveson).
 The original, not the Rust implementation, supplies every expected result.
 When the host supports separate agents, a different agent writes the challenge cases.
 
-The evaluator freezes source and recovered models before outside challenges or source reveal.
+The evaluator freezes source, recovered models, and the executable before outside challenges or source reveal.
+The evaluator scores the frozen executable without a rebuild.
+Changed executable bytes require a new freeze and fresh comparisons.
 The evaluator records original-source access and source-assisted changes separately.
 Finite tests do not prove every possible execution.
