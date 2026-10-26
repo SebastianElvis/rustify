@@ -62,7 +62,8 @@ The agent cleans copied package artifacts for each Cargo target and profile befo
 Compiled tests can retain old executable and fixture paths.
 The agent verifies that rebuilt tests use the current executable and fixture paths.
 The agent adds `--deny` when `cargo-deny` is installed.
-The agent adds `--mutants` when `cargo-mutants` is installed. The mutation score shows test adequacy.
+The agent adds `--mutants` when `cargo-mutants` is installed. The mutation score describes only the executed suite.
+The agent challenges relevant surviving mutants with the affected acceptance and quality checks.
 A missed mutant in a requirement path needs a new test or a recorded gap.
 The implementation checkpoint requires current successful checks.
 The agent also runs the planned [quality checks](../../rustify-validate/references/quality.md) before acceptance.
