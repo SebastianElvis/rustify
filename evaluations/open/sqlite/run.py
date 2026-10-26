@@ -67,8 +67,8 @@ def score(reference, candidate, project):
         if report["converted"]:
             reports[f"upstream-{Path(name).stem}"] = report
         files[name] = {key: report[key] for key in ("status", "passed", "failed", "tests", "converted", "unstable", "unmatched")}
-    failed = sum(value["status"] == "failed" for value in files.values())
-    reports["upstream-tests"] = {"status": "failed" if failed else "passed", "passed": len(files) - failed, "failed": failed, **{key: sum(value[key] for value in files.values()) for key in ("tests", "converted", "unstable", "unmatched")}, "files": files}
+    failed = sum(value["status"] != "passed" for value in files.values())
+    reports["upstream-tests"] = {"status": "invalid" if any(value["status"] == "invalid" for value in files.values()) else "failed" if failed else "passed", "passed": len(files) - failed, "failed": failed, **{key: sum(value[key] for value in files.values()) for key in ("tests", "converted", "unstable", "unmatched")}, "files": files}
     failures = []
     with tempfile.TemporaryDirectory() as directory:
         wrong = Path(directory) / "sqlite3"
