@@ -334,14 +334,14 @@ def evaluate(reference, candidate, name, text):
     for action, a, b, c in zip(actions, first, second, other):
         if "name" not in action:
             continue
-        if a != b or a.get("error"):
+        if a != b and not (a.get("error") or b.get("error")):
             counts["unstable"] += 1
             continue
         result = tcl_result(action, a)
-        if result is None or not matches(result, action["expected"]):
+        if not (a.get("error") or b.get("error")) and (result is None or not matches(result, action["expected"])):
             counts["unmatched"] += 1
             continue
-        passed = a == c
-        rows.append({"id": f"{feature}/{name}/{action['name']}", "passed": passed, **({} if passed else {"input": {key: action[key] for key in action if key not in ("expected",)}, "expected": action["expected"], "reference": a, "candidate": c})})
+        passed = a == c and not (a.get("error") or b.get("error"))
+        rows.append({"id": f"{feature}/{name}/{action['name']}", "passed": passed, **({} if passed else {"input": {key: action[key] for key in action if key not in ("expected",)}, "expected": action["expected"], "reference": a, "repeat": b, "candidate": c, "differences": ["execution_error"] if a.get("error") or b.get("error") or c.get("error") else ["result"]})})
     failed = sum(not row["passed"] for row in rows)
     return {"status": "invalid" if any(row and row.get("error") for row in first + second) else "failed" if failed else "passed", "passed": len(rows) - failed, "failed": failed, "tests": len(TESTS.findall(text)), "converted": len(rows), **counts, "cases": rows}
