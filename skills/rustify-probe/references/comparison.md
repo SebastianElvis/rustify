@@ -59,6 +59,10 @@ The default limits are 512 MiB sampled memory, 64 processes, and 16 MiB of captu
 The API caller can set measured workload limits with `execute` parameters.
 The API caller can set `keep_stdin_open=True` when the target must inherit a pipe without end-of-file.
 The API caller can use `on_spawn(process)` to start a signal watcher within the helper cleanup scope.
+The monitor counts launch time against the deadline.
+The monitor starts after `Popen` returns.
+The caller uses an enclosing supervisor for a blocked launch.
+The caller records a pending termination when the OS does not reap the process.
 The callback runs on the calling thread and owns the streams until it returns.
 The supervisor monitors time, memory, and processes during the callback.
 The output limit bounds helper captures, not protocol data that the callback reads itself.

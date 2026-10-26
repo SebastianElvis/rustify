@@ -100,8 +100,8 @@ def execute(command, *, timeout, stdin=b"", keep_stdin_open=False, on_spawn=None
     peak, footprint, count, error = 0, 0, 0, None
     output = {"stdout": bytearray(), "stderr": bytearray()}
     remaining, size = memoryview(stdin), 0
-    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True, **options)
     start, owned, peak_details = time.monotonic(), {}, []
+    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True, **options)
     def members():
         rows = subprocess.check_output(["/bin/ps", "-axo", "pid=,ppid=,pgid=,rss=,lstart=,comm="], text=True)
         parts = [row.split(maxsplit=9) for row in rows.splitlines()]
