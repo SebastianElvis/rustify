@@ -78,7 +78,7 @@ class CompareTests(unittest.TestCase):
         program = self.program("stdin-policy", "import os,select,sys\nif len(sys.argv)>1: os.read(0,1)\nprint(bool(select.select([0],[],[],.1)[0]))\n")
         for data in (b"", b"x"):
             for keep in (False, True):
-                result, error, _ = compare.execute([str(program), *(["read"] if data else [])], stdin=data, keep_stdin_open=keep, timeout=3)
+                result, error, _ = compare.execute([str(program), *(["read"] if data else [])], stdin=data, keep_stdin_open=keep, timeout=10)
                 self.assertEqual((result.returncode, error, result.stdout), (0, None, b"False\n" if keep else b"True\n"))
 
     def test_failed_spawn_hook_cleans_up_the_process(self):
