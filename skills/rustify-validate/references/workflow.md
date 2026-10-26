@@ -19,6 +19,8 @@ The agent prefers `test`. The other methods need evidence records with captures.
 The agent runs the original against itself under the same controlled conditions.
 An original execution error invalidates the affected batch.
 The agent does not discard that error as variable output.
+The agent preserves setup, callbacks, and cleanup when it translates tests between interfaces.
+Unsupported conditions keep the translated scope incomplete.
 The agent preserves variable outputs and their causes as evidence.
 The agent applies only the normalization rules in `recovered/product.md`.
 An unexplained variation remains a gap.
