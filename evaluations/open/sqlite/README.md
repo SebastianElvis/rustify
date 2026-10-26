@@ -50,7 +50,7 @@ The `sqlite3` program is the command-line shell with the engine linked in.
 - The SQL of one Tcl connection runs in one shell process in `.mode quote`. A marker query separates the steps. Standard error goes into the same stream, so each error stays at its step.
 - The Tcl expectation validates each probe on the reference. A probe that disagrees with its expectation is `unmatched`. Usually an earlier unconverted test changed the state.
 - The gate compares the candidate view with the reference view byte for byte.
-- The other tests need `testfixture` commands. The `tests` and `converted` counts show this gap.
+- Unsupported, unstable, unmatched, and wholly unconverted test scopes remain `incomplete`. The `tests` and `converted` counts show this gap.
 
 ## Variable fields
 
