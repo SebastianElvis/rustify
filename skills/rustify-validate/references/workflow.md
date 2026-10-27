@@ -57,7 +57,8 @@ A failed slice returns to implementation. A new behavior returns to discovery.
    The agent tests each relation on both programs.
 4. The agent runs the surface and adaptive distinguishers from [the indistinguishability guide](indistinguishability.md).
    Each confirmed witness returns to discovery or implementation. Acceptance needs zero witnesses in every class.
-5. The agent runs the implementation `check` command with `--mutants` when the tool is installed.
+5. The validator checks the invoked suite's selection against every mapped regression for the repaired slice before it interprets mutation results.
+   The agent runs the implementation `check` command with `--mutants` when the tool is installed.
 6. The agent checks [software quality acceptance](quality.md).
 7. The agent runs the parity gate and writes `verification/compatibility.md`.
 
