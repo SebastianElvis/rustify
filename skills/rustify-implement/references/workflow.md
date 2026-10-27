@@ -81,5 +81,6 @@ The check supervisor limits each process group to 8 GiB and 64 processes.
 The caller uses an enclosing supervisor when the task requires lower limits.
 The caller qualifies each target's launch route when Cargo tests need separate target limits.
 The caller verifies that the route executes the actual Cargo-built executable.
+The caller checks target concurrency against the task's limit, including workers inside each test.
 The deadline is 900 seconds per check and 3600 seconds for mutation testing.
 A limit failure remains a failed check. The agent plans bounded batches when a complete run needs more time.
