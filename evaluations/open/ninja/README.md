@@ -36,10 +36,12 @@ The scorer runs each upstream test once.
 
 - `replay-core`, `replay-extended`, `replay-complete`: the evaluator's multi-step scenarios in three milestones.
 - `replay-persistence`: the same scenarios with the programs alternating per step, in both orders. Each program must continue the `.ninja_log` and `.ninja_deps` files of the other.
+- `replay-browse`: nine fixed headless HTTP workflows from `cases.yaml`. The evaluator tests graph navigation, escaped names, live manifests, request boundaries, startup errors, help, and termination.
 - `generate-scenarios`: seeded random manifests, flags, tools, state changes, and damaged manifests (`generate.py`).
 - `upstream-<file>`: one report per upstream test file.
 - `repeatability`: the reference against itself on every scenario.
 - A wrapper that deletes `.ninja_log` after each run is the negative control. It must fail.
+- The repeatability report keeps browse controls and legacy counts separate. A control without an HTTP service must fail.
 
 ## Variable fields
 
@@ -62,6 +64,18 @@ The representation preserves invalid UTF-8 bytes.
 - The runner keeps stdin open and preserves merged streams and PTYs.
 - The supervisor applies one total deadline to each step. A missing signal marker makes the capture incomplete.
 - The `browse` tool resolves a `python` executable through `PATH` at runtime. The scorer's controlled `PATH` reaches `ninja: python is required for the browse tool`. A task-owned interpreter link enables headless HTTP probes with `--no-browser`.
+
+`browse.py` preserves raw captures for every HTTP workflow.
+The evaluator replaces only the selected loopback port, the reported server PID, and a valid current HTTP Date header.
+The evaluator keeps other bytes exact.
+The evaluator requires complete target and worker termination records.
+The evaluator checks each observed PID with its recorded start time.
+The evaluator sends no terminal cleanup signal to a reused PID.
+The evaluator pins `compare.py` to the qualified D23 hash.
+A different helper requires qualification before these measurements apply.
+Each target uses a 15-second deadline, 512 MiB, 32 processes, 8 MiB of output, and a zero core limit.
+Each worker uses a 22-second deadline and 2 GiB.
+The supervisor samples resource use. It does not provide hard containment.
 
 ## Scope
 

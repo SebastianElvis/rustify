@@ -1,0 +1,98 @@
+- id: browse-graph-navigation-v1
+  origin: The original runtime help and new owned graph fixtures define this case.
+  files:
+    build.ninja: |
+      rule compile
+        command = printf unused
+      build obj/main.o: compile src/main.c | include/config.h || generated/ready
+      build app: phony obj/main.o
+      build all: phony app
+    src/main.c: "int main(void) { return 0; }\n"
+    include/config.h: "#define VALUE 3\n"
+    generated/ready: "ready\n"
+  actions:
+    - {path: /, status: 302, contains: 'Location: ?all'}
+    - {path: '/?all', status: 200, contains: app}
+    - {path: '/?app', status: 200, contains: obj/main.o}
+    - {path: '/?obj/main.o', status: 200, contains: src/main.c}
+    - {path: '/?src/main.c', status: 200, contains: obj/main.o}
+    - {path: '/?missing-target', status: 200, contains: unknown target}
+    - {path: '/?all', status: 200, contains: app}
+- id: browse-escaped-links-v1
+  origin: New owned target names exercise HTTP decoding and HTML output.
+  files:
+    build.ninja: |
+      build pack$ name: phony a&<b>.txt
+      build a&<b>.txt: phony
+      build all: phony pack$ name
+  actions:
+    - {path: '/?all', status: 200, contains: pack}
+    - {path: '/?pack%20name', status: 200, contains: '&amp;'}
+    - {path: '/?a%26%3Cb%3E.txt', status: 200, contains: '&lt;'}
+    - {path: '/?pack+name', status: 200, contains: unknown target}
+- id: browse-alternate-manifest-v1
+  origin: The original runtime help exposes an initial target and a manifest option.
+  files:
+    graph.ninja: |
+      build entry: phony leaf
+      build leaf: phony
+  prefix: [-f, graph.ninja]
+  args: [entry]
+  actions:
+    - {path: /, status: 302, contains: 'Location: ?entry'}
+    - {path: '/?entry', status: 200, contains: leaf}
+    - {path: '/?leaf', status: 200, contains: entry}
+- id: browse-live-manifest-v1
+  origin: New requests test whether each query reads current graph data.
+  files:
+    build.ninja: "build all: phony first\nbuild first: phony\n"
+  actions:
+    - {path: '/?all', status: 200, contains: first}
+    - path: '/?all'
+      write: {build.ninja: "build all: phony second\nbuild second: phony\n"}
+      status: 200
+      contains: second
+    - path: '/?all'
+      write: {build.ninja: "invalid declaration\n"}
+      status: 200
+      contains: error
+    - path: '/?all'
+      write: {build.ninja: "build all: phony restored\nbuild restored: phony\n"}
+      status: 200
+      contains: restored
+- id: browse-request-boundaries-v1
+  origin: New bounded HTTP requests test route and method boundaries.
+  files:
+    build.ninja: "build all: phony\n"
+  actions:
+    - {path: /favicon.ico, status: 404}
+    - {path: '/nested/?all', status: 404}
+    - {path: '/?all', method: HEAD, status: 501}
+    - {path: '/?all', method: POST, status: 501}
+    - {path: '/?', status: 200, contains: empty path}
+    - {path: '/?all&x', status: 200, contains: unknown target}
+    - {path: '/?all', status: 200, contains: all}
+- id: browse-bind-conflict-v1
+  origin: An owned listening socket occupies the selected loopback endpoint.
+  files:
+    build.ninja: "build all: phony\n"
+  mode: conflict
+- id: browse-invalid-port-v1
+  origin: The runtime help identifies PORT as a command argument.
+  files:
+    build.ninja: "build all: phony\n"
+  mode: cli
+  args: [--port, invalid]
+- id: browse-help-v1
+  origin: The original runtime help defines this command boundary.
+  files:
+    build.ninja: "build all: phony\n"
+  mode: cli
+  args: [--help]
+- id: browse-sigterm-v1
+  origin: A new owned service tests an external termination after a successful request.
+  files:
+    build.ninja: "build all: phony\n"
+  signal: SIGTERM
+  actions:
+    - {path: '/?all', status: 200, contains: all}
