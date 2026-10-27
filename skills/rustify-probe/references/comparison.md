@@ -1,7 +1,7 @@
 # CLI comparison
 
 The helper checks deterministic process cases.
-The helper does not certify product, UI, component, or data-model parity.
+The agent captures observable state outside the helper's comparison view, including extended attributes.
 The validation workflow and ledger supply those acceptance requirements.
 
 The helper accepts a nonempty scenario list.
