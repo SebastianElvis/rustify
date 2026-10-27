@@ -34,9 +34,10 @@ The agent preserves samples, process-tree identities, peaks, and the termination
 The agent links raw evidence and unresolved limits in `verification/compatibility.md`.
 A crash, unexplained resource growth, budget violation, or missing applicable measurement blocks acceptance.
 
-The probe supervisor enforces time, memory, process, and output limits before it runs untrusted workloads.
-The supervisor bounds its own captures and concurrency.
-The supervisor terminates its observed descendants when a limit fails.
+The agent selects time, memory, process, and output limits before an untrusted workload.
+The caller bounds capture storage and concurrent probe invocations.
+The supervisor requests termination of observed descendants when a limit fails.
+A missing terminal record leaves termination unresolved.
 The agent tests detached child groups before it relies on a parent budget.
 A limit termination is a failed or incomplete measurement, never a parity pass.
 Sampled limits can miss brief peaks.
