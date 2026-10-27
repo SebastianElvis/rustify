@@ -18,6 +18,7 @@ Many large C and C++ projects build with it.
 
 - Source: Ninja 1.13.2 from GitHub. The SHA-256 is in `reference.yaml`. The source uses the Apache-2.0 license.
 - Build: `scripts/build_reference.py ninja` runs CMake in `Release` mode with interprocedural optimization and the hardened flags, then runs `strip`.
+- The stripped executable retains a 7,755-byte Python helper for `browse`. Artifact recovery can expose this source. The evaluator records that exposure separately from external repository source access.
 
 ## Oracle
 
@@ -60,7 +61,7 @@ The representation preserves invalid UTF-8 bytes.
 - The interrupt cases send the signal 0.1 seconds after the command creates a marker file.
 - The runner keeps stdin open and preserves merged streams and PTYs.
 - The supervisor applies one total deadline to each step. A missing signal marker makes the capture incomplete.
-- The reference build has no Python at build time, so `-t browse` prints `ninja: python is required for the browse tool`.
+- The `browse` tool resolves a `python` executable through `PATH` at runtime. The scorer's controlled `PATH` reaches `ninja: python is required for the browse tool`. A task-owned interpreter link enables headless HTTP probes with `--no-browser`.
 
 ## Scope
 
