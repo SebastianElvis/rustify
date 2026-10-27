@@ -21,6 +21,10 @@ A track scorer measures only its own cases.
 11. A failure preserves a reproducer. A repair repeats the affected checks.
 12. The final report states source access, repairs, measured coverage, and remaining gaps.
 
+The source reveal concerns source files outside the supplied artifact.
+The agent can recover embedded code from the supplied artifact.
+The report records that code's origin and exposure separately.
+
 The target project separates `recovered/`, `implementation/`, and `verification/`.
 The target project keeps the Rust design and decision records in `implementation/docs/`.
 The recovered test specifications record observable expectations and their origin.

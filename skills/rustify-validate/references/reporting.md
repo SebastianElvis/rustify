@@ -52,6 +52,7 @@ The structure follows the GSN Community Standard and ISO/IEC/IEEE 15026-2.
 | Assumption | A condition that the evidence does not check. |
 | Undeveloped goal | A claim without evidence. Each open gap is an undeveloped goal. |
 
+The report distinguishes code recovered from the shipped artifact from external original source access.
 The report gives the result before any source-assisted repair first.
 The report gives the repaired result and each repair second.
 The report counts the same inventory as the ledger.
