@@ -20,7 +20,7 @@ The agent verifies inherited signal handlers, stream types, and descriptor numbe
 The agent matches crash and resource report identities to executable hashes or build UUIDs before attribution.
 A process name alone does not identify the original or the reconstruction.
 The agent verifies measurement units and native structure layouts before it applies resource budgets.
-The agent qualifies capture delivery through the complete supervisor and observer route before product measurements.
+The agent qualifies capture delivery and rejection of invalid results through the supervisor, observer, and comparison route before product measurements.
 The agent records each budget, its basis, workload size, duration, environment, and executable hash before acceptance.
 The original supplies a measured baseline where its behavior informs the budget.
 The user can impose a stricter host protection limit.
