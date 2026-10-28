@@ -21,7 +21,7 @@ REPOSITORY = next(path for path in HERE.parents if (path / 'evaluations/harness.
 sys.path.insert(0, str(REPOSITORY / 'evaluations'))
 import harness
 
-EXECUTE_SHA256 = '2c4ec7a2108e075b66e2407a5f0bc9e1fabb5a5b6f567bffd87a91ede2f831e7'
+EXECUTE_SHA256 = 'becf7fef300ac19a9e3b9b4ebfa48854fd8fd34274d978f560d7d6c5a1a18405'
 PIN = '117dad1e0c303889221be3149db93cd1cbf496e545786d968402287072bdb92f'
 LIMITS = {'timeout': 15, 'memory_mib': 512, 'process_limit': 32, 'output_mib': 8}
 

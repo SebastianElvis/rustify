@@ -44,8 +44,8 @@ def validate(cases):
             raise ValueError("Each case must have a unique nonempty id.")
         ids.add(identity)
         args = case.get("args")
-        if not isinstance(args, list) or any(not isinstance(a, str) or "\0" in a for a in args):
-            raise ValueError("Case arguments must be strings without NUL bytes.")
+        if not isinstance(args, list) or any(not isinstance(a, (str, bytes)) or "\0" in os.fsdecode(a) for a in args):
+            raise ValueError("Arguments must be text or bytes without NUL.")
         decode(case.get("stdin_b64", ""))
         files = case.get("files", {})
         if not isinstance(files, dict):

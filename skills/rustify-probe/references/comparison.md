@@ -26,7 +26,7 @@ The stdin value and file values encode raw bytes as base64.
 Fixture files use safe relative paths.
 The helper controls home and path variables.
 Cases can set locale and timezone values.
-Each argument is a string.
+Each argument uses a YAML string or a `!!binary` scalar for raw bytes.
 The agent quotes an argument that YAML reads as a number, a boolean, or null.
 
 ```sh
