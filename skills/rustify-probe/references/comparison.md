@@ -14,7 +14,7 @@ A CLI schema limit does not establish that the host cannot test a condition.
 | Signals and cancellation | The API caller starts an owned signal watcher through `on_spawn`. | A native target confirms delivery and termination. |
 | Permissions and links | The API caller prepares owned fixtures and passes `cwd`. | The capture records modes, link identities, bytes, and directory effects. |
 
-The caller inspects the Python API when the approved CLI cannot express a condition.
+The caller checks approved APIs and fault injection for unsupported CLI conditions.
 A missing approved route remains an open gap.
 The agent captures observable state outside the helper's comparison view, including extended attributes.
 
