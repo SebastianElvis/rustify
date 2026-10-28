@@ -1,0 +1,16 @@
+name: Feature request
+description: Propose a new capability, profile, or evaluation track.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Need
+      description: Describe the task that Rustify cannot do now.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the change and the evidence that supports it.

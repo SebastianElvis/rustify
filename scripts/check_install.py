@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check a real Skills CLI installation in a temporary project."""
+"""Check real Skills CLI and Claude Code plugin installations in a temporary project."""
 
 import os
 from pathlib import Path
@@ -40,6 +40,13 @@ def main():
         if result.returncode != 1 or parity["status"] != "failed" or not parity["errors"]:
             raise RuntimeError("The installed parity gate did not reject missing evidence.")
         print("The installer copied all eight skills. All four detached helpers pass.")
+        if shutil.which("claude"):
+            claude = {**os.environ, "CLAUDE_CONFIG_DIR": str(directory / "claude")}
+            for command in (["validate", str(ROOT)], ["marketplace", "add", str(ROOT)], ["install", "rustify@rustify"]):
+                subprocess.run(["claude", "plugin", *command], env=claude, check=True)
+            if "Skills (8)" not in subprocess.check_output(["claude", "plugin", "details", "rustify@rustify"], env=claude, text=True):
+                raise RuntimeError("The Claude Code plugin does not contain the eight skills.")
+            print("The Claude Code plugin installs all eight skills.")
 
 
 if __name__ == "__main__":

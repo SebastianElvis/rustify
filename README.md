@@ -9,7 +9,7 @@ The goal is software that you can inspect, build, and maintain without the origi
 
 ## Installation
 
-The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3.11 or later with PyYAML, and Rust with Cargo.
+The setup below uses Node.js 24.x (24.22.1 or later), npm, Python 3.12 or later with PyYAML, and Rust with Cargo.
 The Rustify helpers read and write YAML with PyYAML.
 You install it with `python3 -m pip install pyyaml`.
 
@@ -34,7 +34,18 @@ The [REA setup reference](https://github.com/morluto/rea/blob/main/docs/installa
 
 ### 2. Install Rustify
 
-You run this command from your project folder:
+You install Rustify as a Claude Code plugin or with the Skills CLI.
+
+**Claude Code plugin.** You run these commands in Claude Code:
+
+```text
+/plugin marketplace add SebastianElvis/rustify
+/plugin install rustify@rustify
+```
+
+The plugin installs all eight Rustify skills for your user account.
+
+**Skills CLI.** You run this command from your project folder:
 
 ```sh
 npx skills add SebastianElvis/rustify --skill '*'
@@ -88,6 +99,7 @@ The resources are in /path/to/resources. The manual is at https://example.com/ma
 ```
 
 Agents without slash commands accept the same request in a prompt.
+The Claude Code plugin uses `/rustify:rustify` in place of `/rustify`.
 
 Rustify always reconstructs the full product.
 A missing feature stays an open gap until the agent completes it.
@@ -131,38 +143,24 @@ The [architecture guide](docs/architecture.md) includes the diagram's editable L
 - **Reports keep gaps visible.** Only a full-product pass establishes parity. Changed evidence invalidates stale results.
 - **Standards keep agents consistent.** Requirements follow ISO/IEC/IEEE 29148 and EARS. Architecture follows ISO/IEC/IEEE 42010, C4, and arc42. Prose follows ASD-STE100.
 
-## Development and evaluation
+## Example
 
-Contributors run these checks from the repository root:
+The [rustify-doom](https://github.com/SebastianElvis/rustify-doom) repository holds the Rustify reconstruction of Doom.
+Rustify built it from a stripped doomgeneric binary and the Freedoom game data.
 
-```sh
-make test
-make evaluate
-python3 scripts/check_install.py
-```
+## Evaluation
 
 The open-source tier covers GNU base64, BLAKE3 hashing, an HTTP client, native desktop dialogs, bzip2, Lua, SQLite, Ninja, and Doom.
 The closed-source tier covers the macOS tools `iconutil` and `textutil`.
 The bzip2, Lua, SQLite, Ninja, and Doom tracks use hardened `-O3`, LTO, and stripped reference builds.
 The [benchmark paper](eval/docs/benchmark.md) explains the track selection and the scores.
-The repository stores the pinned references, cases, and scorers, not agent outputs.
-`make evaluate` runs the current skills with Claude Code on the first three tracks.
-It runs each track three times, freezes each project, and grades it with the track scorer:
+The [contributing guide](CONTRIBUTING.md) gives the test, evaluation, and diagram commands.
 
-```sh
-python3 eval/main.py [TASK...] [--trials N]
-```
+## Responsible use
 
-Each score reports a feature parity score against a target for the track's tier.
-Private held-out tasks can live outside the repository. The command takes their folder as a task.
-
-The evaluation references require macOS.
-These requirements do not restrict the skill bundle to macOS.
-The [evaluation README](eval/README.md) gives the commands and the reproduction steps.
-
-Contributors rebuild the architecture figure with `make diagram`.
-The build needs LaTeX, latexmk, dvisvgm, and Poppler.
-Each skill keeps its main instructions short and stores supporting methods, templates, and helpers in its resource folders.
+Use Rustify only on software that you have the right to analyze.
+Software licenses and local laws can limit reverse engineering.
+You are responsible for compliance with them.
 
 ## Documentation
 
@@ -173,7 +171,12 @@ Each skill keeps its main instructions short and stores supporting methods, temp
 - [Target-project format](skills/rustify/references/project.md)
 - [Standards and terminology](skills/rustify/references/standards.md)
 - [Rust stack guide](skills/rustify-plan/references/rust-stack.md)
+- [Contributing guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
 
 ## License
 
-Rustify uses the [GNU General Public License v3.0](LICENSE).
+Rustify uses the [Apache License 2.0](LICENSE).
+Some evaluation files derive from upstream test suites.
+These files keep their upstream licenses.
+Each track README names the license.

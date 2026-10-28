@@ -18,6 +18,7 @@ It belongs to GNU coreutils, the standard user-space utilities of most Linux sys
 - Homebrew built the binary. The evaluation does not control its flags.
 - Metadata audit: 173 defined symbols remain. The audit finds no source file paths.
 - A future revision can rebuild the binary with `eval/build.py` and the hardened profile.
+- License: GNU coreutils uses GPL-3.0-or-later. `upstream-vectors.yaml` derives from its tests and keeps that license.
 
 ## Oracle
 

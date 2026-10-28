@@ -1,0 +1,16 @@
+{
+  "name": "rustify",
+  "owner": {
+    "name": "Runchao Han"
+  },
+  "metadata": {
+    "description": "Rustify skills for binary-to-Rust reconstruction."
+  },
+  "plugins": [
+    {
+      "name": "rustify",
+      "source": "./",
+      "description": "Reconstruct software from a binary in idiomatic Rust, with recovered specifications, architecture, evidence, and tests."
+    }
+  ]
+}
