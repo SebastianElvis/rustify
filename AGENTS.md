@@ -5,7 +5,7 @@
 - Every author preserves quoted text and identifiers exactly.
 - Every change keeps the implementation concise.
 - A fix or refactor adds no more code than it removes.
-- The code budget includes captured input and output data.
+- The code budget counts fixtures and embedded data, excluding raw validation reports.
 - A new abstraction requires a concrete task need.
 - The skill bundle follows the Agent Skills format.
 - The main skill coordinates focused sibling skills.
