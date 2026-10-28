@@ -1,6 +1,8 @@
 ---
 name: rustify
 description: Reconstruct local software from a binary or package in idiomatic Rust. Coordinate discovery, planning, implementation in slices, and comparison against the original. Use for binary reconstruction rather than source translation.
+metadata:
+  argument-hint: BINARY PROJECT
 ---
 
 # Rustify
@@ -28,8 +30,11 @@ The guide sets the writing rules, the glossary, the EARS requirement form, and t
 
 - The agent reads [the project format and state](references/project.md).
 - The agent reads [the REA connection guide](references/rea.md) when discovery needs its tools.
+- The agent asks for the binary path or the project path when the request lacks one.
 - The agent runs `python3 <rustify>/scripts/project.py init PROJECT --target BINARY --profile cli`.
 - The agent selects `cli`, `desktop`, `service`, or `game` for the actual target.
+- The agent records each resource and documentation source from the request in `recovered/product.md`.
+- Observed original behavior takes precedence over documentation. The agent records each contradiction in `recovered/evidence.yaml`.
 - The agent preserves user data and uses separate experiment data.
 - The agent runs the helper with `status PROJECT` after an interruption and resumes the first incomplete or stale phase.
 

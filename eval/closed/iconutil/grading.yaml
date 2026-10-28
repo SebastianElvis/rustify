@@ -1,0 +1,89 @@
+tier: small
+features:
+- id: usage
+  pattern: (?i)usage|--help|-h\b
+  milestone: core
+  cases: '^[^/]+/usage/'
+- id: convert-option
+  pattern: --convert|-c (icns|iconset)
+  milestone: core
+  cases: '^[^/]+/convert-option/'
+- id: output-option
+  pattern: --output|-o\b
+  milestone: core
+  cases: '^[^/]+/output-option/'
+- id: default-output
+  pattern: (?i)default (output|name|file)|same (directory|folder)
+  milestone: core
+  cases: '^[^/]+/default-output/'
+- id: iconset-to-icns
+  pattern: (?i)iconset\W+(to|into|->)\W+\.?icns|-c icns
+  milestone: core
+  cases: '^[^/]+/iconset-to-icns/'
+- id: icns-to-iconset
+  pattern: (?i)icns\W+(to|into|->)\W+\.?iconset|-c iconset
+  milestone: core
+  cases: '^[^/]+/icns-to-iconset/'
+- id: icon-sizes
+  pattern: (?i)@2x|512x512|1024|scale
+  milestone: extended
+  cases: '^[^/]+/icon-sizes/'
+- id: image-validation
+  pattern: (?i)dimension|wrong size|pixel size|invalid (image|png)|corrupt
+  milestone: extended
+  cases: '^[^/]+/image-validation/'
+- id: png-formats
+  pattern: (?i)\bpng\b
+  milestone: extended
+  cases: '^[^/]+/png-formats/'
+- id: legacy-entries
+  pattern: (?i)is32|il32|it32|ICN#|icl8|legacy|ARGB|packbits|run-length
+  milestone: complete
+  cases: '^[^/]+/legacy-entries/'
+- id: asset-catalog
+  pattern: (?i)\.car\b|asset catalog
+  milestone: extended
+  cases: '^[^/]+/asset-catalog/'
+- id: icon-name
+  pattern: (?i)icon[- ]name
+  milestone: extended
+  cases: '^[^/]+/icon-name/'
+- id: errors
+  pattern: (?i)error message|exit (status|code)|not found|Failed to
+  milestone: core
+  cases: '^[^/]+/errors/'
+- id: separate-hidpi
+  pattern: ICONCOMPILER_SEPARATE_HIDPI|@2x\.icns
+  milestone: extended
+  cases: '^[^/]+/separate-hidpi/'
+- id: base-system-icns
+  pattern: ICONCOMPILER_GENERATE_BASE_SYSTEM_ICNS|\.licns
+  milestone: complete
+  cases: '^[^/]+/base-system-icns/'
+components:
+- id: command-line
+  pattern: (?i)getopt|option pars|argument pars|command line
+- id: icns-container
+  pattern: (?i)ISIcns|icnsWithType|writeAsICNSToURL|icns (writer|encoder|container)
+- id: iconset-reader
+  pattern: (?i)ISIconset|iconsetWithURL|iconset (reader|loader|parser)
+- id: iconset-writer
+  pattern: (?i)writeAsIconsetToURL|iconset writer
+- id: asset-catalog-reader
+  pattern: (?i)ISAssetCatalogResource|assetCatalogResourceWithURL|(asset catalog|car) (reader|parser|resource)
+- id: compositor
+  pattern: (?i)ISCompositor|composit|render
+- id: recipe
+  pattern: (?i)ISGenericRecipe|ISiOSMacAppRecipe|addElementWithRecipe|recipe
+- id: icon-specification
+  pattern: (?i)IFIconSpecification|macosIconSpecification|allImageSpecifications|icon specification|size table
+- id: image-codec
+  pattern: (?i)png (encoder|decoder|codec)|ImageIO|deflate|zlib
+- id: run-length-codec
+  pattern: (?i)packbits|run-length|\brle\b
+- id: keyed-archive
+  pattern: (?i)NSKeyedArchiver|bplist|keyed archive|info (entry|plist)
+- id: environment-flags
+  pattern: getenv|ICONCOMPILER_
+- id: file-system
+  pattern: (?i)NSFileManager|fileExistsAtPath|file system|file manager

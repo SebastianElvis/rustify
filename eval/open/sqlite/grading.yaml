@@ -1,0 +1,275 @@
+tier: large
+features:
+- id: cli-options
+  pattern: (?i)command[- ]line (option|argument)|-bail|-cmd|-batch|-init|-readonly
+  milestone: core
+  cases: '^(?!upstream-shell\w*/)[^/]+/cli-options/|^upstream-shell1/[^/]+/[^/]+/shell1-1\.|^upstream-shell2/[^/]+/[^/]+/shell2-1\.2'
+- id: sql-input
+  pattern: (?i)standard input|stdin|sql argument|statement on the command line
+  milestone: core
+  cases: '^[^/]+/sql-input/|^upstream-shell1/[^/]+/[^/]+/shell1-9\.|^upstream-shell3/[^/]+/[^/]+/shell3-[12]\.'
+- id: error-format
+  pattern: (?i)parse error|runtime error|error near line|error message
+  milestone: core
+  cases: '^[^/]+/error-format/|^upstream-shell2/[^/]+/[^/]+/shell2-1\.3|^upstream-shell3/[^/]+/[^/]+/shell3-3\.'
+- id: mode-list
+  pattern: (?i)\blist mode|mode list|\.separator
+  milestone: core
+  cases: '^[^/]+/mode-list/|^upstream-shell1/[^/]+/[^/]+/(shell1-3\.(13|22)\.)|^upstream-shell5/[^/]+/[^/]+/shell5-1\.2\.'
+- id: mode-csv
+  pattern: (?i)\bcsv\b
+  milestone: core
+  cases: '^[^/]+/mode-csv/'
+- id: mode-column
+  pattern: (?i)column mode|mode column|\.width|columnar
+  milestone: core
+  cases: '^[^/]+/mode-column/|^upstream-shell1/[^/]+/[^/]+/shell1-3\.26\.'
+- id: mode-line
+  pattern: (?i)line mode|mode line
+  milestone: core
+  cases: '^[^/]+/mode-line/'
+- id: mode-json
+  pattern: (?i)json mode|mode json|jobject|jatom
+  milestone: core
+  cases: '^[^/]+/mode-json/'
+- id: mode-table
+  pattern: (?i)\b(box|qbox|table|markdown|psql)\b mode|mode (box|qbox|table|markdown|psql)
+  milestone: extended
+  cases: '^[^/]+/mode-table/|^upstream-shell1/[^/]+/[^/]+/shell1-12\.'
+- id: mode-markup
+  pattern: (?i)\bhtml\b|\btcl\b mode|mode tcl
+  milestone: extended
+  cases: '^[^/]+/mode-markup/|^upstream-shell1/[^/]+/[^/]+/shell1-4\.[3-6]'
+- id: mode-sql
+  pattern: (?i)insert mode|mode insert|quote mode|mode quote
+  milestone: extended
+  cases: '^[^/]+/mode-sql/|^upstream-shell1/[^/]+/[^/]+/shell1-4\.[27]'
+- id: mode-delimited
+  pattern: (?i)\bascii\b|\btabs\b|split mode|count mode|mode off
+  milestone: extended
+  cases: '^[^/]+/mode-delimited/'
+- id: mode-options
+  pattern: (?i)--(wordwrap|quote|title|charlimit|linelimit|escape|align|rowcount|null)|\.nullvalue|\.headers
+  milestone: core
+  cases: '^[^/]+/mode-options/|^upstream-shell1/[^/]+/[^/]+/(shell1-3\.(9|14)\.)|^upstream-shellA/'
+- id: dot-schema
+  pattern: (?i)\.schema|\.tables|\.indexes|\.fullschema
+  milestone: core
+  cases: '^[^/]+/dot-schema/|^upstream-shell1/[^/]+/[^/]+/(shell1-(3\.(12|21|24)[.-]|7\.))'
+- id: dot-dump
+  pattern: (?i)\.dump
+  milestone: extended
+  cases: '^[^/]+/dot-dump/|^upstream-shell1/[^/]+/[^/]+/shell1-4\.1|^upstream-shell9/'
+- id: dot-import
+  pattern: (?i)\.import
+  milestone: extended
+  cases: '^[^/]+/dot-import/|^upstream-shell1/[^/]+/[^/]+/shell1-3\.11\.|^upstream-shell5/[^/]+/[^/]+/(shell5-(1\.1|9)\.)'
+- id: dot-output
+  pattern: (?i)\.output|\.once|\.print|\.echo|\.excel|\.www
+  milestone: extended
+  cases: '^[^/]+/dot-output/|^upstream-shell1/[^/]+/[^/]+/(shell1-(3\.(5|15|16)\.|3-29))|^upstream-shell2/[^/]+/[^/]+/shell2-1\.4'
+- id: dot-read
+  pattern: (?i)\.read|\.quit|\.exit
+  milestone: core
+  cases: '^[^/]+/dot-read/|^upstream-shell1/[^/]+/[^/]+/(shell1-3\.(6|18|19)\.)'
+- id: dot-database
+  pattern: (?i)\.open|\.save|\.backup|\.restore|\.clone|\.databases|\.connection|\.deserialize
+  milestone: extended
+  cases: '^[^/]+/dot-database/|^upstream-shell1/[^/]+/[^/]+/(shell1-3\.(1|20)\.)'
+- id: dot-settings
+  pattern: (?i)\.show|\.bail|\.changes|\.timeout|\.limit|\.dbconfig|\.prompt|\.crlf|\.nonce
+  milestone: extended
+  cases: '^[^/]+/dot-settings/|^upstream-shell1/[^/]+/[^/]+/(shell1-3\.(2|17|23|25)\.)'
+- id: dot-parameter
+  pattern: (?i)\.parameter|bound parameter
+  milestone: extended
+  cases: '^[^/]+/dot-parameter/'
+- id: dot-info
+  pattern: (?i)\.dbinfo|\.version|\.vfsinfo|\.vfslist|\.vfsname|\.diskused|\.dbtotxt|\.sha3sum|\.check|\.testcase
+  milestone: extended
+  cases: '^[^/]+/dot-info/'
+- id: dot-explain
+  pattern: (?i)\.eqp|\.explain|\.expert|\.lint|\.scanstats|\.imposter|\.intck|query plan
+  milestone: extended
+  cases: '^[^/]+/dot-explain/|^upstream-(eqp2?|scanstatus2?)/|^upstream-shell1/[^/]+/[^/]+/shell1-3\.7\.'
+- id: dot-trace
+  pattern: (?i)\.trace|\.stats|\.timer|\.log|\.progress|\.auth
+  milestone: complete
+  cases: '^[^/]+/dot-trace/|^upstream-shell1/[^/]+/[^/]+/(shell1-3\.(23b|27|28)\.)|^upstream-shell4/'
+- id: dot-system
+  pattern: (?i)\.shell|\.system|\.cd|\.load|safe mode|\.help
+  milestone: extended
+  cases: '^[^/]+/dot-system/'
+- id: sql-engine
+  pattern: (?i)sql engine|sql statement|statement execution
+  milestone: core
+  cases: '^(?!upstream-(boundary[134]|intpkey|boundary2|bloom1|cost|coveridxscan|cursorhint\d?|offset1|pushdown|seekscan1|skipscan\d|unordered|tpch01|descidx\d|widetab1|tkt-8454a207b9|filter\w+|percentile|tkt-99378177930f87bd|coalesce|zeroblob|istrue|literal2?|regexp\d|rowvalue\w*|cse|intreal|atof\d|fpconv1|tkt-a8a0d2996a|tkt-9a8b09f8e6|tkt3493|in|tkt-80e031a00f|tkt3334|tkt1473|tkt2339|tkt2822|tkt2927|tkt1537|tkt3935|tkt-b1d3a2e531|queryonly|enc\d?|securedel2?|sync2|exclusive|jrnlmode\d?|atomic2?|tkt35xx|nockpt|snapshot\w+|fts[34]\w+|amatch1|closure01|fuzzer\w+|dbdata|basexx1|upfrom\w+|scanstatus2?)/)[^/]+/sql-engine/|^upstream-(columncount|sqllimits1|e_blob\w+|e_resolve|shared\w+)/'
+- id: ddl
+  pattern: (?i)create table|drop table|alter table|create index|drop index
+  milestone: core
+  cases: '^(?!upstream-(starschema1|fts[34]\w+)/)[^/]+/ddl/|^upstream-(descidx\d|widetab1|e_createtable|expridx\d|index|index[3-79A]|indexexpr\d|indexfault|numindex1|tkt-8454a207b9)/'
+- id: dml
+  pattern: (?i)\binsert\b|\bupdate\b|\bdelete\b|upsert|on conflict|returning|replace into
+  milestone: core
+  cases: '^[^/]+/dml/|^upstream-(upfrom\w+|e_(total)?changes)/'
+- id: select
+  pattern: (?i)\bselect\b|where clause|order by|limit|group by|having|distinct
+  milestone: core
+  cases: '^(?!upstream-(index|index[3-79A]|indexexpr\d|indexfault|numindex1|subselect|bestindex\w|sqllimits1)/)[^/]+/select/|^upstream-(boundary2|bloom1|cost|coveridxscan|cursorhint\d?|offset1|pushdown|seekscan1|skipscan\d|unordered|tpch01|starschema1|transitive1|nulls1|index8)/'
+- id: join
+  pattern: (?i)\bjoin\b
+  milestone: core
+  cases: '^[^/]+/join/|^upstream-(tkt1537|tkt3935)/'
+- id: subquery
+  pattern: (?i)subquer|\bexists\b|\bin \(
+  milestone: core
+  cases: '^(?!upstream-subtype1/)[^/]+/subquery/|^upstream-(in|subselect|tkt-80e031a00f|tkt3334)/'
+- id: compound
+  pattern: (?i)\bunion\b|intersect|except|values clause
+  milestone: extended
+  cases: '^(?!upstream-unionvtab\w*/)[^/]+/compound/|^upstream-(tkt1473|tkt2339|tkt2822|tkt2927)/'
+- id: cte
+  pattern: (?i)common table expression|\bwith recursive\b|\bcte\b
+  milestone: extended
+  cases: '^(?!upstream-without_rowid\d/)[^/]+/cte/'
+- id: window
+  pattern: (?i)window function|\bover\b|row_number|partition by
+  milestone: extended
+  cases: '^[^/]+/window/'
+- id: aggregate
+  pattern: (?i)aggregate|count\(|group_concat|string_agg|\bsum\b|\bavg\b|\btotal\b
+  milestone: core
+  cases: '^(?!upstream-(columncount|cksumvfs)/)[^/]+/aggregate/|^upstream-(filter\w+|percentile|tkt-99378177930f87bd)/'
+- id: scalar-functions
+  pattern: (?i)scalar function|\bsubstr|\bprintf|\bformat\(|\bunistr|\breplace\(|\bhex\(|\babs\(|\binstr|\btrim
+  milestone: core
+  cases: '^(?!upstream-(hexlit|tabfunc01)/)[^/]+/scalar-functions/|^upstream-(coalesce|zeroblob|subtype1)/'
+- id: math
+  pattern: (?i)math function|\bsqrt|\bpow|\blog10|\bceil|\bfloor|\bpi\(
+  milestone: extended
+  cases: '^[^/]+/math/'
+- id: datetime
+  pattern: (?i)date and time|\bstrftime|\bjulianday|\bunixepoch|\btimediff|\bdatetime\(
+  milestone: extended
+  cases: '^[^/]+/datetime/'
+- id: json
+  pattern: (?i)\bjsonb?\b|json_each|json_tree
+  milestone: complete
+  cases: '^[^/]+/json/'
+- id: expressions
+  pattern: (?i)\bexpression|\bcase\b|\bcast\b|\blike\b|\bglob\b|\bregexp\b|\bbetween\b|operator
+  milestone: core
+  cases: '^(?!upstream-(e_createtable|expridx\d|e_(total)?changes|e_blob\w+|e_resolve)/)[^/]+/expressions/|^upstream-(istrue|literal2?|hexlit|regexp\d|rowvalue\w*|cse)/'
+- id: affinity
+  pattern: (?i)affinity|type conversion|typeof|storage class|\bstrict\b
+  milestone: core
+  cases: '^[^/]+/affinity/|^upstream-(intreal|atof\d|fpconv1|tkt-a8a0d2996a|tkt-9a8b09f8e6|tkt3493)/'
+- id: "null"
+  pattern: (?i)\bnull\b
+  milestone: core
+  cases: '^(?!upstream-(nulls1|notnull(fault)?)/)[^/]+/null/'
+- id: collation
+  pattern: (?i)collat|nocase|rtrim
+  milestone: extended
+  cases: '^[^/]+/collation/'
+- id: rowid
+  pattern: (?i)\browid\b|without rowid|integer primary key|autoincrement
+  milestone: core
+  cases: '^[^/]+/rowid/|^upstream-(boundary[134]|intpkey|without_rowid\d)/'
+- id: constraints
+  pattern: (?i)primary key|\bunique\b|not null|\bcheck\b|foreign key|default value|generated column
+  milestone: core
+  cases: '^(?!upstream-(fts[34]\w+|quickcheck)/)[^/]+/constraints/|^upstream-(notnull(fault)?|tkt-b1d3a2e531)/'
+- id: transactions
+  pattern: (?i)\bbegin\b|\bcommit\b|\brollback\b|savepoint|transaction
+  milestone: core
+  cases: '^(?!upstream-(transitive1|memjournal\d?|mjournal|subjournal)/)[^/]+/transactions/|^upstream-(atomic2?|tkt35xx)/'
+- id: views
+  pattern: (?i)\bview\b
+  milestone: extended
+  cases: '^[^/]+/views/'
+- id: triggers
+  pattern: (?i)\btrigger\b
+  milestone: extended
+  cases: '^[^/]+/triggers/'
+- id: pragma
+  pattern: (?i)\bpragma\b
+  milestone: extended
+  cases: '^[^/]+/pragma/|^upstream-(queryonly|enc\d?|securedel2?|sync2|exclusive)/'
+- id: maintenance
+  pattern: (?i)\bvacuum\b|\banalyze\b|\breindex\b|\battach\b|\bdetach\b|\bexplain\b
+  milestone: extended
+  cases: '^(?!upstream-eqp2?/)[^/]+/maintenance/'
+- id: virtual-tables
+  pattern: (?i)virtual table|generate_series|fsdir|completion|pragma_\w+|table-valued
+  milestone: complete
+  cases: '^(?!upstream-(decimal|ieee754|shared\w+)/)[^/]+/virtual-tables/|^upstream-(bestindex\w|fts[34]\w+|tabfunc01|unionvtab\w*|amatch1|closure01|fuzzer\w+|dbdata)/'
+- id: shell-extensions
+  pattern: (?i)\bdecimal|ieee754|\bsha3|\bsha1|\bbase64|\bbase85|\buint\b|readfile|writefile|\bedit\(
+  milestone: complete
+  cases: '^[^/]+/shell-extensions/|^upstream-(basexx1|decimal|ieee754)/|^upstream-shell1/[^/]+/[^/]+/(shell1-(8|10|11)\.)|^upstream-shell7/'
+- id: file-format
+  pattern: (?i)file format|database file|page size|b-?tree|header
+  milestone: core
+  cases: '^[^/]+/file-format/|^upstream-cksumvfs/'
+- id: rollback-journal
+  pattern: (?i)rollback journal|-journal|journal_mode
+  milestone: core
+  cases: '^[^/]+/rollback-journal/|^upstream-(jrnlmode\d?|memjournal\d?|mjournal|subjournal)/'
+- id: wal
+  pattern: (?i)\bwal\b|write-ahead|checkpoint
+  milestone: complete
+  cases: '^[^/]+/wal/|^upstream-(nockpt|snapshot\w+)/'
+- id: integrity
+  pattern: (?i)integrity_check|quick_check|corrupt
+  milestone: complete
+  cases: '^(?!upstream-fts[34]\w+/)[^/]+/integrity/|^upstream-quickcheck/'
+- id: dot-parsing
+  pattern: '(?i)dot.command (argument|token|pars|quot)|unknown command'
+  milestone: extended
+  cases: '^upstream-shell1/[^/]+/[^/]+/(shell1-(2\.|3-30))'
+components:
+- id: shell-main
+  pattern: (?i)\bmain\b|argument pars|command-line option|entry point
+- id: input-loop
+  pattern: (?i)process_input|line reader|input loop|statement splitter|complete statement
+- id: dot-commands
+  pattern: (?i)do_meta_command|dot.command|meta.command
+- id: output-renderer
+  pattern: (?i)output mode|renderer|formatter|qrf|result format
+- id: tokenizer
+  pattern: (?i)tokeni[sz]er|lexer
+- id: parser
+  pattern: (?i)\bparser\b|grammar|lemon|\bast\b|syntax tree
+- id: resolver
+  pattern: (?i)resolv|name binding|semantic
+- id: planner
+  pattern: (?i)planner|optimi[sz]er|where clause analysis|query plan
+- id: code-generator
+  pattern: (?i)code ?gen|compil|bytecode gen
+- id: vdbe
+  pattern: (?i)\bvdbe\b|virtual machine|bytecode (engine|interpreter)|opcode
+- id: functions
+  pattern: (?i)function registry|built-in function|func\.c|scalar function
+- id: sorter
+  pattern: (?i)sorter|external sort
+- id: record-format
+  pattern: (?i)record format|serial type|varint|record (encod|decod)
+- id: btree
+  pattern: (?i)b-?tree
+- id: pager
+  pattern: (?i)\bpager\b|page cache
+- id: journal
+  pattern: (?i)rollback journal|\bjournal\b
+- id: wal-module
+  pattern: (?i)\bwal\b|write-ahead
+- id: vfs
+  pattern: (?i)\bvfs\b|os layer|file (i/o|locking)
+- id: schema-catalog
+  pattern: (?i)schema|catalog|sqlite_(master|schema)
+- id: json-module
+  pattern: (?i)json (module|parser)|jsonb
+- id: datetime-module
+  pattern: (?i)date ?time module|julian day
+- id: shell-extensions
+  pattern: (?i)shell extension|decimal extension|series extension|sha3 extension|fileio

@@ -1,0 +1,227 @@
+tier: large
+features:
+- id: cli-options
+  pattern: (?i)-e\b|-l\b|-v\b|-E\b|-W\b|command.?line option
+  milestone: core
+  cases: '^[^/]+/cli-options/'
+- id: cli-arguments
+  pattern: (?i)\barg\b table|script arguments|arg\[
+  milestone: core
+  cases: '^[^/]+/cli-arguments/'
+- id: cli-stdin
+  pattern: (?i)standard input|stdin
+  milestone: core
+  cases: '^[^/]+/cli-stdin/'
+- id: lua-init
+  pattern: LUA_INIT
+  milestone: complete
+  cases: '^[^/]+/lua-init/'
+- id: interactive
+  pattern: (?i)interactive|\bREPL\b|-i\b|prompt
+  milestone: complete
+  cases: '^[^/]+/interactive/'
+- id: exit-status
+  pattern: (?i)exit (status|code)|os\.exit
+  milestone: core
+  cases: '^[^/]+/exit-status/'
+- id: error-reporting
+  pattern: (?i)traceback|uncaught error|error message
+  milestone: core
+  cases: '^[^/]+/error-reporting/'
+- id: lexer
+  pattern: (?i)lexer|lexical|escape sequence|long (string|bracket)|numeral|comment
+  milestone: core
+  cases: '^[^/]+/lexer/'
+- id: syntax-errors
+  pattern: (?i)syntax error|unexpected symbol|near '
+  milestone: core
+  cases: '^[^/]+/syntax-errors/'
+- id: numbers
+  pattern: (?i)integer|float|number subtype|overflow|wrap.?around
+  milestone: core
+  cases: '^[^/]+/numbers/'
+- id: arithmetic
+  pattern: (?i)arithmetic|floor division|modulo|exponent
+  milestone: core
+  cases: '^[^/]+/arithmetic/'
+- id: bitwise
+  pattern: (?i)bitwise|shift
+  milestone: core
+  cases: '^[^/]+/bitwise/'
+- id: coercion
+  pattern: (?i)coercion|string.to.number|convert
+  milestone: core
+  cases: '^[^/]+/coercion/'
+- id: control-flow
+  pattern: (?i)\bwhile\b|repeat|numeric for|generic for|\bbreak\b
+  milestone: core
+  cases: '^[^/]+/control-flow/'
+- id: goto
+  pattern: (?i)\bgoto\b|label
+  milestone: core
+  cases: '^[^/]+/goto/'
+- id: functions
+  pattern: (?i)closure|upvalue|tail call|function call
+  milestone: core
+  cases: '^[^/]+/functions/'
+- id: varargs
+  pattern: (?i)vararg|\.\.\.|select\(
+  milestone: core
+  cases: '^[^/]+/varargs/'
+- id: tables
+  pattern: (?i)\btables?\b|constructor|length operator|border
+  milestone: core
+  cases: '^[^/]+/tables/'
+- id: metatables
+  pattern: (?i)metatable|metamethod|__index|__call
+  milestone: core
+  cases: '^[^/]+/metatables/'
+- id: to-be-closed
+  pattern: (?i)to.be.closed|<close>|__close
+  milestone: core
+  cases: '^[^/]+/to-be-closed/'
+- id: const
+  pattern: (?i)<const>|constant variable|read.only
+  milestone: core
+  cases: '^[^/]+/const/'
+- id: global-declarations
+  pattern: (?i)\bglobal\b (declaration|keyword|statement)|global \*|undeclared
+  milestone: core
+  cases: '^[^/]+/global-declarations/'
+- id: error-handling
+  pattern: (?i)pcall|xpcall|\berror\(|assert
+  milestone: core
+  cases: '^[^/]+/error-handling/'
+- id: base-library
+  pattern: (?i)tostring|tonumber|ipairs|rawget|setmetatable|base library
+  milestone: core
+  cases: '^[^/]+/base-library/'
+- id: load
+  pattern: (?i)\bload\b|loadfile|dofile|chunk
+  milestone: core
+  cases: '^[^/]+/load/'
+- id: string-library
+  pattern: (?i)string library|string\.(rep|sub|byte|char|upper|lower|reverse|len)
+  milestone: extended
+  cases: '^[^/]+/string-library/'
+- id: string-format
+  pattern: (?i)string\.format|format specifier|%q
+  milestone: extended
+  cases: '^[^/]+/string-format/'
+- id: patterns
+  pattern: (?i)pattern|gsub|gmatch|string\.find|string\.match|capture
+  milestone: extended
+  cases: '^[^/]+/patterns/'
+- id: string-pack
+  pattern: (?i)string\.pack|unpack|packsize|binary format
+  milestone: extended
+  cases: '^[^/]+/string-pack/'
+- id: table-library
+  pattern: (?i)table\.(insert|remove|concat|sort|move|pack|unpack|create)|table library
+  milestone: extended
+  cases: '^[^/]+/table-library/'
+- id: math-library
+  pattern: (?i)math library|math\.(floor|ceil|fmod|sqrt|tointeger|ult|type|abs|max|min)
+  milestone: extended
+  cases: '^[^/]+/math-library/'
+- id: random
+  pattern: (?i)random|xoshiro|seed
+  milestone: extended
+  cases: '^[^/]+/random/'
+- id: utf8
+  pattern: (?i)utf.?8
+  milestone: extended
+  cases: '^[^/]+/utf8/'
+- id: coroutines
+  pattern: (?i)coroutine|yield|resume
+  milestone: extended
+  cases: '^[^/]+/coroutines/'
+- id: io-library
+  pattern: (?i)\bio\.|file handle|io library|popen
+  milestone: extended
+  cases: '^[^/]+/io-library/'
+- id: os-library
+  pattern: (?i)\bos\.|os library|os\.date|os\.time|getenv
+  milestone: extended
+  cases: '^[^/]+/os-library/'
+- id: package
+  pattern: (?i)require|package\.(path|cpath|loaded|preload|searchpath|searchers|loadlib)|LUA_PATH
+  milestone: complete
+  cases: '^[^/]+/package/'
+- id: debug-library
+  pattern: (?i)debug library|debug\.(traceback|getinfo|getlocal|sethook|upvalue)|hook
+  milestone: complete
+  cases: '^[^/]+/debug-library/'
+- id: binary-chunks
+  pattern: (?i)binary chunk|bytecode|string\.dump|precompiled|undump
+  milestone: complete
+  cases: '^[^/]+/binary-chunks/'
+- id: garbage-collector
+  pattern: (?i)garbage|collectgarbage|finali[sz]er|__gc|weak table|__mode
+  milestone: complete
+  cases: '^[^/]+/garbage-collector/'
+- id: warnings
+  pattern: (?i)\bwarn(ing)?s?\b|-W\b
+  milestone: complete
+  cases: '^[^/]+/warnings/'
+components:
+- id: standalone
+  pattern: (?i)standalone|lua\.c|interpreter front.?end|\bmain\b
+- id: lexer
+  pattern: (?i)lexer|scanner|llex|tokeni[sz]er
+- id: parser
+  pattern: (?i)parser|lparser|syntax tree|recursive descent
+- id: code-generator
+  pattern: (?i)code generat|compiler|lcode|emit|register alloc
+- id: virtual-machine
+  pattern: (?i)virtual machine|\bVM\b|lvm|interpreter loop|dispatch|opcode
+- id: call-stack
+  pattern: (?i)call stack|call info|ldo|stack frame|protected call|longjmp|unwind
+- id: values
+  pattern: (?i)tagged value|value representation|lobject|TValue
+- id: strings
+  pattern: (?i)string (intern|table)|lstring|short string|string cache
+- id: tables
+  pattern: (?i)ltable|hash part|array part|table implementation
+- id: closures
+  pattern: (?i)lfunc|upvalue|prototype|closure
+- id: metamethods
+  pattern: (?i)ltm|tag method|metamethod dispatch|event
+- id: garbage-collector
+  pattern: (?i)lgc|garbage collector|mark|sweep|generational|incremental
+- id: memory
+  pattern: (?i)lmem|allocator|memory manag
+- id: debug-interface
+  pattern: (?i)ldebug|debug interface|line info|variable name|hooks?
+- id: dump-undump
+  pattern: (?i)ldump|lundump|serializ|undump|binary chunk
+- id: buffered-input
+  pattern: (?i)lzio|zio|stream reader|buffer
+- id: state
+  pattern: (?i)lstate|global state|lua_State|thread state
+- id: api
+  pattern: (?i)lapi|C API|stack API|embedding
+- id: auxiliary-library
+  pattern: (?i)lauxlib|auxiliary|luaL_
+- id: base-library
+  pattern: (?i)lbaselib|base library
+- id: string-library
+  pattern: (?i)lstrlib|string library|pattern match
+- id: table-library
+  pattern: (?i)ltablib|table library|sort
+- id: math-library
+  pattern: (?i)lmathlib|math library|random
+- id: utf8-library
+  pattern: (?i)lutf8lib|utf.?8 library
+- id: coroutine-library
+  pattern: (?i)lcorolib|coroutine library
+- id: io-library
+  pattern: (?i)liolib|io library|file
+- id: os-library
+  pattern: (?i)loslib|os library|date|clock
+- id: package-library
+  pattern: (?i)loadlib|package library|require|searcher
+- id: debug-library
+  pattern: (?i)ldblib|debug library
+- id: library-init
+  pattern: (?i)linit|open(ing)? (the )?(standard )?librar
