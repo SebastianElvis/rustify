@@ -31,6 +31,7 @@ Complete every phase, run the parity gate, and report the remaining gaps.
 TARGETS = {"small": (0.95, 0.90), "medium": (0.85, 0.75), "large": (0.70, 0.55)}
 AGENT = "claude -p --output-format json --dangerously-skip-permissions"
 OUTPUT, TIMEOUT = ROOT / "work/agent-eval", 4 * 3600
+# The agent limits cover its MCP servers, shells, subagents, and parallel Cargo builds. A Doom trial reached 33 processes.
 
 
 def reference(directory):
@@ -65,7 +66,7 @@ def run(directories, trials):
 def attempt(workspace, record, command, prompt, timeout):
     """The helper records one attempt and freezes its project."""
     start = time.monotonic()
-    process, error, resources = harness.compare.execute(command, cwd=workspace, stdin=prompt.encode(), env={**os.environ, "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"}, timeout=timeout, memory_mib=2048, process_limit=32, output_mib=16)
+    process, error, resources = harness.compare.execute(command, cwd=workspace, stdin=prompt.encode(), env={**os.environ, "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"}, timeout=timeout, memory_mib=16384, process_limit=256, output_mib=16)
     stdout, stderr = process.stdout.decode(errors="replace"), process.stderr.decode(errors="replace") + (error or "")
     record.update(agent=shlex.join(command), returncode=None if error else process.returncode, seconds=round(time.monotonic() - start, 1), error="agent_failed" if error or process.returncode != 0 else None, execution_error=error, resources=resources)
     (workspace / "agent.log").write_text(stdout + stderr)
