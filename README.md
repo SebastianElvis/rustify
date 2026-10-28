@@ -1,6 +1,6 @@
 # Rustify
 
-**Closed source should not block reconstruction.**
+**Rebuild software as maintainable Rust from its binary.**
 
 Rustify gives AI agents a workflow to reconstruct software from a binary in idiomatic Rust.
 It recovers product specifications, UX, architecture, evidence, and tests alongside the implementation.
