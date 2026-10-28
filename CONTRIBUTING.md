@@ -5,7 +5,7 @@ This guide gives the setup, the rules, and the checks for a change to Rustify.
 
 ## Setup
 
-You need Python 3.11 or later, Node.js 24.x, and Rust with Cargo.
+You need Python 3.12 or later, Node.js 24.x, and Rust with Cargo.
 Run these commands from the repository root:
 
 ```sh

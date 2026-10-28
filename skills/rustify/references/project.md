@@ -1,6 +1,6 @@
 # Project format and state
 
-The helper scripts use Python 3.11 or later with PyYAML.
+The helper scripts use Python 3.12 or later with PyYAML.
 
 ## Fidelity rule
 

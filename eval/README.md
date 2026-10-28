@@ -11,7 +11,7 @@ This file explains how to run the evaluation.
 ## Requirements
 
 - The references need macOS and the CPU support of each reference binary.
-- The scorers need Python 3.11 or later with PyYAML, Rust with Cargo, and clang for the hardened builds.
+- The scorers need Python 3.12 or later with PyYAML, Rust with Cargo, and clang for the hardened builds.
 - The first run needs internet access for the pinned binaries and the Cargo dependencies.
 - Later runs use local inputs and loopback HTTP.
 - The skill bundle stays host-neutral. Only the references need macOS.
