@@ -8,7 +8,7 @@ The agent verifies each case's decoded inputs, operation, and relevant contrasts
 The agent derives cases from the binary surface, input partitions, boundaries, diagnostics, and persistent states.
 The agent includes omitted options, explicit defaults, malformed inputs, and failure paths.
 For encoded data, the agent partitions valid precision, channel models, and compression modes when the format exposes them.
-The agent checks the existing captures before it repeats an experiment.
+The agent checks existing captures and permitted shipped samples before it repeats an experiment or generates fixtures.
 The agent uses owned fixtures and permitted group changes when they test the required effect without root access.
 Credential-dependent behavior stays unmeasured when the host cannot run it.
 
