@@ -37,7 +37,7 @@ The agent sets supervisor limits for time, memory, process count, output, and co
 The agent places bounded trace windows around the measured transition.
 The agent records resource samples and limit terminations.
 The agent follows [software quality acceptance](../../rustify-validate/references/quality.md) for resource and lifecycle probes.
-Each capture identifies the binary, resources, inputs, environment, commands, and observation method.
+Each capture identifies the executed binary and its launchers, resources, inputs, environment, commands, and observation method.
 The agent preserves raw outputs, files, status, protocol bytes, GUI captures, and trace exports for the channels under test.
 The agent preserves exact file timestamps and persistent log bytes before normalization.
 The agent checks directory effects, file identity, and read-ahead when a workflow replaces files or changes its input.
@@ -48,7 +48,7 @@ The agent writes authored records in YAML and interpretations in Markdown.
 The agent checks repeatability on the original before it defines a rule for variable fields.
 The agent compares instrumented runs with an uninstrumented control.
 The agent records the failure injection layer.
-The agent verifies the injected failure with a control on each binary before acceptance.
+The agent verifies fault delivery on each binary, with telemetry outside product output.
 A library fault and a kernel denial can produce different metadata.
 Missing trace events do not prove that a call did not occur.
 An unexplained variation remains an open question.
