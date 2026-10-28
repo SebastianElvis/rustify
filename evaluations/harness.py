@@ -36,7 +36,7 @@ def save(path, value):
 
 
 def freeze(project, ignored=(), binaries=()):
-    hashes = {path.relative_to(project).as_posix(): digest(path) for path in sorted(project.rglob("*")) if path.is_file() and not set(ignored).intersection(path.relative_to(project).parts) and path.relative_to(project).parts[:2] != ("implementation", "target")}
+    hashes = {path.relative_to(project).as_posix(): (digest(path) if os.access(path, os.R_OK) else ("unreadable", *(info := path.stat())[:7], info.st_mtime_ns, info.st_ctime_ns)) for path in sorted(project.rglob("*")) if path.is_file() and not set(ignored).intersection(path.relative_to(project).parts) and path.relative_to(project).parts[:2] != ("implementation", "target")}
     return {**hashes, **{str(path): [digest(path), path.stat().st_mode, any(item.is_symlink() for item in (path, *path.parents))] for path in binaries}}
 
 

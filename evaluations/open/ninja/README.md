@@ -71,7 +71,7 @@ The evaluator keeps other bytes exact.
 The evaluator requires complete target and worker termination records.
 The evaluator checks each observed PID with its recorded start time.
 The evaluator sends no terminal cleanup signal to a reused PID.
-The evaluator pins `compare.py` to the qualified D23 hash.
+The evaluator pins `compare.py` to its recorded hash.
 A different helper requires qualification before these measurements apply.
 Each target uses a 15-second deadline, 512 MiB, 32 processes, 8 MiB of output, and a zero core limit.
 Each worker uses a 22-second deadline and 2 GiB.

@@ -1,8 +1,24 @@
 # CLI comparison
 
-The helper checks deterministic process cases.
+The agent reads the supplied runtime contract before it selects an observation route.
+The agent qualifies each needed route with a native control through the same observer.
+The agent uses approved endpoints only.
+A CLI schema limit does not establish that the host cannot test a condition.
+
+| Condition | Helper route | Control |
+| --- | --- | --- |
+| Finite pipe input and regular files | The agent uses the comparison CLI and scenario schema. | The original matches itself. A wrong candidate fails. |
+| Input before EOF | The API caller uses `execute`, `keep_stdin_open`, and `on_spawn`. | A native target emits the expected output before EOF. |
+| Closed descriptors | The POSIX API caller uses `preexec_fn` to set the required descriptors. | A native target records the inherited descriptor state. |
+| Terminal input and output | The POSIX API caller assigns a private PTY through `pass_fds` and `preexec_fn`. The callback captures bounded PTY data. | A native target confirms its terminal and foreground group. |
+| Signals and cancellation | The API caller starts an owned signal watcher through `on_spawn`. | A native target confirms delivery and termination. |
+| Permissions and links | The API caller prepares owned fixtures and passes `cwd`. | The capture records modes, link identities, bytes, and directory effects. |
+
+The caller inspects the Python API when the approved CLI cannot express a condition.
+A missing approved route remains an open gap.
 The agent captures observable state outside the helper's comparison view, including extended attributes.
-The validation workflow and ledger supply those acceptance requirements.
+
+## Deterministic cases
 
 The helper accepts a nonempty scenario list.
 Each scenario has a unique `id`, an `args` list, optional `stdin_b64`, optional `files`, and optional `env`.
@@ -10,23 +26,13 @@ The stdin value and file values encode raw bytes as base64.
 Fixture files use safe relative paths.
 The helper controls home and path variables.
 Cases can set locale and timezone values.
-
-```yaml
-- id: encode-stdin
-  args: [-w, '0']
-  stdin_b64: aGVsbG8=
-  files: {}
-```
-
-Each argument is a string. The agent quotes an argument that YAML reads as a number, a boolean, or null.
-
-The agent runs the installed helper with these arguments.
+Each argument is a string.
+The agent quotes an argument that YAML reads as a number, a boolean, or null.
 
 ```sh
 python3 <rustify-probe>/scripts/compare.py --reference ORIGINAL --candidate IMPLEMENTATION --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name PROGRAM
 ```
 
-Here, `<rustify-probe>` means this installed skill folder.
 The helper gives both processes the same argv[0] and deterministic environment.
 The helper uses the original filename when the caller omits `--name`.
 The helper uses separate temporary directories and compares output bytes, errors, status, and regular files.
@@ -34,9 +40,6 @@ The file view includes content, mode, owner, group, and kept input time.
 The `file_metadata` record preserves exact timestamps, device, inode, and link count outside that comparison view.
 The report preserves inputs, raw captures, and executable hashes.
 Timeouts and execution errors fail even when both processes fail alike.
-The helper does not provide OS-level containment for hostile binaries.
-The agent verifies that a deliberately wrong candidate fails the comparison.
-The agent checks that resume detection rejects changed target, source, or artifacts.
 
 ## Differential fuzzing
 
@@ -50,32 +53,28 @@ python3 <rustify-probe>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEME
 
 The report lists each divergence with both captures.
 The helper returns a failure status when it finds a divergence.
-The agent records the seed and the iteration count so that another run reproduces the search.
+The agent records the seed and iteration count.
 
 ## Supervisor limits
 
-The helper preserves pipe streams and tracks observed descendants across process groups and terminates them after a limit failure.
-The default limits are 512 MiB sampled memory, 64 processes, and 16 MiB of captured stream data.
-The API caller can set measured workload limits with `execute` parameters.
-The API caller can set `keep_stdin_open=True` when the target must inherit a pipe without end-of-file.
-The API caller can use `on_spawn(process)` to start a signal watcher within the helper cleanup scope.
-The monitor counts launch time against the deadline.
-The monitor starts after `Popen` returns.
+The helper uses sampled limits of 512 MiB memory, 64 processes, and 16 MiB captured stream data by default.
+The API caller sets workload limits with `execute` parameters.
+The file capture limit is 64 MiB.
+The monitor counts launch time against the deadline but starts after `Popen` returns.
 The caller uses an enclosing supervisor for a blocked launch.
-The caller records a pending termination when the OS does not reap the process.
 The callback runs on the calling thread and owns the streams until it returns.
 The supervisor monitors time, memory, and processes during the callback.
-The output limit bounds helper captures, not protocol data that the callback reads itself.
-The caller bounds callback protocol data and callback duration.
+The caller bounds callback duration and protocol data.
 The helper cannot cancel arbitrary callback code.
-The helper records resource peaks separately from exact behavior comparisons.
-The peak-memory sample includes process IDs, start times, parent IDs, and process commands.
-A limit failure always produces an execution error, even when both programs reach the same limit.
-These limits protect probe execution. They do not establish the absence of a product leak.
-On macOS, the helper also checks physical footprint to include compressed memory.
-The helper uses `proc_pid_rusage` with `rusage_info_v2` from the host SDK.
-The file capture limit is 64 MiB. A larger capture produces an execution error.
-
-The supervisor follows parent process IDs and preserves observed process identities through reparenting.
-The supervisor can miss a process that detaches and loses its parent between samples.
-The evaluator uses OS containment for workloads that can exploit that observation gap.
+The output limit bounds helper captures.
+The callback must bound data that it reads itself.
+The helper records resource peaks separately from behavior comparisons, including process identities, parents, commands, and physical footprint on macOS.
+The caller checks the host SDK and measurement units before it accepts resource budgets.
+The supervisor follows parent IDs and retains observed identities across reparenting and process groups.
+The supervisor terminates observed descendants after a limit failure.
+The caller qualifies cleanup after driver or observer termination before it uses a nested test driver.
+The caller records pending termination when the OS does not reap a process.
+The supervisor can miss a process that detaches between samples.
+The caller uses OS containment when that gap can affect safety.
+A limit failure produces an execution error.
+Sampled limits do not establish leak freedom or contain hostile binaries.

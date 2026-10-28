@@ -120,16 +120,17 @@ class CompareTests(unittest.TestCase):
     def test_execution_errors_are_not_fuzz_divergences(self):
         bad = self.program("bad", "")
         bad.write_text("#!/this-interpreter-does-not-exist\n")
-        for program, timeout in [
-            (self.program("slow", "import time\ntime.sleep(10)\n"), 0.05),
-            (bad, 30),
-            (self.program("link", "import os\nos.symlink('/tmp', 'link')\n"), 30),
+        for program, timeout, case in [
+            (self.program("slow", "import time\ntime.sleep(10)\n"), 0.05, self.case),
+            (bad, 30, self.case),
+            (self.program("link", "import os\nos.symlink('/tmp', 'link')\n"), 30, self.case),
+            (self.reference, 30, {**self.case, "files": {"x" * 256: ""}}),
         ]:
             with self.subTest(program=program.name):
-                report = compare.compare(program, program, [self.case], timeout=timeout)
+                report = compare.compare(program, program, [case], timeout=timeout)
                 self.assertEqual((report["status"], report["failed"]), ("failed", 1))
                 self.assertIn("execution_error", report["cases"][0]["differences"])
-                report = fuzz.fuzz(program, program, [self.case], iterations=1, timeout=timeout)
+                report = fuzz.fuzz(program, program, [case], iterations=1, timeout=timeout)
                 self.assertEqual((report["status"], report["divergences"], len(report["errors"])), ("invalid", [], 1))
                 self.assertEqual(report["errors"][0]["input"]["id"], "fuzz-0-0")
                 self.assertIn("execution_error", report["errors"][0]["differences"])

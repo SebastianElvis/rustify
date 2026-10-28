@@ -21,7 +21,7 @@ REPOSITORY = next(path for path in HERE.parents if (path / 'evaluations/harness.
 sys.path.insert(0, str(REPOSITORY / 'evaluations'))
 import harness
 
-EXECUTE_SHA256 = 'd23e2c654f68af21b9c61d8ccc4020559aad006dc64a7a29e43abb94206b6a9e'
+EXECUTE_SHA256 = '2c4ec7a2108e075b66e2407a5f0bc9e1fabb5a5b6f567bffd87a91ede2f831e7'
 PIN = '117dad1e0c303889221be3149db93cd1cbf496e545786d968402287072bdb92f'
 LIMITS = {'timeout': 15, 'memory_mib': 512, 'process_limit': 32, 'output_mib': 8}
 
@@ -41,7 +41,7 @@ def identity(pid):
 def helper_pin():
     path = REPOSITORY / 'skills/rustify-probe/scripts/compare.py'
     if Path(harness.compare.__file__).resolve() != path or harness.digest(path) != EXECUTE_SHA256:
-        raise ValueError('The compare helper differs from D23.')
+        raise ValueError('The compare helper differs from its pin.')
 
 
 def process_rows(capture):

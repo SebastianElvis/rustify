@@ -76,7 +76,7 @@ The validator preserves each failure and its smallest reproducer.
 The validator confirms the original result through `rustify-probe` before it requests a product repair.
 The validator links the failure to its requirement, evidence, test, and original-to-Rust mapping in `recovered/model.yaml`.
 
-The validator freezes the executable, source, and recovered model before a repair.
+The validator freezes the executable, source, recovered model, and fixture budget baseline before new repair probes.
 The validator sends a confirmed Rust defect to `rustify-implement`.
 The validator sends a recovery error or unknown mapping to discovery and planning before implementation.
 The validator reruns affected checks, complete workflows, and acceptance after each repair.

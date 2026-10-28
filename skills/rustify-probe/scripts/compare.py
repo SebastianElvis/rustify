@@ -175,21 +175,20 @@ def run(executable, name, case, timeout):
     result = {"returncode": None, "stdout_b64": "", "stderr_b64": "", "files": {}, "file_metadata": {}, "error": None}
     with tempfile.TemporaryDirectory(prefix="rustify-") as directory:
         root = Path(directory)
-        for filename, data in case.get("files", {}).items():
-            path = root / filename
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(decode(data))
-            path.chmod(0o644)
-            os.utime(path, (FIXTURE_TIME, FIXTURE_TIME))
-        env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": directory, "PATH": "/usr/bin:/bin"}
-        env.update(case.get("env", {}))
         try:
+            for filename, data in case.get("files", {}).items():
+                path = root / filename
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(decode(data))
+                path.chmod(0o644)
+                os.utime(path, (FIXTURE_TIME, FIXTURE_TIME))
+            env = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC", "HOME": directory, "PATH": "/usr/bin:/bin"} | case.get("env", {})
             completed, error, metrics = execute(
                 [name, *case["args"]], executable=str(executable), cwd=root, env=env,
                 stdin=decode(case.get("stdin_b64", "")), timeout=timeout,
             )
             result.update(returncode=completed.returncode, stdout_b64=base64.b64encode(completed.stdout).decode("ascii"), stderr_b64=base64.b64encode(completed.stderr).decode("ascii"), error=error, resources=metrics)
-        except OSError as error:
+        except (OSError, ValueError) as error:
             result["error"] = str(error)
         try:
             result["files"] = capture_files(root, result["file_metadata"])

@@ -122,7 +122,7 @@ class TerminalTests(unittest.TestCase):
 
     def test_loaded_helper_path_stays_strict(self):
         with patch.object(browse.harness.compare, '__file__', '/substitute/compare.py'), patch.object(browse.harness, 'digest', return_value=browse.EXECUTE_SHA256):
-            with self.assertRaisesRegex(ValueError, 'differs from D23'):
+            with self.assertRaisesRegex(ValueError, 'differs from its pin'):
                 browse.helper_pin()
 
     def test_original_pin_stays_strict(self):
@@ -132,7 +132,7 @@ class TerminalTests(unittest.TestCase):
 
     def test_helper_pin_stays_strict(self):
         with patch.object(browse.harness, 'digest', return_value='changed'):
-            with self.assertRaisesRegex(ValueError, 'differs from D23'):
+            with self.assertRaisesRegex(ValueError, 'differs from its pin'):
                 browse.helper_pin()
 
 
