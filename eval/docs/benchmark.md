@@ -556,14 +556,23 @@ It ran on macOS 26.7.2, build `25G325`.
 | zenity | 5 | 3 of 14 | Not run. The track needs operator GUI captures. |
 | textutil | 1,286 | 44 of 44 | All reports pass. |
 | bzip2 | 1,342 | 27 of 31 | All reports pass. |
-| ninja | 790 | 41 of 42 | `replay-browse` fails 5 cases, so the repeatability check fails. |
+| ninja | 790 | 41 of 42 | All reports pass. |
 | lua | 645 | 41 of 41 | All reports pass. |
 | sqlite | 22,618 | 57 of 57 | The upstream reports are `incomplete`. The replay reports pass. |
 | doom | 141 | 19 of 33 | The case reports pass. Three manual frame checks have no evidence. |
 
 All 28,688 scored case keys map to exactly one feature.
-The ninja failure makes ninja scores invalid on this host. The cause is open.
-The self-check ran ten scorers at the same time, and the `browse` tool depends on timing.
+An earlier ninja self-check failed 5 `replay-browse` cases.
+Each of these cases stops the browse server with `SIGINT`.
+A background shell job ignores `SIGINT`, and the browse server inherited this setting.
+The server did not stop, and the 15-second limit ended each case.
+A background run of `browse.py` repeats this result: the same 5 cases fail.
+The browse scorer now restores the default `SIGINT` action in its child processes.
+A second defect also failed 1 to 4 cases in some runs at a load average above 50.
+The readiness probe stopped on a connection timeout and did not try again.
+The probe now tries again until its 3-second deadline.
+After the two fixes, the self-check passes as a background job and as a foreground job.
+Six background runs of `browse.py` at the same time also pass all 9 cases.
 
 ### 7.2 Skill results
 
