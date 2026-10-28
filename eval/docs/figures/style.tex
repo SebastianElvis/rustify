@@ -25,3 +25,5 @@
  every node/.append style={font=\sffamily}
 }
 \newcommand{\step}[2]{\tikz[baseline=(s.base)]\node[circle,fill=#1,text=white,inner sep=1.6pt,font=\sffamily\tiny\bfseries](s){#2};}
+\ifpdf\usepackage[hidelinks]{hyperref}\else\usepackage[hypertex]{hyperref}\fi
+\newcommand{\paper}[2]{\href{https://arxiv.org/abs/#2}{\textcolor{blue}{#1}}}

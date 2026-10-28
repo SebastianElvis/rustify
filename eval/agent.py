@@ -26,7 +26,7 @@ Work only from the binary, its resources, and its observable behavior.
 Do not download, search for, or read the source code, tests, or documentation of this program.
 Complete every phase, run the parity gate, and report the remaining gaps.
 """
-# The tier targets come from published whole-program results. eval/docs/design.md records the evidence.
+# The tier targets come from published whole-program results. eval/docs/benchmark.md records the evidence.
 TARGETS = {"small": (0.95, 0.90), "medium": (0.85, 0.75), "large": (0.70, 0.55)}
 RESUME = "Continue the reconstruction from where you stopped. Follow the same rules. Complete every phase, run the parity gate, and report the remaining gaps.\n"
 

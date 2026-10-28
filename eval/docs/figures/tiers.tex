@@ -1,3 +1,5 @@
+\RequirePackage{ifpdf}
+\ifpdf\else\def\pgfsysdriver{pgfsys-dvisvgm.def}\fi
 \documentclass[tikz,border=10pt]{standalone}
 \input{style}
 \begin{document}
