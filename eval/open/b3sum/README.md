@@ -18,6 +18,7 @@ The BLAKE3 team develops it in Rust.
 - The upstream release controls the flags.
 - Metadata audit: the binary is not stripped. 2,891 defined symbols remain. The strings contain 139 Rust source paths, for example `src/main.rs`.
 - The leaked symbols make this track easier than a hardened build. A future revision can rebuild it with the hardened Rust profile.
+- License: BLAKE3 uses CC0-1.0, Apache-2.0, or Apache-2.0 WITH LLVM-exception. `upstream-vectors.yaml` copies its official test vectors.
 
 ## Oracle
 

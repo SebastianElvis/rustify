@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustify"
+version = "0.1.0"
+description = "Agent skills that reconstruct software from a binary in idiomatic Rust."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Runchao Han" }]
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6"]
+
+[project.urls]
+Homepage = "https://github.com/SebastianElvis/rustify"
+Issues = "https://github.com/SebastianElvis/rustify/issues"
+
+# The skills and the evaluation run as scripts. The project installs only its dependencies.
+[tool.setuptools]
+packages = []

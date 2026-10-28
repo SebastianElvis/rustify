@@ -17,6 +17,7 @@ It follows the interface of HTTPie and is written in Rust.
 - Binary: `xh` from the 0.26.3 GitHub release for macOS arm64.
 - The upstream release controls the flags.
 - Metadata audit: the binary is stripped. One defined symbol remains. The strings still contain 675 source-path matches from Rust panic and tracing locations, for example the `h2` crate paths.
+- License: xh uses MIT. `upstream.py` derives its vectors from the upstream tests.
 
 ## Oracle
 

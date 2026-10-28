@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a skill, helper, or evaluation defect.
+labels: [bug]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the actual result and the expected result.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: Give the target type, the request, and the commands.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Give the agent and its version, the operating system, and the REA version.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Attach logs, reports, or files from `verification/`. Remove private data first.

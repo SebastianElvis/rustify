@@ -7,3 +7,5 @@ __pycache__/
 *.fls
 *.fdb_latexmk
 *.out
+build/
+*.egg-info/

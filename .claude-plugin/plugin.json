@@ -1,0 +1,10 @@
+{
+  "name": "rustify",
+  "version": "0.1.0",
+  "description": "Reconstruct software from a binary in idiomatic Rust, with recovered specifications, architecture, evidence, and tests.",
+  "author": {"name": "Runchao Han"},
+  "homepage": "https://github.com/SebastianElvis/rustify",
+  "repository": "https://github.com/SebastianElvis/rustify",
+  "license": "Apache-2.0",
+  "keywords": ["rust", "reverse-engineering", "reconstruction", "skills"]
+}

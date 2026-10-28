@@ -16,6 +16,7 @@ Scripts use it to show native dialogs and read the user's answer.
 - Binary: `zenity_macos.zip` from the v0.10.15 GitHub release. The replay uses the arm64 slice of the universal binary.
 - The upstream release controls the flags.
 - Metadata audit: the binary has no defined symbols. Go still keeps type names, package paths, and function names in its runtime tables. The strings contain 766 such matches. Stripping cannot remove this metadata from a Go binary.
+- License: zenity uses MIT.
 
 ## Oracle
 
