@@ -28,6 +28,7 @@ LIMITS = {'timeout': 15, 'memory_mib': 512, 'process_limit': 32, 'output_mib': 8
 
 def no_core():
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    signal.signal(signal.SIGINT, signal.SIG_DFL)  # A background shell job inherits an ignored SIGINT.
 
 
 def identity(pid):
@@ -166,7 +167,7 @@ def worker(config):
             try:
                 with socket.create_connection(('127.0.0.1', port), timeout=0.05):
                     break
-            except ConnectionRefusedError:
+            except OSError:
                 time.sleep(0.02)
         else:
             result['errors'].append('The service did not become ready.')
