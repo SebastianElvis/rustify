@@ -2,7 +2,7 @@
 
 The specification describes the original interface.
 The specification uses stable screen, state, component, token, asset, transition, requirement, and gap identifiers.
-Each observable interaction rule is a `ux` requirement in `recovered/model.json`.
+Each observable interaction rule is a `ux` requirement in `recovered/model.yaml`.
 Each requirement follows the EARS patterns in [the standards guide](../../rustify/references/standards.md).
 
 ## Visual and stateful interfaces
@@ -18,7 +18,7 @@ A missing applicable surface remains an open investigation gap.
 
 The requirements table links each state, transition, or token to its requirement IDs and captures.
 The ledger and the parity gate own the Rust mapping and the replay result.
-The replay uses the contract's explicit visual or timing tolerances.
+The replay uses the explicit visual or timing tolerances in `recovered/product.md`.
 The agent does not introduce a tolerance to hide a known mismatch.
 
 ## Command-line interfaces
@@ -39,7 +39,7 @@ A test origin is `observed`, `inferred`, or `proposed`.
 The origin does not establish the expected result.
 An expectation becomes a parity requirement only when original behavior supports it.
 An unknown expected result remains a proposed probe or an unconfirmed inference.
-The orchestrator merges worker shards into the canonical recovered JSON files.
+The orchestrator merges worker shards into the canonical recovered YAML files.
 The implementation owns executable replay and test code.
 
 ## Scope and completion

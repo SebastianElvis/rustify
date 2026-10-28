@@ -9,12 +9,12 @@ metadata:
 
 # Recover the interaction specification
 
-The agent reads `recovered/contract.json` and [the project contract](../rustify/references/project.md).
+The agent reads `recovered/state.yaml` and [the project format](../rustify/references/project.md).
 The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent preserves original appearance and behavior without aesthetic improvements.
 
 1. The agent reads [the investigation methods](references/investigation.md) before capturing interactions.
-2. The agent uses the existing [REA tools](https://github.com/morluto/rea) and the current provider.
+2. The agent invokes [rustify-probe](../rustify-probe/SKILL.md) for interface captures and binary evidence.
    The orchestrator owns dependency setup and shared session coordination.
 3. The agent reads [the output rules](references/output-format.md) before writing `recovered/ux.md`.
 4. The agent uses the [interaction specification template](assets/interaction-specification.md) for visual or stateful interfaces.

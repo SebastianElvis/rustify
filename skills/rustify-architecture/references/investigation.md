@@ -2,19 +2,20 @@
 
 ## Establish the boundary
 
-The agent records the binary hash, resources, platform, and investigation scope.
-The default scope covers the full product.
-The agent narrows that scope only when the user requests it.
+The agent records the binary hash, resources, and platform.
+The investigation covers the full product.
 The agent identifies entry points, processes, libraries, plugins, and external services.
 The agent assigns stable component, edge, and interface identifiers.
 A component represents an evidenced responsibility and boundary.
 A source filename or compiler symbol alone does not establish that boundary.
+The agent checks local symbols as well as exports before it declares symbols absent.
 
 ## Trace complete workflows
 
 The agent selects scenarios from `recovered/product.md` and `recovered/ux.md`.
 The agent traces each scenario from its entry point to its result.
 The trace records calls, data transfer, state changes, storage, and external effects.
+The agent records transient data layouts, buffer bounds, ownership, and allocation lifetimes.
 The agent preserves call order, error paths, cancellation, retry rules, and recovery behavior.
 The agent records thread ownership, blocking behavior, scheduling, and synchronization when they affect the workflow.
 The agent tests a static hypothesis with a controlled runtime scenario.
@@ -33,7 +34,7 @@ The agent builds the views that [the standards guide](../../rustify/references/s
 | Runtime | The trigger, ordered calls, decisions, data transfers, failures, and outcome of each workflow. |
 | State and data | The observed states, events, guards, and transitions; the stored entities and formats. |
 
-The agent supplies context, container, component, and runtime views for scoped workflows.
+The agent supplies context, container, component, and runtime views for all workflows.
 The agent adds a state machine when behavior depends on persistent or protocol state.
 The agent keeps the recovered model separate from Rust implementation choices.
 
@@ -56,5 +57,7 @@ Each claim is `observed`, `inferred`, or `unknown`.
 The agent states high, medium, or low confidence with a reason.
 Confidence does not replace evidence classification.
 The agent records provider limits, omitted paths, indirect calls, and unresolved boundaries.
-The agent blocks a dependent implementation task when a missing fact prevents faithful reconstruction.
+The agent separates provider limits from unknown product facts.
+The agent names each missing fact, its dependent behavior or mapping, and the evidence that can resolve it.
+The agent blocks only work that needs that fact.
 Original goals and future plans remain inferred or unknown unless direct evidence establishes them.

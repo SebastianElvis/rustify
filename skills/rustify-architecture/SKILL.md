@@ -9,12 +9,12 @@ metadata:
 
 # Recover the original architecture
 
-The agent reads `recovered/contract.json` and [the project contract](../rustify/references/project.md).
+The agent reads `recovered/state.yaml` and [the project format](../rustify/references/project.md).
 The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent does not redesign the original system.
 
 1. The agent reads [the investigation method](references/investigation.md).
-2. The agent uses [the REA guide](references/rea.md) for binary evidence.
+2. The agent invokes [rustify-probe](../rustify-probe/SKILL.md) for binary evidence and runtime traces.
 3. The agent writes the `components` and `edges` shards and `recovered/architecture.md` with [the output rules](references/outputs.md).
 4. The agent supplies component and runtime diagrams with editable sources.
 5. The agent adds state and storage models when the original requires them.

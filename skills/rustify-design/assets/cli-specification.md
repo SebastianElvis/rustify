@@ -2,7 +2,6 @@
 
 The original version and binary hash are {{ORIGINAL_VERSION_AND_SHA256}}.
 The environment is {{PLATFORM_LOCALE_TERMINAL_AND_ENVIRONMENT}}.
-The scope is {{FULL_PRODUCT_OR_SUBSET_WITH_USER_INSTRUCTION}}.
 The invocation grammar is `{{ORIGINAL_INVOCATION_GRAMMAR}}`.
 The original help and version captures are {{HELP_AND_VERSION_CAPTURE_PATHS}}.
 

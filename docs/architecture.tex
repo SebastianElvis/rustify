@@ -7,12 +7,11 @@
 \definecolor{ink}{HTML}{243447}
 \definecolor{gray}{HTML}{738294}
 \tikzset{
- box/.style={draw=gray,rounded corners=3pt,minimum height=13mm,text width=30mm,align=center,font=\sffamily\small,text=ink,inner sep=6pt},
- component/.style={box,fill=blue!7},
+ box/.style={draw=gray,rounded corners=3pt,text width=38mm,minimum height=17mm,align=center,text=ink,inner sep=6pt,font=\sffamily\small},
+ skill/.style={box,fill=blue!6},
  external/.style={box,fill=gray!7},
- helper/.style={box,fill=white,text width=39mm,font=\sffamily\small},
  flow/.style={-{Latex[length=2.5mm]},draw=blue,line width=1.25pt},
- repair/.style={-{Latex[length=2.5mm]},draw=orange,line width=1.25pt},
+ repair/.style={-{Latex[length=2.5mm]},draw=orange,line width=1.1pt},
  relation/.style={draw=gray,dashed,line width=.85pt},
  label/.style={font=\sffamily\small,text=ink,align=center},
  heading/.style={font=\sffamily\bfseries,text=ink,anchor=west},
@@ -22,71 +21,44 @@
 \newcommand{\step}[1]{\tikz[baseline=(s.base)]\node[circle,fill=blue,text=white,inner sep=2pt,font=\sffamily\tiny\bfseries](s){#1};}
 \begin{document}
 \begin{tikzpicture}[x=1cm,y=1cm]
- \node[heading,font=\sffamily\bfseries\Large] at (.1,20.0) {Rustify: original software to a faithful Rust implementation};
+ \node[heading,font=\sffamily\bfseries\Large] at (.2,17.6) {Rustify: reconstruction with shared evidence};
+ \node[external] (input) at (2.8,15.9) {Original binary\\and resources};
+ \node[skill,text width=48mm] (main) at (11.0,15.9) {\texttt{/rustify}\\Orchestrator};
+ \node[box,text width=48mm] (workspace) at (21.2,15.9) {Agent workspace\\Temporary shards and notes};
+ \draw[flow] (input.east) -- node[label,above]{\step{1} Supply} (main.west);
+ \draw[relation] (main.east) -- node[label,above]{Worker coordination} (workspace.west);
  \begin{scope}[on background layer]
-  \filldraw[fill=blue!2,draw=gray,rounded corners=5pt] (4.8,8.7) rectangle (31.3,18.9);
-  \filldraw[fill=white,draw=gray!65,rounded corners=4pt] (10.3,10.8) rectangle (18.8,16.8);
-  \filldraw[fill=orange!5,draw=gray,rounded corners=5pt] (4.8,.5) rectangle (31.3,6.3);
+  \filldraw[fill=blue!2,draw=gray,rounded corners=5pt] (.2,9.6) rectangle (24.3,14.1);
+  \filldraw[fill=blue!2,draw=gray,rounded corners=5pt] (8.3,5.4) rectangle (24.3,8.6);
+  \filldraw[fill=orange!4,draw=gray,rounded corners=5pt] (.2,.3) rectangle (24.3,4.7);
  \end{scope}
- \node[heading,font=\sffamily\bfseries\large] at (5.3,18.3) {INSTALLED SKILL BUNDLE};
- \node[label,anchor=west] at (5.3,17.7) {Host-native agents execute these instructions and call the bundled helpers.};
- \node[heading] at (10.7,16.3) {Parallel discovery};
- \node[external,text width=32mm,minimum height=23mm] (input) at (2.0,13.6) {Original binary\\and resources\\[3pt]Scope contract};
- \node[component,text width=32mm] (main) at (7.9,13.6) {\texttt{rustify}\\Orchestrator};
- \node[label,text width=26mm] at (6.2,12.0) {Preparation and coordination};
- \node[component,text width=38mm] (product) at (14.6,15.25) {\texttt{rustify-product}};
- \node[component,text width=38mm] (design) at (14.6,13.6) {\texttt{rustify-design}};
- \node[component,text width=38mm] (architecture) at (14.6,11.95) {\texttt{rustify-architecture}};
- \node[component,text width=28mm] (plan) at (20.9,13.6) {\texttt{rustify-plan}};
- \node[component,text width=32mm] (implement) at (25.0,13.6) {\texttt{rustify-implement}};
- \node[component,text width=30mm] (validate) at (29.2,13.6) {\texttt{rustify-validate}};
- \draw[blue,line width=3pt] (10.95,11.95) -- (10.95,15.25);
- \draw[blue,line width=3pt] (18.15,11.95) -- (18.15,15.25);
- \node[label,below] at (10.95,11.65) {Fork};
- \node[label,below] at (18.15,11.65) {Join};
- \draw[flow] (input.east) -- node[label,above,yshift=5pt]{\step{1} Supply} (main.west);
- \draw[flow] (main.east) -- (10.95,13.6);
- \node[label,anchor=east] at (10.65,14.8) {\step{2} Discover};
- \foreach \name/\y in {product/15.25,design/13.6,architecture/11.95} {
-  \draw[flow] (10.95,\y) -- (\name.west);
-  \draw[flow] (\name.east) -- (18.15,\y);
- }
- \draw[flow] (18.15,13.6) -- (plan.west);
- \node[label,anchor=west] at (18.4,14.8) {\step{3} Merge};
- \draw[flow] (plan.east) -- node[label,above,yshift=23pt]{\step{4} Build} (implement.west);
- \draw[flow] (implement.east) -- node[label,above,yshift=23pt]{\step{5} Compare} (validate.west);
- \draw[repair] (validate.north) -- (29.2,17.05) -- (7.9,17.05) -- (main.north);
- \node[label,text=orange] at (22.1,17.35) {Differences reopen affected work};
- \node[helper] (state) at (7.9,10.1) {{\scriptsize\texttt{rustify/scripts/project.py}}\\[2pt]Phase order, ledger, Rust checks};
- \node[helper,text width=51mm] (comparison) at (27.9,10.1) {{\scriptsize\texttt{rustify-validate/scripts/}}\\\texttt{compare.py}, \texttt{fuzz.py}, \texttt{parity.py}\\[2pt]Comparisons, fuzzing, and gate};
- \draw[relation] (main.south) -- (state.north);
- \draw[relation] (validate.south) -- (29.2,11.15) -- (27.9,11.15) -- (comparison.north);
- \node[label,anchor=east] at (30.6,11.4) {Other profiles use host replay.};
- \node[external,text width=38mm,minimum height=11mm] (rea) at (14.6,7.5) {REA\\Investigation backend};
- \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (14.6,10.8) -- (rea.north);
- \node[label,anchor=west,text width=42mm,align=left] at (14.9,9.35) {Analysis requests\\and exported evidence};
- \node[box,fill=white,text width=46mm,minimum height=16mm] (workspace) at (20.9,7.5) {\textbf{AGENT WORKSPACE}\\[2pt]Worker shards\\Progress notes};
- \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (workspace.north) -- (20.9,10.3) -- (18.15,10.3) -- (18.15,11.2);
- \node[label,anchor=west] at (21.1,9.35) {Shards to merge};
- \draw[repair] (28.2,12.95) -- (28.2,12.05) -- (25.0,12.05) -- (implement.south);
- \node[label,text=orange,anchor=south] at (26.6,12.1) {Next slice};
- \draw[relation] (state.south) -- (7.9,6.3);
- \node[label,anchor=west] at (8.1,7.4) {State and artifact checks};
- \draw[relation] (comparison.south) -- (27.9,6.3);
- \node[label,anchor=west] at (28.1,7.4) {Reports};
- \draw[flow] (validate.east) -- (32.3,13.6) -- (32.3,5.0) -- (31.3,5.0);
- \node[label,text width=22mm,anchor=west] at (32.55,9.1) {\step{6} Deliver\\project};
- \node[heading,font=\sffamily\bfseries\large] at (5.3,5.8) {TARGET PROJECT \quad Generated reconstruction output};
- \node[heading,font=\ttfamily\bfseries] at (5.4,4.95) {recovered/};
- \node[files] at (5.4,4.6) {\quad contract.json\quad state.json\\\quad model.json\quad evidence.json\\\quad product.md\quad ux.md\\\quad architecture.md\\\quad evidence/\quad scenarios.json\\\quad tests.json\quad roadmap.md};
- \node[label,anchor=north west,text width=54mm,align=left,font=\sffamily\small] at (10.7,3.5) {\texttt{tests.json} contains declarative test specifications.\\[4pt]Each test has an observed, inferred, or proposed origin.};
- \node[files,font=\ttfamily\scriptsize] at (10.7,1.65) {diagrams/ (when grounded)\\data-models/ (when present)};
- \node[heading,font=\ttfamily\bfseries] at (18.6,4.95) {implementation/};
- \node[files] at (18.6,4.6) {\quad Cargo.toml\\\quad Cargo.lock\\\quad src/\\\quad tests/\\\quad docs/design.md\\\quad docs/adr/};
- \node[label,anchor=north west,text width=50mm,align=left,font=\sffamily\scriptsize] at (18.6,1.6) {Unit tests can also reside in \texttt{src/}.\\ADRs record each design decision.};
- \node[heading,font=\ttfamily\bfseries] at (25.5,4.95) {verification/};
- \node[files] at (25.5,4.6) {\quad checks.json\\\quad comparison.json\\\quad fuzz.json\\\quad parity.json\\\quad compatibility.md\\\quad logs/};
- \node[label,anchor=west,font=\sffamily\small] at (.1,-.1) {Blue arrows show reconstruction. Orange arrows show refinement. Gray lines show tool and workspace relations.};
- \node[label,anchor=west,font=\sffamily\small] at (.1,-.65) {The host runs discovery sequentially when parallel agents are unavailable. REA remains an external investigation backend.};
+ \node[heading] at (13.5,13.65) {RECONSTRUCTION PHASES};
+ \node[skill,text width=43mm,minimum height=24mm] (discovery) at (3.1,11.9) {Discovery\\[4pt]\texttt{/rustify-product}\\\texttt{/rustify-design}\\\texttt{/rustify-architecture}};
+ \node[skill,minimum height=24mm] (plan) at (9.6,11.9) {\texttt{/rustify-plan}\\[4pt]Rust design and slices};
+ \node[skill,minimum height=24mm] (implement) at (15.6,11.9) {\texttt{/rustify-implement}\\[4pt]Rust implementation};
+ \node[skill,minimum height=24mm] (validate) at (21.5,11.9) {\texttt{/rustify-validate}\\[4pt]Parity assessment};
+ \draw[flow] (main.south) -- (11.0,14.65) -- (3.1,14.65) -- node[label,right,xshift=4pt]{\step{2} Discover} (discovery.north);
+ \draw[flow] (discovery.east) -- node[label,above]{\step{3} Merge} (plan.west);
+ \draw[flow] (plan.east) -- node[label,above]{\step{4} Build} (implement.west);
+ \draw[flow] (implement.east) -- node[label,above]{\step{5} Check} (validate.west);
+ \draw[repair] (validate.south) -- (21.5,10.05) -- node[label,above,text=orange]{Next slice} (15.6,10.05) -- (implement.south);
+ \node[heading] at (8.8,8.1) {SHARED PROBE METHODS};
+ \node[skill,text width=46mm] (probe) at (11.7,6.65) {\texttt{/rustify-probe}\\Captures and traces};
+ \node[label,text width=61mm,align=left] at (19.6,6.65) {\texttt{compare.py} and \texttt{fuzz.py}\\[4pt]The skill preserves raw evidence,\\identities, hashes, and limitations.};
+ \draw[relation,{Latex[length=2mm]}-{Latex[length=2mm]}] (11.0,9.6) -- node[label,right]{All phases request probes.} (11.0,8.6);
+ \node[external,text width=40mm] (rea) at (3.1,6.65) {REA\\Binary and runtime analysis};
+ \draw[relation] (discovery.south) -- node[label,left]{Direct REA access} (rea.north);
+ \draw[relation] (rea.east) -- node[label,above]{REA access} (8.3,6.65);
+ \node[heading] at (.7,4.15) {TARGET PROJECT};
+ \node[heading,font=\ttfamily\bfseries] at (.8,3.35) {recovered/};
+ \node[files] at (.8,2.95) {model.yaml\quad evidence.yaml\\product.md\quad ux.md\\architecture.md\quad evidence/\\scenarios.yaml\quad tests.yaml\\state.yaml\quad roadmap.md};
+ \node[heading,font=\ttfamily\bfseries] at (9.1,3.35) {implementation/};
+ \node[files] at (9.1,2.95) {Cargo.toml\quad Cargo.lock\\src/\quad tests/\\docs/design.md\\docs/adr/};
+ \node[heading,font=\ttfamily\bfseries] at (17.0,3.35) {verification/};
+ \node[files] at (17.0,2.95) {checks.yaml\quad comparison.yaml\\fuzz.yaml\quad parity.yaml\\compatibility.md\quad logs/};
+ \draw[flow] (validate.east) -- (25.15,11.9) -- node[label,right,text width=18mm]{\step{6} Deliver} (25.15,3.7) -- (24.3,3.7);
+ \node[label,anchor=west] at (.2,-.3) {\texttt{project.py} checks phases and Rust code. \texttt{parity.py} checks evidence and mappings.};
+ \node[label,anchor=west] at (.2,-.85) {Validation differences reopen the affected phase. The full gate requires zero open gaps.};
+ \node[label,anchor=west] at (.2,-1.4) {\texttt{/} identifies a skill. Blue arrows show reconstruction. Orange arrows show iteration. Dashed lines show shared relations.};
 \end{tikzpicture}
 \end{document}

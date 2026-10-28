@@ -1,0 +1,146 @@
+features:
+- id: incremental
+  pattern: (?i)incremental|no-op|up to date|no work to do|dirty|mtime|timestamp
+- id: command-change
+  pattern: (?i)command (line )?(changed|hash)|rebuild.*command
+- id: targets
+  pattern: (?i)default target|target selection|\^ ?syntax|did you mean|unknown target
+- id: keep-going
+  pattern: (?i)keep going|-k N|-k 0|subcommands? failed|cannot make progress
+- id: options
+  pattern: (?i)-C DIR|-f FILE|--version|--quiet|--verbose|dry run|-n\b|usage
+- id: manifest-language
+  pattern: (?i)manifest|build\.ninja|variable|scope|include|subninja|escape
+- id: manifest-errors
+  pattern: (?i)parse error|syntax error|near here|expected .* got|bad \$-escape
+- id: warnings
+  pattern: (?i)-w FLAG|phonycycle|dupbuild|warning flag
+- id: depfile
+  pattern: (?i)depfile|\.d file|makefile-style dep
+- id: deps-log
+  pattern: (?i)\.ninja_deps|deps log|deps ?= ?gcc|deps ?= ?msvc
+- id: build-log
+  pattern: (?i)\.ninja_log|build log|log version
+- id: restat
+  pattern: (?i)restat
+- id: generator
+  pattern: (?i)generator|regenerat|manifest rebuild|still dirty after
+- id: edges
+  pattern: (?i)implicit (dep|output|input)|order-only|validation|phony
+- id: pools
+  pattern: (?i)\bpools?\b|depth|console pool
+- id: rspfile
+  pattern: (?i)rspfile|response file
+- id: builddir
+  pattern: (?i)builddir|build dir
+- id: dyndep
+  pattern: (?i)dyndep|dynamic dependenc
+- id: status
+  pattern: (?i)NINJA_STATUS|status line|progress|\[%f/%t\]|CLICOLOR_FORCE|color
+- id: smart-terminal
+  pattern: (?i)smart terminal|tty|terminal width|elide|\\r|carriage return
+- id: interrupt
+  pattern: (?i)interrupt|SIGINT|SIGTERM|SIGHUP|signal|exit (code|status) 130
+- id: jobserver
+  pattern: (?i)jobserver|MAKEFLAGS
+- id: parallelism
+  pattern: (?i)-j N|parallel|-l N|load average
+- id: debug-modes
+  pattern: (?i)-d MODE|-d explain|keepdepfile|keeprsp|-d stats|debug mode
+- id: tools
+  pattern: (?i)subtool|-t TOOL|-t list
+- id: tool-list
+  pattern: (?i)-t list|ninja subtools
+- id: tool-browse
+  pattern: (?i)\bbrowse\b
+- id: tool-clean
+  pattern: (?i)-t clean|\bclean\b
+- id: tool-cleandead
+  pattern: (?i)cleandead
+- id: tool-commands
+  pattern: (?i)-t commands|\bcommands tool
+- id: tool-inputs
+  pattern: (?i)-t inputs|inputs tool|dependency-order|no-shell-escape
+- id: tool-multi-inputs
+  pattern: (?i)multi-inputs
+- id: tool-deps
+  pattern: (?i)-t deps|deps tool
+- id: tool-missingdeps
+  pattern: (?i)missingdeps|missing dep
+- id: tool-graph
+  pattern: (?i)-t graph|graphviz|\bdot\b
+- id: tool-query
+  pattern: (?i)-t query|\bquery\b
+- id: tool-targets
+  pattern: (?i)-t targets|targets tool
+- id: tool-compdb
+  pattern: (?i)compdb|compilation database
+- id: tool-recompact
+  pattern: (?i)recompact
+- id: tool-restat
+  pattern: (?i)-t restat|restat tool
+- id: tool-rules
+  pattern: (?i)-t rules|rules tool
+- id: tool-urtle
+  pattern: (?i)urtle
+components:
+- id: main
+  pattern: (?i)\bmain\b|entry point|NinjaMain|command line|option pars
+- id: lexer
+  pattern: (?i)lexer|tokeni[sz]
+- id: manifest-parser
+  pattern: (?i)manifest parser|ManifestParser|parser
+- id: eval-env
+  pattern: (?i)eval[_ ]?env|BindingEnv|EvalString|variable (scope|expan)
+- id: state-graph
+  pattern: (?i)\bgraph\b|\bState\b|Node|Edge|DAG
+- id: dependency-scan
+  pattern: (?i)DependencyScan|dirty (check|scan)|RecomputeDirty
+- id: build-plan
+  pattern: (?i)\bPlan\b|scheduler|critical path|ready queue
+- id: builder
+  pattern: (?i)Builder|build (driver|engine|loop)
+- id: build-log
+  pattern: (?i)BuildLog|build log|\.ninja_log
+- id: deps-log
+  pattern: (?i)DepsLog|deps log|\.ninja_deps
+- id: depfile-parser
+  pattern: (?i)depfile parser|DepfileParser
+- id: dyndep
+  pattern: (?i)dyndep|DyndepLoader|DyndepParser
+- id: disk-interface
+  pattern: (?i)disk ?interface|RealDiskInterface|stat cache|filesystem
+- id: subprocess
+  pattern: (?i)subprocess|SubprocessSet|process spawn|posix_spawn
+- id: command-runner
+  pattern: (?i)command ?runner|RealCommandRunner
+- id: jobserver
+  pattern: (?i)jobserver
+- id: status-printer
+  pattern: (?i)StatusPrinter|status printer|status line
+- id: line-printer
+  pattern: (?i)LinePrinter|line printer|smart terminal
+- id: clean
+  pattern: (?i)Cleaner|\bclean\b
+- id: graphviz
+  pattern: (?i)graphviz
+- id: missing-deps
+  pattern: (?i)MissingDependencyScanner|missing ?deps
+- id: tools
+  pattern: (?i)\btools?\b|subtool
+- id: explanations
+  pattern: (?i)explanation|explain
+- id: edit-distance
+  pattern: (?i)edit distance|EditDistance|spell|did you mean
+- id: elide-middle
+  pattern: (?i)elide|ElideMiddle
+- id: json
+  pattern: (?i)\bjson\b|EncodeJSON
+- id: browse
+  pattern: (?i)browse
+- id: util
+  pattern: (?i)\butil\b|CanonicalizePath|path canonical|shell escap
+- id: metrics
+  pattern: (?i)metrics|\bstats\b
+- id: version
+  pattern: (?i)version check|ninja_required_version|kNinjaVersion

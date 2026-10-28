@@ -4,12 +4,12 @@
 | --- | --- |
 | `implementation/` | Rust source, locked dependencies, unit tests, and acceptance tests. |
 | `implementation/docs/` | The design and ADRs from planning, with new ADRs for implementation decisions. |
-| `verification/checks.json` | The records that the helper's `check` command writes. |
+| `verification/checks.yaml` | The records that the helper's `check` command writes. |
 | `verification/logs/` | The check logs and their failures. |
 
 ## Check records
 
-The agent does not write `checks.json` by hand.
+The agent does not write `checks.yaml` by hand.
 The `check` command records each command, its return code, its log path, and the log SHA-256.
 It records the combined hash of the implementation files at the time of the run.
 The `--mutants` option adds the caught, missed, timeout, and unviable counts and the score.

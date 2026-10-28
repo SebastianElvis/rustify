@@ -1,7 +1,7 @@
 # {{target_name}}: faithful Rust design
 
-This design implements contract `recovered/contract.json` for target SHA-256 `{{target_sha256}}`.
-It follows arc42 sections. The ledger `recovered/model.json` holds the records.
+This design implements the full product for target SHA-256 `{{target_sha256}}`.
+It follows arc42 sections. The ledger `recovered/model.yaml` holds the records.
 
 ## Solution strategy
 
@@ -36,5 +36,4 @@ The data formats are {{preserved_formats_and_invariants}}.
 ## Risks and gaps
 
 The open gaps are {{gap_ids_or_none}}.
-The approved exceptions are {{exception_ids_or_none}}.
 The blocked slices are {{slice_ids_and_missing_evidence_or_none}}.

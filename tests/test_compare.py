@@ -2,21 +2,22 @@
 
 import base64
 import importlib.util
-import json
 import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
-import time
+import threading
 import unittest
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("compare", ROOT / "skills/rustify-validate/scripts/compare.py")
+SPEC = importlib.util.spec_from_file_location("compare", ROOT / "skills/rustify-probe/scripts/compare.py")
 compare = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(compare)
 sys.modules["compare"] = compare
-FUZZ = importlib.util.spec_from_file_location("fuzz", ROOT / "skills/rustify-validate/scripts/fuzz.py")
+FUZZ = importlib.util.spec_from_file_location("fuzz", ROOT / "skills/rustify-probe/scripts/fuzz.py")
 fuzz = importlib.util.module_from_spec(FUZZ)
 FUZZ.loader.exec_module(fuzz)
 
@@ -29,11 +30,22 @@ class CompareTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.root = Path(self.directory.name)
-        self.reference = self.program("reference", "import sys\nsys.stdout.buffer.write(sys.stdin.buffer.read())\n")
+        self.reference = self.program("reference", "import os,stat,sys\nassert all(stat.S_ISFIFO(os.fstat(fd).st_mode) for fd in (0,1,2))\nsys.stdout.buffer.write(sys.stdin.buffer.read())\n")
         self.case = {"id": "binary", "args": [], "stdin_b64": encoded(b"\x00\xff\r\n")}
 
     def tearDown(self):
         self.directory.cleanup()
+
+    def test_file_ownership_mode_and_kept_time_are_part_of_the_view(self):
+        keep = self.program("keep", "import shutil\nshutil.copy2('in', 'out')\n")
+        case = {"id": "copy", "args": [], "files": {"in": encoded(b"data")}}
+        for field, call, before, after in [("mtime", f"utime('out', ns=({compare.FIXTURE_TIME * 10**9 + 1}, {compare.FIXTURE_TIME * 10**9 + 1}))", "fixture", "new"),
+                *[("gid", f"chown('out', -1, {gid})", os.getgid(), gid) for gid in os.getgroups() if gid != os.getgid()][:1]]:
+            touch = self.program("touch", f"import os,shutil\nshutil.copy2('in', 'out')\nos.{call}\n")
+            report = compare.compare(keep, touch, [case], name="copy", timeout=30)
+            files = {label: report["cases"][0][label]["files"]["out"] for label in ("reference", "candidate")}
+            self.assertEqual((files["reference"][field], files["candidate"][field], files["reference"]["mode"], files["reference"]["uid"], files["candidate"]["uid"]), (before, after, "644", os.getuid(), os.getuid()))
+            self.assertIn("files", report["cases"][0]["differences"])
 
     def program(self, name, body):
         path = self.root / name
@@ -41,12 +53,55 @@ class CompareTests(unittest.TestCase):
         path.chmod(0o755)
         return path
 
+    def test_supervisor_limits_memory_children_and_streams(self):
+        marker, owner = self.root / "escaped", threading.get_ident()
+        def peer(process):
+            self.assertEqual(threading.get_ident(), owner)
+            subprocess.run([sys.executable, "-S", "-c", "import time; time.sleep(.5)"], timeout=.9, check=True)
+            if name != "output":
+                self.assertIsNotNone(process.poll())
+        for name, body, limits in [
+            ("memory", "import time\ntime.sleep(.8)\n", {"memory_mib": 1}),
+            ("process", f"import subprocess,sys,time\nsubprocess.Popen([sys.executable,'-S','-c', {('import time; time.sleep(.35); open(' + repr(str(marker)) + ', \"w\").write(\"leak\")')!r}],start_new_session=True)\ntime.sleep(.8)\n", {"process_limit": 1}),
+            ("time", "import time\ntime.sleep(.8)\n", {"timeout": .12}),
+            ("output", "import os,time\nos.write(1,b'x'*(1024**2+1))\ntime.sleep(.8)\n", {"output_mib": 1}),
+        ]:
+            with self.subTest(name=name):
+                result, error, metrics = compare.execute([str(self.program(name, body))], **{"timeout": 1.5, **limits}, on_spawn=(lambda process: threading.Event().wait(.5)) if name == "process" else peer)
+                self.assertIn(name + " limit", error)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertLessEqual(len(result.stdout), limits.get("output_mib", 16) * 1024 * 1024)
+                self.assertTrue(any(row["pid"] == metrics["pid"] and row["command"] and row["started"] for row in metrics["peak_memory_processes"]))
+        self.assertFalse(marker.exists())
+
+    def test_oversized_files_do_not_enter_memory(self):
+        program = self.program("large-file", "with open('out', 'wb') as stream: stream.truncate(1024**3)\n")
+        result = compare.run(program, "large-file", {"id": "large-file", "args": []}, 30)
+        self.assertEqual(result["error"], "The files exceeded the capture limit.")
+        self.assertEqual(result["files"], {})
+
+    def test_stdin_can_stay_open_after_delivery(self):
+        program = self.program("stdin-policy", "import os,select,sys\nif len(sys.argv)>1: os.read(0,1)\nprint(bool(select.select([0],[],[],.1)[0]))\n")
+        for data in (b"", b"x"):
+            for keep in (False, True):
+                result, error, _ = compare.execute([str(program), *(["read"] if data else [])], stdin=data, keep_stdin_open=keep, on_spawn=lambda process: self.assertEqual(threading.get_ident(), threading.main_thread().ident), timeout=1.5)
+                self.assertEqual((result.returncode, error, result.stdout), (0, None, b"False\n" if keep else b"True\n"))
+
+    def test_failed_spawn_hook_cleans_up_the_process(self):
+        def reject(process):
+            self.process = process
+            raise RuntimeError("The watcher did not start.")
+        with self.assertRaisesRegex(RuntimeError, "watcher"):
+            compare.execute([str(self.program("hook", "import time\ntime.sleep(.8)\n"))], on_spawn=reject, timeout=1.5)
+        self.assertEqual(self.process.returncode, -9)
+
     def test_binary_data_and_fixture_files_match(self):
+        self.case["env"] = {"LC_ALL": "C", "LANG": "C", "TZ": "UTC0"}
         self.case["files"] = {"nested/data": encoded(b"\x00\xff")}
-        report = compare.compare(self.reference, self.reference, [self.case])
-        self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["cases"][0]["reference"]["stdout_b64"], self.case["stdin_b64"])
-        self.assertEqual(report["cases"][0]["reference"]["files"]["nested/data"]["data_b64"], encoded(b"\x00\xff"))
+        reference, candidate = [self.program(f"time-{offset}", f"import os\nos.utime('nested/data', ns=({compare.FIXTURE_TIME * 10**9 + offset}, {compare.FIXTURE_TIME * 10**9 + offset}))\n" + self.reference.read_text().split("\n", 1)[1]) for offset in (1234, 5678)]
+        report = compare.compare(reference, candidate, [self.case], timeout=30)
+        row = report["cases"][0]
+        self.assertEqual((report["status"], row["reference"]["stdout_b64"], row["reference"]["files"]["nested/data"]["data_b64"], *[row[label]["file_metadata"]["nested/data"]["mtime_ns"] for label in ("reference", "candidate")]), ("passed", self.case["stdin_b64"], encoded(b"\x00\xff"), compare.FIXTURE_TIME * 10**9 + 1234, compare.FIXTURE_TIME * 10**9 + 5678), report)
 
     def test_differences_are_separate(self):
         candidates = {
@@ -58,44 +113,35 @@ class CompareTests(unittest.TestCase):
         for field, body in candidates.items():
             with self.subTest(field=field):
                 candidate = self.program(field, body)
-                report = compare.compare(self.reference, candidate, [self.case])
+                report = compare.compare(self.reference, candidate, [self.case], timeout=30)
                 self.assertEqual(report["status"], "failed")
-                self.assertEqual(report["cases"][0]["differences"], [field])
+                self.assertEqual(report["cases"][0]["differences"], [field], report)
 
-    def test_equal_timeouts_fail(self):
-        slow = self.program("slow", "import time\ntime.sleep(10)\n")
-        report = compare.compare(slow, slow, [self.case], timeout=0.05)
-        self.assertEqual(report["failed"], 1)
-        self.assertIn("execution_error", report["cases"][0]["differences"])
-
-    def test_timeout_kills_descendants(self):
-        marker = self.root / "escaped"
-        body = "import subprocess, sys, time\nsubprocess.Popen([sys.executable, '-c', \"import time; time.sleep(0.5); open(\" + repr(str(marker)) + \", 'w').write('leak')\"])\ntime.sleep(10)\n"
-        slow = self.program("descendants", body)
-        report = compare.compare(slow, self.reference, [self.case], timeout=0.1)
-        self.assertEqual(report["status"], "failed")
-        time.sleep(0.6)
-        self.assertFalse(marker.exists())
-
-    def test_launch_errors_fail(self):
+    def test_execution_errors_are_not_fuzz_divergences(self):
         bad = self.program("bad", "")
         bad.write_text("#!/this-interpreter-does-not-exist\n")
-        report = compare.compare(bad, bad, [self.case])
-        self.assertEqual(report["status"], "failed")
-        self.assertIn("execution_error", report["cases"][0]["differences"])
-
-    def test_symlinks_fail(self):
-        link = self.program("link", "import os\nos.symlink('/tmp', 'link')\n")
-        report = compare.compare(link, link, [self.case])
-        self.assertEqual(report["status"], "failed")
-        self.assertIn("execution_error", report["cases"][0]["differences"])
+        for program, timeout, case in [
+            (self.program("slow", "import time\ntime.sleep(10)\n"), 0.05, self.case),
+            (bad, 30, self.case),
+            (self.program("link", "import os\nos.symlink('/tmp', 'link')\n"), 30, self.case),
+            (self.reference, 30, {**self.case, "files": {"x" * 256: ""}}),
+        ]:
+            with self.subTest(program=program.name):
+                report = compare.compare(program, program, [case], timeout=timeout)
+                self.assertEqual((report["status"], report["failed"]), ("failed", 1))
+                self.assertIn("execution_error", report["cases"][0]["differences"])
+                report = fuzz.fuzz(program, program, [case], iterations=1, timeout=timeout)
+                self.assertEqual((report["status"], report["divergences"], len(report["errors"])), ("invalid", [], 1))
+                self.assertEqual(report["errors"][0]["input"]["id"], "fuzz-0-0")
+                self.assertIn("execution_error", report["errors"][0]["differences"])
+                self.assertTrue(all(report["errors"][0][label]["error"] for label in ("reference", "candidate")))
 
     def test_invalid_cases_fail(self):
         invalid = [[], {}, [self.case, self.case], [{"id": "x", "args": [], "stdin_b64": "!"}], [{"id": "x", "args": "bad"}]]
         for name in ("../escape", "/absolute", "a/../escape", "./file", "a//b", "a\\b"):
             invalid.append([{"id": "x", "args": [], "files": {name: ""}}])
         invalid.append([{"id": "x", "args": [], "files": {"a": "", "a/b": ""}}])
-        invalid.append([{"id": "x", "args": [], "env": {"LC_ALL": "wrong"}}])
+        invalid.append([{"id": "x", "args": [], "env": {"HOME": "wrong"}}])
         for cases in invalid:
             with self.subTest(cases=cases), self.assertRaises(ValueError):
                 compare.compare(self.reference, self.reference, cases)
@@ -104,23 +150,24 @@ class CompareTests(unittest.TestCase):
         for timeout in (0, -1, float("inf"), float("nan")):
             with self.subTest(timeout=timeout), self.assertRaises(ValueError):
                 compare.compare(self.reference, self.reference, [self.case], timeout=timeout)
+        self.assertTrue(all(fuzz.fuzz(self.reference, self.reference, [self.case], iterations=count)["status"] == "invalid" for count in (0, -1)))
 
-    def test_cli_writes_report_and_returns_failure(self):
-        cases = self.root / "cases.json"
-        report = self.root / "report.json"
-        cases.write_text("[]")
-        result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-validate/scripts/compare.py"), "--reference", str(self.reference), "--candidate", str(self.reference), "--cases", str(cases), "--report", str(report)], capture_output=True)
-        self.assertEqual(result.returncode, 1)
-        self.assertEqual(json.loads(report.read_text())["status"], "error")
+    def test_cli_checks_cases_and_program_name(self):
+        cases, report = self.root / "cases.yaml", self.root / "report.yaml"
+        case = {"id": "name", "args": ["-c", 'printf "%s" "$0"']}
+        for rows, name, expected in [([], None, None), ([case], None, b"sh"), ([case], "alias", b"alias")]:
+            cases.write_text(yaml.safe_dump(rows))
+            result = subprocess.run([sys.executable, str(ROOT / "skills/rustify-probe/scripts/compare.py"), "--reference", "/bin/sh", "--candidate", "/bin/sh", "--cases", str(cases), "--report", str(report), *(["--name", name] if name else [])], capture_output=True)
+            self.assertEqual((result.returncode, (data := yaml.safe_load(report.read_text()))["status"], data.get("program_name"), data["cases"][0]["reference"]["stdout_b64"] if data["cases"] else None), (0 if expected else 1, "passed" if expected else "error", expected.decode() if expected else None, encoded(expected) if expected else None))
 
     def test_fuzz_finds_divergence_and_keeps_reproducer(self):
         candidate = self.program("candidate", "import sys\ndata = sys.stdin.buffer.read()\nsys.stdout.buffer.write(data + (b'!' if len(data) > 4 else b''))\n")
         seeds = [{"id": "seed", "args": [], "stdin_b64": encoded(b"ab")}]
-        report = fuzz.fuzz(self.reference, candidate, seeds, iterations=40, seed=1)
+        report = fuzz.fuzz(self.reference, candidate, seeds, iterations=40, seed=1, timeout=30)
         self.assertEqual(report["status"], "failed")
         self.assertIn("stdout_b64", report["divergences"][0]["differences"])
-        self.assertEqual(compare.compare(self.reference, candidate, [report["divergences"][0]["input"]])["failed"], 1)
-        self.assertEqual(fuzz.fuzz(self.reference, self.reference, seeds, iterations=10)["status"], "passed")
+        self.assertEqual(compare.compare(self.reference, candidate, [report["divergences"][0]["input"]], timeout=30)["failed"], 1)
+        self.assertEqual(fuzz.fuzz(self.reference, self.reference, seeds, iterations=10, timeout=30)["status"], "passed")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,9 @@
 """Keep reconstruction checkpoints and detect stale evidence."""
 
 import argparse
+from contextlib import nullcontext
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -10,14 +12,19 @@ import subprocess
 import tempfile
 import time
 
+import yaml
 
-PHASES = ("prepare", "discover", "plan", "implement", "validate")
+
+PROBE = importlib.util.spec_from_file_location("rustify_supervisor", Path(__file__).resolve().parents[2] / "rustify-probe/scripts/compare.py")
+supervisor = importlib.util.module_from_spec(PROBE)
+PROBE.loader.exec_module(supervisor)
+
+PHASES = ("discover", "plan", "implement", "validate")
 REQUIRED = {
-    "prepare": ("recovered/contract.json",),
-    "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.json", "recovered/scenarios.json", "recovered/tests.json", "recovered/roadmap.md", "recovered/model.json#inventory,requirements,components,edges"),
-    "plan": ("recovered/model.json#correspondences,slices,exceptions", "implementation/docs/design.md"),
-    "implement": ("implementation/Cargo.toml", "implementation/Cargo.lock", "verification/checks.json"),
-    "validate": ("verification/comparison.json", "verification/parity.json", "verification/compatibility.md"),
+    "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.yaml", "recovered/scenarios.yaml", "recovered/tests.yaml", "recovered/roadmap.md", "recovered/model.yaml#inventory,surface,requirements,components,edges"),
+    "plan": ("recovered/model.yaml#correspondences,slices", "implementation/docs/design.md"),
+    "implement": ("implementation/Cargo.toml", "implementation/Cargo.lock", "verification/checks.yaml"),
+    "validate": ("verification/comparison.yaml", "verification/parity.yaml", "verification/compatibility.md"),
 }
 CHECKS = {
     "fmt": ["cargo", "fmt", "--check"],
@@ -29,7 +36,8 @@ CHECKS = {
 
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    with path.open("rb") if isinstance(path, Path) else nullcontext(path) as stream:
+        return (hashlib.file_digest(stream, "sha256") if isinstance(path, Path) else hashlib.sha256(stream)).hexdigest()
 
 
 def project_root(project):
@@ -61,10 +69,10 @@ def artifact(root, name, check_content=True):
             raise ValueError("An artifact cannot use a symlink.")
     if not path.is_file() or (check_content and not path.read_bytes().strip()):
         raise ValueError(f"The artifact is missing or empty: {name}")
-    if check_content and path.suffix == ".json":
-        value = json.loads(path.read_text())
+    if check_content and path.suffix == ".yaml":
+        value = yaml.safe_load(path.read_text())
         if not isinstance(value, (list, dict)) or not value:
-            raise ValueError(f"The JSON artifact must have content: {name}")
+            raise ValueError(f"The YAML artifact must have content: {name}")
     return path
 
 
@@ -72,11 +80,11 @@ def section(root, name):
     path, _, keys = name.partition("#")
     if not keys:
         return digest(artifact(root, path))
-    value = json.loads(artifact(root, path).read_text())
+    value = yaml.safe_load(artifact(root, path).read_text())
     keys = keys.split(",")
     if not isinstance(value, dict) or any(value.get(key) is None for key in keys):
         raise ValueError(f"The artifact lacks a required section: {name}")
-    return hashlib.sha256(json.dumps({key: value[key] for key in keys}, sort_keys=True).encode()).hexdigest()
+    return hashlib.sha256(yaml.safe_dump({key: value[key] for key in keys}).encode()).hexdigest()
 
 
 def tree(root, name):
@@ -96,7 +104,7 @@ def tree(root, name):
 
 
 def combined(hashes):
-    return hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
+    return hashlib.sha256(yaml.safe_dump(hashes).encode()).hexdigest()
 
 
 def check_plan(model):
@@ -122,23 +130,22 @@ def check_plan(model):
         for identity in ready:
             del pending[identity]
     planned = {identity for item in slices.values() for identity in item["requirements"]}
-    if any(item.get("in_scope", True) and identity not in planned for identity, item in requirements.items()):
-        raise ValueError("Every scoped requirement needs a slice.")
+    if set(requirements) - planned:
+        raise ValueError("Every requirement needs a slice.")
     if any(item["original"] not in components for item in model["correspondences"]):
         raise ValueError("A correspondence names an unknown original component.")
 
 
 def save(root, state):
     directory = root / "recovered"
-    if directory.is_symlink() or (directory / "state.json").is_symlink():
+    if directory.is_symlink() or (directory / "state.yaml").is_symlink():
         raise ValueError("The state cannot use a symlink.")
     directory.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w", dir=directory, delete=False) as stream:
         name = stream.name
-        json.dump(state, stream, indent=2)
-        stream.write("\n")
+        yaml.safe_dump(state, stream, sort_keys=False)
     try:
-        os.replace(name, directory / "state.json")
+        os.replace(name, directory / "state.yaml")
     finally:
         Path(name).unlink(missing_ok=True)
 
@@ -146,7 +153,7 @@ def save(root, state):
 def init(project, target, profile, work_dir=None):
     root = project_root(project)
     workspace = work_root(root, work_dir if work_dir is not None else root.parent / ("." + root.name + "-rustify"))
-    if (root / "recovered/state.json").exists() or (root / "recovered").is_symlink() or (root / "recovered/state.json").is_symlink():
+    if (root / "recovered/state.yaml").exists() or (root / "recovered").is_symlink() or (root / "recovered/state.yaml").is_symlink():
         raise ValueError("The project already has state.")
     binary = Path(target).absolute()
     if binary.is_symlink() or not binary.is_file():
@@ -163,7 +170,7 @@ def init(project, target, profile, work_dir=None):
 
 
 def load(root):
-    state = json.loads(artifact(root, "recovered/state.json").read_text())
+    state = yaml.safe_load(artifact(root, "recovered/state.yaml").read_text())
     if state["version"] != 3 or not Path(state["work_dir"]).is_absolute():
         raise ValueError("The project state must use version 3 and an absolute agent workspace.")
     work_root(root, state["work_dir"])
@@ -178,28 +185,26 @@ def files_for(root, phase, state):
     if phase == "discover":
         hashes.update(tree(root, "recovered/evidence"))
     if phase == "plan":
-        check_plan(json.loads((root / "recovered/model.json").read_text()))
+        check_plan(yaml.safe_load((root / "recovered/model.yaml").read_text()))
     if phase == "implement":
         inputs = tree(root, "implementation")
         if not any(name.endswith(".rs") for name in inputs):
             raise ValueError("The implementation must contain Rust source.")
         hashes.update(inputs)
-        checks = json.loads((root / "verification/checks.json").read_text())
+        checks = yaml.safe_load((root / "verification/checks.yaml").read_text())
         latest = {record.get("name"): record for record in checks.get("commands", [])}
         if checks.get("status") != "passed" or checks.get("inputs_sha256") != combined(inputs) or any(latest.get(name, {}).get("returncode") != 0 for name in ("fmt", "clippy", "test")):
-            raise ValueError("The latest format, clippy, and test checks must pass for the current implementation.")
+            raise ValueError("The latest requested checks must pass for the current implementation.")
         if any(digest(artifact(root, record["log"], False)) != record["log_sha256"] for record in latest.values()):
             raise ValueError("A check log differs from its record.")
     if phase == "validate":
-        contract = json.loads((root / "recovered/contract.json").read_text())
-        parity = json.loads((root / "verification/parity.json").read_text())
-        expected = "scoped_pass" if contract["scope"]["mode"] == "subset" else "full_parity_pass"
-        if parity.get("assessment") != expected or parity.get("errors") != [] or parity.get("target_sha256") != state["target"]["sha256"] or (expected == "full_parity_pass" and parity.get("gaps") != []):
-            raise ValueError(f"The parity gate must report {expected}.")
+        parity = yaml.safe_load((root / "verification/parity.yaml").read_text())
+        if parity.get("assessment") != "full_parity_pass" or parity.get("errors") != [] or parity.get("target_sha256") != state["target"]["sha256"] or parity.get("gaps") != []:
+            raise ValueError("The parity gate must report full_parity_pass.")
         inputs = parity.get("inputs", {})
         if not inputs or any(digest(artifact(root, name, False)) != value for name, value in inputs.items()):
             raise ValueError("The parity evidence changed after the gate.")
-        report = json.loads((root / "verification/comparison.json").read_text())
+        report = yaml.safe_load((root / "verification/comparison.yaml").read_text())
         cases = report.get("cases", [])
         if report.get("status") != "passed" or report.get("failed") != 0 or not cases or report.get("passed") != len(cases):
             raise ValueError("The comparison must pass every recorded case.")
@@ -218,8 +223,8 @@ def files_for(root, phase, state):
 def check(project, extra=()):
     root = project_root(project)
     load(root)
-    path = root / "verification/checks.json"
-    records = json.loads(path.read_text()).get("commands", []) if path.is_file() else []
+    path = root / "verification/checks.yaml"
+    records = yaml.safe_load(path.read_text()).get("commands", []) if path.is_file() else []
     inputs = tree(root, "implementation")
     status = "passed"
     for name in ("fmt", "clippy", "test", *extra):
@@ -227,21 +232,22 @@ def check(project, extra=()):
         log = root / "verification/logs" / f"{stamp}.log"
         command = CHECKS[name] + ([str(log.with_suffix(""))] if name == "mutants" else [])
         log.parent.mkdir(parents=True, exist_ok=True)
-        with log.open("wb") as stream:
-            returncode = subprocess.run(command, cwd=root / "implementation", stdout=stream, stderr=subprocess.STDOUT).returncode
-        record = {"name": name, "command": command, "returncode": returncode, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
+        result, error, resources = supervisor.execute(command, cwd=root / "implementation", timeout=3600 if name == "mutants" else 900, memory_mib=8192)
+        returncode = result.returncode or int(error is not None)
+        log.write_bytes(result.stdout + result.stderr + (error.encode() if error else b""))
+        record = {"name": name, "command": command, "returncode": returncode, "error": error, "resources": resources, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
+        if returncode:
+            status = "failed"
         if name == "mutants":
             outcomes = log.with_suffix("") / "mutants.out/outcomes.json"
             counts = json.loads(outcomes.read_text()) if outcomes.is_file() else {}
             record["mutation"] = {key: counts.get(key) for key in ("caught", "missed", "timeout", "unviable")}
             tested = sum(counts.get(key, 0) for key in ("caught", "missed", "timeout"))
             record["mutation"]["score"] = counts["caught"] / tested if tested else None
-        elif returncode:
-            status = "failed"
         records.append(record)
     if tree(root, "implementation") != inputs:
         status = "failed"
-    path.write_text(json.dumps({"status": status, "inputs_sha256": combined(inputs), "commands": records}, indent=2) + "\n")
+    path.write_text(yaml.safe_dump({"status": status, "inputs_sha256": combined(inputs), "commands": records}, sort_keys=False))
     return {"status": status, "commands": [{key: record[key] for key in ("name", "returncode")} for record in records[-len(extra) - 3:]]}
 
 
@@ -254,7 +260,7 @@ def freshness(root, state):
             break
         try:
             current = files_for(root, phase, state)
-        except (OSError, ValueError, KeyError, TypeError):
+        except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError):
             current = None
         if current != expected:
             stale = phase
@@ -307,9 +313,9 @@ def main():
             result = check(args.project, [name for name in ("deny", "mutants") if getattr(args, name)])
         else:
             result = checkpoint(args.project, args.phase)
-        print(json.dumps(result, indent=2))
-        return 0
-    except (OSError, ValueError, KeyError, TypeError) as error:
+        print(yaml.safe_dump(result, sort_keys=False), end="")
+        return int(result.get("status") == "failed")
+    except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as error:
         parser.exit(1, f"{error}\n")
 
 

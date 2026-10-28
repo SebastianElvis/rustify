@@ -1,0 +1,158 @@
+features:
+- id: cli-options
+  pattern: (?i)command[- ]line (option|argument)|-bail|-cmd|-batch|-init|-readonly
+- id: sql-input
+  pattern: (?i)standard input|stdin|sql argument|statement on the command line
+- id: error-format
+  pattern: (?i)parse error|runtime error|error near line|error message
+- id: mode-list
+  pattern: (?i)\blist mode|mode list|\.separator
+- id: mode-csv
+  pattern: (?i)\bcsv\b
+- id: mode-column
+  pattern: (?i)column mode|mode column|\.width|columnar
+- id: mode-line
+  pattern: (?i)line mode|mode line
+- id: mode-json
+  pattern: (?i)json mode|mode json|jobject|jatom
+- id: mode-table
+  pattern: (?i)\b(box|qbox|table|markdown|psql)\b mode|mode (box|qbox|table|markdown|psql)
+- id: mode-markup
+  pattern: (?i)\bhtml\b|\btcl\b mode|mode tcl
+- id: mode-sql
+  pattern: (?i)insert mode|mode insert|quote mode|mode quote
+- id: mode-delimited
+  pattern: (?i)\bascii\b|\btabs\b|split mode|count mode|mode off
+- id: mode-options
+  pattern: (?i)--(wordwrap|quote|title|charlimit|linelimit|escape|align|rowcount|null)|\.nullvalue|\.headers
+- id: dot-schema
+  pattern: (?i)\.schema|\.tables|\.indexes|\.fullschema
+- id: dot-dump
+  pattern: (?i)\.dump
+- id: dot-import
+  pattern: (?i)\.import
+- id: dot-output
+  pattern: (?i)\.output|\.once|\.print|\.echo|\.excel|\.www
+- id: dot-read
+  pattern: (?i)\.read|\.quit|\.exit
+- id: dot-database
+  pattern: (?i)\.open|\.save|\.backup|\.restore|\.clone|\.databases|\.connection|\.deserialize
+- id: dot-settings
+  pattern: (?i)\.show|\.bail|\.changes|\.timeout|\.limit|\.dbconfig|\.prompt|\.crlf|\.nonce
+- id: dot-parameter
+  pattern: (?i)\.parameter|bound parameter
+- id: dot-info
+  pattern: (?i)\.dbinfo|\.version|\.vfsinfo|\.vfslist|\.vfsname|\.diskused|\.dbtotxt|\.sha3sum|\.check|\.testcase
+- id: dot-explain
+  pattern: (?i)\.eqp|\.explain|\.expert|\.lint|\.scanstats|\.imposter|\.intck|query plan
+- id: dot-trace
+  pattern: (?i)\.trace|\.stats|\.timer|\.log|\.progress|\.auth
+- id: dot-system
+  pattern: (?i)\.shell|\.system|\.cd|\.load|safe mode|\.help
+- id: sql-engine
+  pattern: (?i)sql engine|sql statement|statement execution
+- id: ddl
+  pattern: (?i)create table|drop table|alter table|create index|drop index
+- id: dml
+  pattern: (?i)\binsert\b|\bupdate\b|\bdelete\b|upsert|on conflict|returning|replace into
+- id: select
+  pattern: (?i)\bselect\b|where clause|order by|limit|group by|having|distinct
+- id: join
+  pattern: (?i)\bjoin\b
+- id: subquery
+  pattern: (?i)subquer|\bexists\b|\bin \(
+- id: compound
+  pattern: (?i)\bunion\b|intersect|except|values clause
+- id: cte
+  pattern: (?i)common table expression|\bwith recursive\b|\bcte\b
+- id: window
+  pattern: (?i)window function|\bover\b|row_number|partition by
+- id: aggregate
+  pattern: (?i)aggregate|count\(|group_concat|string_agg|\bsum\b|\bavg\b|\btotal\b
+- id: scalar-functions
+  pattern: (?i)scalar function|\bsubstr|\bprintf|\bformat\(|\bunistr|\breplace\(|\bhex\(|\babs\(|\binstr|\btrim
+- id: math
+  pattern: (?i)math function|\bsqrt|\bpow|\blog10|\bceil|\bfloor|\bpi\(
+- id: datetime
+  pattern: (?i)date and time|\bstrftime|\bjulianday|\bunixepoch|\btimediff|\bdatetime\(
+- id: json
+  pattern: (?i)\bjsonb?\b|json_each|json_tree
+- id: expressions
+  pattern: (?i)\bexpression|\bcase\b|\bcast\b|\blike\b|\bglob\b|\bregexp\b|\bbetween\b|operator
+- id: affinity
+  pattern: (?i)affinity|type conversion|typeof|storage class|\bstrict\b
+- id: "null"
+  pattern: (?i)\bnull\b
+- id: collation
+  pattern: (?i)collat|nocase|rtrim
+- id: rowid
+  pattern: (?i)\browid\b|without rowid|integer primary key|autoincrement
+- id: constraints
+  pattern: (?i)primary key|\bunique\b|not null|\bcheck\b|foreign key|default value|generated column
+- id: transactions
+  pattern: (?i)\bbegin\b|\bcommit\b|\brollback\b|savepoint|transaction
+- id: views
+  pattern: (?i)\bview\b
+- id: triggers
+  pattern: (?i)\btrigger\b
+- id: pragma
+  pattern: (?i)\bpragma\b
+- id: maintenance
+  pattern: (?i)\bvacuum\b|\banalyze\b|\breindex\b|\battach\b|\bdetach\b|\bexplain\b
+- id: virtual-tables
+  pattern: (?i)virtual table|generate_series|fsdir|completion|pragma_\w+|table-valued
+- id: shell-extensions
+  pattern: (?i)\bdecimal|ieee754|\bsha3|\bsha1|\bbase64|\bbase85|\buint\b|readfile|writefile|\bedit\(
+- id: file-format
+  pattern: (?i)file format|database file|page size|b-?tree|header
+- id: rollback-journal
+  pattern: (?i)rollback journal|-journal|journal_mode
+- id: wal
+  pattern: (?i)\bwal\b|write-ahead|checkpoint
+- id: integrity
+  pattern: (?i)integrity_check|quick_check|corrupt
+components:
+- id: shell-main
+  pattern: (?i)\bmain\b|argument pars|command-line option|entry point
+- id: input-loop
+  pattern: (?i)process_input|line reader|input loop|statement splitter|complete statement
+- id: dot-commands
+  pattern: (?i)do_meta_command|dot.command|meta.command
+- id: output-renderer
+  pattern: (?i)output mode|renderer|formatter|qrf|result format
+- id: tokenizer
+  pattern: (?i)tokeni[sz]er|lexer
+- id: parser
+  pattern: (?i)\bparser\b|grammar|lemon|\bast\b|syntax tree
+- id: resolver
+  pattern: (?i)resolv|name binding|semantic
+- id: planner
+  pattern: (?i)planner|optimi[sz]er|where clause analysis|query plan
+- id: code-generator
+  pattern: (?i)code ?gen|compil|bytecode gen
+- id: vdbe
+  pattern: (?i)\bvdbe\b|virtual machine|bytecode (engine|interpreter)|opcode
+- id: functions
+  pattern: (?i)function registry|built-in function|func\.c|scalar function
+- id: sorter
+  pattern: (?i)sorter|external sort
+- id: record-format
+  pattern: (?i)record format|serial type|varint|record (encod|decod)
+- id: btree
+  pattern: (?i)b-?tree
+- id: pager
+  pattern: (?i)\bpager\b|page cache
+- id: journal
+  pattern: (?i)rollback journal|\bjournal\b
+- id: wal-module
+  pattern: (?i)\bwal\b|write-ahead
+- id: vfs
+  pattern: (?i)\bvfs\b|os layer|file (i/o|locking)
+- id: schema-catalog
+  pattern: (?i)schema|catalog|sqlite_(master|schema)
+- id: json-module
+  pattern: (?i)json (module|parser)|jsonb
+- id: datetime-module
+  pattern: (?i)date ?time module|julian day
+- id: shell-extensions
+  pattern: (?i)shell extension|decimal extension|series extension|sha3 extension|fileio

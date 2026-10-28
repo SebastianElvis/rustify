@@ -3,7 +3,6 @@
 The original version is {{ORIGINAL_VERSION}}.
 The interface environment is {{PLATFORM_LOCALE_THEME_SCALE_AND_VIEWPORT}}.
 The initial session and data are {{INITIAL_SESSION_DATA_AND_SETTINGS}}.
-The scope is {{FULL_PRODUCT_OR_SUBSET_WITH_USER_INSTRUCTION}}.
 The capture baseline is {{ORIGINAL_CAPTURE_SET_AND_REA_EXPORT}}.
 
 ## Screen and navigation map

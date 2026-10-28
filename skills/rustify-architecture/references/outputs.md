@@ -1,6 +1,6 @@
 # Architecture output rules
 
-The canonical records are the `components` and `edges` sections of `recovered/model.json`.
+The canonical records are the `components` and `edges` sections of `recovered/model.yaml`.
 The canonical document is `recovered/architecture.md`.
 The agent starts from [the document template](../assets/architecture.md).
 The agent stores editable diagrams and supporting schemas under `recovered/evidence/architecture/`.
@@ -11,8 +11,9 @@ The state helper hashes that evidence directory.
 | Record | Fields |
 | --- | --- |
 | Component | `id`, `name`, `level` (`container` or `component`), `responsibility`, `classification`, `evidence` |
-| Edge | `id`, `source`, `target`, `kind` (`control`, `data`, or `static`), `classification`, `evidence` |
+| Edge | `id`, `source`, `target`, `kind` (`control`, `data`, or `static`) |
 
+`recovered/architecture.md` states the classification and evidence of each edge.
 A `control` or `static` edge points from the user to the used component.
 A `data` edge points from the producer to the consumer.
 The reflexion check compares `control` and `static` edges with Rust module dependencies.
