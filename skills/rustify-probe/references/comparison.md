@@ -7,9 +7,9 @@ A CLI schema limit does not establish that the host cannot test a condition.
 
 | Condition | Helper route | Control |
 | --- | --- | --- |
-| Finite pipe input and regular files | The agent uses the comparison CLI and scenario schema. | The original matches itself. A wrong candidate fails. |
+| Finite pipe input and file fixtures | The agent uses the comparison CLI and scenario schema. | The original matches itself. A wrong candidate fails. |
 | Input before EOF | The API caller uses `execute`, `keep_stdin_open`, and `on_spawn`. | A native target emits the expected output before EOF. |
-| Closed descriptors | The POSIX API caller uses `preexec_fn` to set the required descriptors. | A native target records the inherited descriptor state. |
+| Closed or redirected descriptors | The POSIX API caller sets descriptors with `preexec_fn` and retains redirected handles with `pass_fds`. | A native target records inherited descriptor states and file identities. |
 | Terminal input and output | The POSIX API caller assigns a private PTY through `pass_fds` and `preexec_fn`. The callback captures bounded PTY data. | A native target confirms its terminal and foreground group. |
 | Signals and cancellation | The API caller starts an owned signal watcher through `on_spawn`. | A native target confirms delivery and termination. |
 | Permissions and links | The API caller prepares owned fixtures and passes `cwd`. | The capture records modes, link identities, bytes, and directory effects. |
