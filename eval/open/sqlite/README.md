@@ -18,7 +18,7 @@ The `sqlite3` program is the command-line shell with the engine linked in.
 ## Reference build
 
 - Source: the SQLite 3.54.1 amalgamation from `sqlite.org`. The SHA-256 is in `reference.yaml`.
-- Build: `python3 eval/main.py build sqlite` compiles `shell.c` and `sqlite3.c` with the hardened profile and runs `strip`.
+- Build: `eval/build.py` compiles `shell.c` and `sqlite3.c` with the hardened profile and runs `strip`.
 - The build keeps the default compile-time options.
 
 ## Oracle

@@ -7,7 +7,7 @@ test:
 	$(PYTHON) -m unittest discover -s eval/tests -v
 
 evaluate:
-	$(PYTHON) eval/main.py score
+	$(PYTHON) eval/main.py
 
 diagram:
 	cd docs && latexmk -pdf -interaction=nonstopmode -halt-on-error architecture.tex

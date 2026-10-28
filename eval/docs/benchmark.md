@@ -530,6 +530,7 @@ The evaluation is a self-contained folder with one command line, `eval/main.py`.
 **Agent harness.** `agent.py` runs the trials of Section 5.3 and grades them.
 The grader checks the project freeze and the skill copies before it loads any helper from the trial.
 It scores the frozen candidate with `run.py --frozen`, runs the parity gate from the trial's own skill copy, and measures recall.
+It runs the adaptive distinguisher on each trial that passes the gate.
 `grades.yaml` gives each trial's scores and each track's median FPS, standard error, and tier result.
 
 **Parity gate.** The skill's `parity.py` reads the ledger `recovered/model.yaml`.
@@ -567,7 +568,7 @@ The self-check ran ten scorers at the same time, and the `browse` tool depends o
 ### 7.2 Skill results
 
 No agent evaluation has run with the graded scores yet.
-The first run of `python3 eval/main.py agent run` with three trials sets the baseline for each track.
+The first run of `python3 eval/main.py` with three trials sets the baseline for each track.
 This section will report, for each track: the gate result, the CPR, the median FPS with its standard error, the milestone credit, the strict result, product and architecture recall, the self-check gap, and the cost.
 
 ## 8. Threats to validity

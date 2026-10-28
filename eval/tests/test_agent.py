@@ -66,14 +66,19 @@ if __name__ == "__main__":
         (self.root / "agent.py").write_text(AGENT)
 
     def test_scripted_agent_trials_are_frozen_and_graded(self):
-        stamp = agent.run([self.track], f"{sys.executable} {self.root / 'agent.py'}", 2, self.root / "out", 120)
+        with patch.multiple(agent, AGENT=f"{sys.executable} {self.root / 'agent.py'}", OUTPUT=self.root / "out", TIMEOUT=120):
+            stamp = agent.run([self.track], 2)
         self.assertTrue((stamp / TRACK / "trial-1/.claude/skills/rustify/SKILL.md").is_file())
         helper = stamp / TRACK / "trial-1/.agents/skills/rustify-validate/scripts/parity.py"
         cache = Path(importlib.util.cache_from_source(str(helper)))
         cache.parent.mkdir(exist_ok=True)
         payload = compile('def check(project):\n return {"assessment": "full_parity_pass", "errors": [], "gaps": []}\n', str(helper), "exec")
         cache.write_bytes(importlib.util.MAGIC_NUMBER + struct.pack("<III", 0, int(helper.stat().st_mtime), helper.stat().st_size) + marshal.dumps(payload))
+        play = patch.object(agent.distinguish, "play", return_value={"status": "passed", "probes": 4, "witnesses": 0, "inconclusive": 0, "query_complexity": None}).start()
+        self.addCleanup(patch.stopall)
         report = agent.grade(stamp)
+        self.assertEqual(play.call_args.args[2:5], (agent.AGENT, 200, TRACK))
+        self.assertEqual(report["trials"][0]["adaptive"]["status"], "passed")
         self.assertEqual(report["summary"][TRACK]["pass_hat_k"], False, report["trials"])
         trial = report["trials"][0]
         self.assertEqual([(item["gate"], item["cpr"], item["fps"], item["coverage"], item["milestone_credit"]) for item in report["trials"]], [(1, 1.0, 1.0, 0.5, 1.0)] * 2)
@@ -90,49 +95,33 @@ if __name__ == "__main__":
         self.assertIn("installed skills changed", report["trials"][0]["error"])
 
 
-class ResumeTests(unittest.TestCase):
-    def test_resume_uses_failed_parity_and_error_sessions(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            stamp = Path(temporary)
-            for trial, error, session in ((1, "usage_limit_reached", "saved-session"), (2, None, "done"), (3, "failed", None), (4, None, "partial-session")):
-                agent.save(stamp / TRACK / f"trial-{trial}/run.yaml", {"error": error, "session": session})
-            agent.save(stamp / TRACK / "trial-4/project/verification/parity.yaml", {"full_parity_gate_pass": False})
-            with patch.object(agent, "attempt") as attempt:
-                agent.resume(stamp, "agent -p", 30)
-            self.assertEqual([call.args[2] for call in attempt.call_args_list], [["agent", "-p", "--resume", session] for session in ("saved-session", "partial-session")])
-            (stamp / TRACK / "trial-1/score").mkdir()
-            with patch.object(agent, "attempt") as attempt, self.assertRaisesRegex(ValueError, "new blind run"):
-                agent.resume(stamp, "agent -p", 30)
-            attempt.assert_not_called()
-
+class AttemptTests(unittest.TestCase):
     def test_binary_resources_reach_the_agent(self):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary)
             source = ROOT / "LICENSE"
-            with patch.object(agent, "reference", return_value=(source, {"resources": {"README.md": "README.md"}, "forbidden_libraries": ["ClosedCodec"]})), patch.object(agent, "attempt") as attempt:
-                stamp = agent.run([ROOT / "eval/open/doom"], "agent", 1, output, 1)
+            with patch.object(agent, "reference", return_value=(source, {"resources": {"README.md": "README.md"}, "forbidden_libraries": ["ClosedCodec"]})), patch.object(agent, "attempt") as attempt, patch.object(agent, "OUTPUT", output):
+                stamp = agent.run([ROOT / "eval/open/doom"], 1)
             self.assertEqual((stamp / "doom/trial-1/input/README.md").read_bytes(), (ROOT / "README.md").read_bytes())
             self.assertIn("ClosedCodec", attempt.call_args.args[3])
 
-    def test_timeout_preserves_partial_output_and_session(self):
+    def test_timeout_preserves_partial_output(self):
         with tempfile.TemporaryDirectory() as temporary:
             workspace = Path(temporary)
-            record = {"seconds": 1, "session": "saved-session", "cost_usd": 2}
+            record = {}
             with patch.object(agent.harness.compare, "execute", return_value=(Mock(stdout=b"partial output", stderr=b"", returncode=-9), "The process group exceeded the time limit.", {"pid": 1})):
                 agent.attempt(workspace, record, ["agent"], "continue", 1)
             self.assertEqual(record["execution_error"], "The process group exceeded the time limit.")
             self.assertIn("partial output", (workspace / "agent.log").read_text())
-            self.assertEqual(record["session"], "saved-session")
             self.assertEqual(record["error"], "agent_failed")
 
-    def test_success_clears_error_and_preserves_cost(self):
+    def test_success_records_cost(self):
         with tempfile.TemporaryDirectory() as temporary:
-            record = {"seconds": 1, "error": "usage_limit_reached", "session": "saved-session", "cost_usd": 2}
+            record = {}
             with patch.object(agent.harness.compare, "execute", return_value=(Mock(returncode=0, stdout=b'{"is_error": false, "total_cost_usd": 0.5}', stderr=b""), None, {})):
                 agent.attempt(Path(temporary), record, ["agent"], "continue", 1)
             self.assertIsNone(record["error"])
-            self.assertEqual(record["session"], "saved-session")
-            self.assertEqual(record["cost_usd"], 2.5)
+            self.assertEqual(record["cost_usd"], 0.5)
 
 
 if __name__ == "__main__":
