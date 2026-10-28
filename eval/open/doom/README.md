@@ -19,7 +19,7 @@ The game data is Freedoom: Phase 1, a free replacement for the original game dat
 ## Reference build
 
 - Source: doomgeneric commit `e257a09527062bfb986b6e5e0780839b6cbd5b71` and Freedoom 0.13.0. The SHA-256 values are in `reference.yaml`. The source uses the GPL-2.0 (engine) and BSD-3-Clause (Freedoom) license.
-- Build: `python3 eval/main.py build doom` builds the SDL front end with the hardened profile and runs `strip`.
+- Build: `eval/build.py` builds the SDL front end with the hardened profile and runs `strip`.
 - The build removes the SDL_mixer music and sound objects. The reference binary has no sound.
 - The binary links the Homebrew `sdl2-compat` library dynamically.
 

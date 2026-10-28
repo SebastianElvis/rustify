@@ -15,6 +15,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "eval"))
+import distinguish
 import harness
 
 load, save, freeze = harness.load, harness.save, harness.freeze
@@ -28,7 +29,8 @@ Complete every phase, run the parity gate, and report the remaining gaps.
 """
 # The tier targets come from published whole-program results. eval/docs/benchmark.md records the evidence.
 TARGETS = {"small": (0.95, 0.90), "medium": (0.85, 0.75), "large": (0.70, 0.55)}
-RESUME = "Continue the reconstruction from where you stopped. Follow the same rules. Complete every phase, run the parity gate, and report the remaining gaps.\n"
+AGENT = "claude -p --output-format json --dangerously-skip-permissions"
+OUTPUT, TIMEOUT = ROOT / "work/agent-eval", 4 * 3600
 
 
 def reference(directory):
@@ -38,8 +40,8 @@ def reference(directory):
     return harness.reference(directory.name, pin), pin
 
 
-def run(directories, agent, trials, output, timeout):
-    stamp = output / time.strftime("%Y%m%d-%H%M%S")
+def run(directories, trials):
+    stamp = OUTPUT / time.strftime("%Y%m%d-%H%M%S")
     save(stamp / "tracks.yaml", [str(directory) for directory in directories])
     for directory in directories:
         source, pin = reference(directory)
@@ -56,7 +58,7 @@ def run(directories, agent, trials, output, timeout):
             prompt = PROMPT.format(binary=shlex.quote(str(binary)), project=shlex.quote(str(workspace / "project")))
             if pin.get("forbidden_libraries"):
                 prompt += "The reconstruction must not link these libraries: " + ", ".join(pin["forbidden_libraries"]) + ".\n"
-            attempt(workspace, {"track": directory.name, "trial": trial, "seconds": 0, "cost_usd": 0, "skills": {name: freeze(workspace / name, ("__pycache__",)) for name in (".agents/skills", ".claude/skills")}}, shlex.split(agent), prompt, timeout)
+            attempt(workspace, {"track": directory.name, "trial": trial, "skills": {name: freeze(workspace / name, ("__pycache__",)) for name in (".agents/skills", ".claude/skills")}}, shlex.split(AGENT), prompt, TIMEOUT)
     return stamp
 
 
@@ -65,27 +67,16 @@ def attempt(workspace, record, command, prompt, timeout):
     start = time.monotonic()
     process, error, resources = harness.compare.execute(command, cwd=workspace, stdin=prompt.encode(), env={**os.environ, "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"}, timeout=timeout, memory_mib=2048, process_limit=32, output_mib=16)
     stdout, stderr = process.stdout.decode(errors="replace"), process.stderr.decode(errors="replace") + (error or "")
-    record.update(agent=shlex.join(command), returncode=None if error else process.returncode, seconds=round(record["seconds"] + time.monotonic() - start, 1), error="agent_failed" if error or process.returncode != 0 else None, execution_error=error, resources=resources)
-    with (workspace / "agent.log").open("a") as log:
-        log.write(stdout + stderr + "\n")
+    record.update(agent=shlex.join(command), returncode=None if error else process.returncode, seconds=round(time.monotonic() - start, 1), error="agent_failed" if error or process.returncode != 0 else None, execution_error=error, resources=resources)
+    (workspace / "agent.log").write_text(stdout + stderr)
     try:
         usage = json.loads(stdout)
-        record.update(usage=usage.get("usage"), cost_usd=round((record.get("cost_usd") or 0) + (usage.get("total_cost_usd") or 0), 4), session=usage.get("session_id") or record.get("session"), error=(usage.get("api_error") or "agent_failed") if usage.get("is_error") else record["error"])
+        record.update(usage=usage.get("usage"), cost_usd=usage.get("total_cost_usd"), error=(usage.get("api_error") or "agent_failed") if usage.get("is_error") else record["error"])
     except (json.JSONDecodeError, AttributeError):
         pass
     project = workspace / "project"
     record["freeze"] = freeze(project) if project.is_dir() else {}
     save(workspace / "run.yaml", record)
-
-
-def resume(stamp, agent, timeout):
-    """The helper resumes saved sessions after agent errors or failed parity reports."""
-    for workspace in sorted(stamp.glob("*/trial-*")):
-        record, parity = yaml.safe_load((workspace / "run.yaml").read_text()), workspace / "project/verification/parity.yaml"
-        if (record.get("error") or (parity.is_file() and (yaml.safe_load(parity.read_text()) or {}).get("full_parity_gate_pass") is not True)) and record.get("session"):
-            if (workspace / "score").exists():
-                raise ValueError("A scored trial needs a new blind run.")
-            attempt(workspace, record, [*shlex.split(agent), "--resume", record["session"]], RESUME, timeout)
 
 
 def recall(patterns, text):
@@ -129,6 +120,12 @@ def grade_trial(workspace, directory, grading):
     gate_path = (workspace / ".agents/skills" if skills is not None else ROOT / "skills") / "rustify-validate/scripts/parity.py"
     gate = load("trial_parity", gate_path).check(project)
     result["success"] = result["success"] and gate["full_parity_gate_pass"] and score.get("checkpoints", {}).get("completed") == ["discover", "plan", "implement", "validate"]
+    if result.get("gate"):
+        reference_path = reference(directory)[0]
+        candidate = project / yaml.safe_load((project / "verification/comparison.yaml").read_text())["executables"]["candidate"]["path"]
+        game = distinguish.play(reference_path, candidate, AGENT, 200, reference_path.name, workspace / "adaptive", 10, None)
+        result["adaptive"] = {name: game[name] for name in ("status", "probes", "witnesses", "inconclusive", "query_complexity")}
+    result["success"] = result["success"] and result.get("adaptive", {}).get("status") == "passed"
     result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"]), "helper_sha256": harness.digest(gate_path)}
     result["structural_fidelity"] = result["edge_convergence"] = None
     if structure := gate.get("reflexion"):

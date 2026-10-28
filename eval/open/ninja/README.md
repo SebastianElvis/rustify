@@ -17,7 +17,7 @@ Many large C and C++ projects build with it.
 ## Reference build
 
 - Source: Ninja 1.13.2 from GitHub. The SHA-256 is in `reference.yaml`. The source uses the Apache-2.0 license.
-- Build: `python3 eval/main.py build ninja` runs CMake in `Release` mode with interprocedural optimization and the hardened flags, then runs `strip`.
+- Build: `eval/build.py` runs CMake in `Release` mode with interprocedural optimization and the hardened flags, then runs `strip`.
 - The stripped executable retains a 7,755-byte Python helper for `browse`. Artifact recovery can expose this source. The evaluator records that exposure separately from external repository source access.
 
 ## Oracle

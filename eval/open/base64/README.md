@@ -17,7 +17,7 @@ It belongs to GNU coreutils, the standard user-space utilities of most Linux sys
 - Binary: `gbase64` from the Homebrew coreutils 9.12 bottle for macOS arm64.
 - Homebrew built the binary. The evaluation does not control its flags.
 - Metadata audit: 173 defined symbols remain. The audit finds no source file paths.
-- A future revision can rebuild the binary with `python3 eval/main.py build` and the hardened profile.
+- A future revision can rebuild the binary with `eval/build.py` and the hardened profile.
 
 ## Oracle
 

@@ -146,23 +146,15 @@ The closed-source tier covers the macOS tools `iconutil` and `textutil`.
 The bzip2, Lua, SQLite, Ninja, and Doom tracks use hardened `-O3`, LTO, and stripped reference builds.
 The [benchmark paper](eval/docs/benchmark.md) explains the track selection and the scores.
 The repository stores the pinned references, cases, and scorers, not agent outputs.
-You reconstruct each reference into `work/projects/<track>` with your agent.
-`make evaluate` scores the first three tracks.
-Each score reports a feature parity score against a target for the track's tier.
-The `--desktop` option also scores saved GUI captures:
-
-```sh
-python3 eval/main.py score --desktop
-```
-
-The agent evaluation runs the current skills itself.
+`make evaluate` runs the current skills with Claude Code on the first three tracks.
 It runs each track three times, freezes each project, and grades it with the track scorer:
 
 ```sh
-python3 eval/main.py agent run --agent "claude -p --output-format json --dangerously-skip-permissions"
+python3 eval/main.py [TASK...] [--trials N]
 ```
 
-Private held-out tracks can live outside the repository and use `--track /path/to/track`.
+Each score reports a feature parity score against a target for the track's tier.
+Private held-out tasks can live outside the repository. The command takes their folder as a task.
 
 The evaluation references require macOS.
 These requirements do not restrict the skill bundle to macOS.
