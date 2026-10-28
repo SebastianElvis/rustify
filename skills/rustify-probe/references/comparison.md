@@ -53,7 +53,7 @@ python3 <rustify-probe>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEME
 
 The report lists each divergence with both captures.
 The helper returns a failure status when it finds a divergence.
-The agent records the seed and iteration count.
+The agent sizes batches from measured probe cost and the runtime budget and records each seed and completed iteration count.
 
 ## Supervisor limits
 
