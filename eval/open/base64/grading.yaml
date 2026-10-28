@@ -1,0 +1,62 @@
+tier: small
+features:
+- id: encode
+  pattern: (?i)encod
+  milestone: core
+  cases: '^challenge/encode-\d+$|^upstream/upstream-(empty|inout\d+)$'
+- id: decode
+  pattern: (?i)decod
+  milestone: core
+  cases: '^challenge/(decode-\d+|generated-\d*[02468])$|^upstream/upstream-(d\d+-.*|buf.*|b4k.*)$'
+- id: ignore-garbage
+  pattern: (?i)garbage
+  milestone: extended
+  cases: '^challenge/(garbage-\d+|all-garbage|generated-\d*[13579])$'
+- id: wrap
+  pattern: (?i)wrap
+  milestone: core
+  cases: '^challenge/(unwrap|width)-\d+$|^upstream/upstream-wrap.*$'
+- id: help
+  pattern: --help
+  milestone: extended
+  cases: '^challenge/options-0$'
+- id: version
+  pattern: --version
+  milestone: extended
+  cases: '^challenge/options-1$'
+- id: stdin
+  pattern: (?i)standard input|stdin
+  milestone: core
+  cases: '^challenge/options-22$'
+- id: file-operand
+  pattern: (?i)file operand|input file|one file
+  milestone: core
+  cases: '^challenge/(file-\d+|file-decode-\d+|directory-input|options-(18|19|20|21))$|^upstream/upstream-ext-op\d+$'
+- id: padding
+  pattern: (?i)padding
+  milestone: extended
+  cases: '^challenge/unpadded-\d+$|^upstream/upstream-paddec\d+$'
+- id: partial-output
+  pattern: (?i)partial
+  milestone: complete
+- id: invalid-input
+  pattern: (?i)invalid input
+  milestone: extended
+  cases: '^challenge/(malformed-\d+|newline-input)$|^upstream/upstream-baddecode\d*$'
+- id: option-parsing
+  pattern: '(?i)abbreviat|unrecognized option|invalid option|long option'
+  milestone: extended
+  cases: '^challenge/options-([2-9]|1[0-7])$'
+components:
+- id: main
+  pattern: (?i)\bmain\b|entry
+- id: option-parser
+  pattern: (?i)getopt|option pars
+- id: encoder
+  pattern: (?i)encoder|do_encode
+- id: decoder
+  pattern: (?i)decoder|do_decode|decode_ctx
+- id: wrapper
+  pattern: (?i)wrap_write|line wrap|wrapper
+- id: output-close
+  pattern: (?i)close_stdout|finish_and_exit|close

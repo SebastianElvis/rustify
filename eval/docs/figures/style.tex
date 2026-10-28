@@ -1,0 +1,27 @@
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usetikzlibrary{arrows.meta,backgrounds,calc}
+\definecolor{blue}{HTML}{0072B2}
+\definecolor{green}{HTML}{009E73}
+\definecolor{orange}{HTML}{B44B00}
+\definecolor{ink}{HTML}{243447}
+\definecolor{gray}{HTML}{738294}
+\tikzset{
+ box/.style={draw=gray,rounded corners=3pt,text width=34mm,minimum height=14mm,align=center,text=ink,inner sep=5pt,font=\sffamily\small},
+ actor/.style={box,text width=24mm,fill=white},
+ component/.style={box,fill=blue!6},
+ store/.style={box,fill=yellow!14},
+ external/.style={box,fill=gray!7},
+ panel/.style={fill=blue!2,draw=gray,rounded corners=5pt},
+ flow/.style={-{Latex[length=2.5mm]},line width=1.25pt},
+ run/.style={flow,draw=blue},
+ again/.style={flow,draw=orange},
+ grade/.style={flow,draw=green},
+ relation/.style={draw=gray,dashed,line width=.85pt},
+ label/.style={font=\sffamily\small,text=ink,align=center,fill=none,inner sep=2pt},
+ heading/.style={font=\sffamily\bfseries,text=ink,anchor=west},
+ title/.style={font=\sffamily\bfseries\Large,text=ink,anchor=west},
+ note/.style={font=\sffamily\small,text=ink,anchor=west},
+ every node/.append style={font=\sffamily}
+}
+\newcommand{\step}[2]{\tikz[baseline=(s.base)]\node[circle,fill=#1,text=white,inner sep=1.6pt,font=\sffamily\tiny\bfseries](s){#2};}

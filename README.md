@@ -74,17 +74,20 @@ Your agent must have access to REA through MCP or the CLI.
 
 ## Usage
 
-You give your agent the binary path, its resources, and an output folder.
-You invoke the main `rustify` skill through your agent's skill interface or a prompt:
+You invoke the main `rustify` skill with the binary path and the output folder:
 
 ```text
-Use the rustify skill to reconstruct /path/to/program in Rust.
-Write the target project to ./reconstructed-program.
-Preserve the original features, behavior, UX, data, and component boundaries.
-Recover the product and architecture documents with supporting evidence.
-Run unit tests and E2E comparisons against the original.
-Keep every known mismatch open until a repair resolves it.
+/rustify /path/to/program ./reconstructed-program
 ```
+
+You can add resources, documentation, and constraints in natural language:
+
+```text
+/rustify /path/to/program ./reconstructed-program
+The resources are in /path/to/resources. The manual is at https://example.com/manual.
+```
+
+Agents without slash commands accept the same request in a prompt.
 
 Rustify always reconstructs the full product.
 A missing feature stays an open gap until the agent completes it.
@@ -140,28 +143,29 @@ python3 scripts/check_install.py
 
 The dataset covers GNU base64, BLAKE3 hashing, an HTTP client, native desktop dialogs, bzip2, Lua, SQLite, Ninja, and Doom.
 The last five tracks use hardened `-O3`, LTO, and stripped reference builds.
-The [evaluation overview](evaluations/README.md) explains the track selection.
+The [evaluation design](eval/docs/design.md) explains the track selection.
 The repository stores the pinned references, cases, and scorers, not agent outputs.
 You reconstruct each reference into `work/projects/<track>` with your agent.
 `make evaluate` scores the first three tracks.
+Each score reports a feature parity score against a target for the track's tier.
 The `--desktop` option also scores saved GUI captures:
 
 ```sh
-python3 scripts/evaluate.py --desktop
+python3 eval/main.py score --desktop
 ```
 
 The agent evaluation runs the current skills itself.
 It runs each track three times, freezes each project, and grades it with the track scorer:
 
 ```sh
-python3 scripts/agent_eval.py run --agent "claude -p --output-format json --dangerously-skip-permissions"
+python3 eval/main.py agent run --agent "claude -p --output-format json --dangerously-skip-permissions"
 ```
 
 Private held-out tracks can live outside the repository and use `--track /path/to/track`.
 
 The evaluation references require macOS.
 These requirements do not restrict the skill bundle to macOS.
-The [evaluation guide](docs/evaluation.md) records the tracks, the scorer steps, and the reproduction details.
+The [evaluation workflow](eval/docs/workflow.md) records the tracks, the scorer steps, and the reproduction details.
 
 Contributors rebuild the architecture figure with `make diagram`.
 The build needs LaTeX, latexmk, and Poppler.
@@ -171,7 +175,9 @@ Each skill keeps its main instructions short and stores supporting methods, temp
 
 - [Product and vision](docs/product.md)
 - [Architecture and diagram source](docs/architecture.md)
-- [Evaluation method and dataset](docs/evaluation.md)
+- [Evaluation design](eval/docs/design.md)
+- [Evaluation workflow](eval/docs/workflow.md)
+- [Benchmark results](eval/docs/benchmarks.md)
 - [Target-project format](skills/rustify/references/project.md)
 - [Standards and terminology](skills/rustify/references/standards.md)
 - [Rust stack guide](skills/rustify-plan/references/rust-stack.md)

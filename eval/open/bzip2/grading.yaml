@@ -1,0 +1,149 @@
+tier: medium
+features:
+- id: compress
+  pattern: (?i)compress
+  milestone: core
+  cases: '^[^/]+/compress/'
+- id: decompress
+  pattern: (?i)decompress|bunzip2
+  milestone: core
+  cases: '^[^/]+/decompress/'
+- id: test-integrity
+  pattern: (?i)--test|integrity|-t\b
+  milestone: core
+  cases: '^[^/]+/test-integrity/'
+- id: stdout
+  pattern: (?i)--stdout|standard output|-c\b
+  milestone: extended
+  cases: '^[^/]+/stdout/'
+- id: keep
+  pattern: (?i)--keep|keep input|-k\b
+  milestone: extended
+  cases: '^[^/]+/keep/'
+- id: force
+  pattern: (?i)--force|overwrite|-f\b
+  milestone: extended
+  cases: '^[^/]+/force/'
+- id: quiet
+  pattern: (?i)--quiet|-q\b
+  milestone: extended
+  cases: '^[^/]+/quiet/'
+- id: verbose
+  pattern: (?i)--verbose|verbos|-v\b
+  milestone: complete
+  cases: '^[^/]+/verbose/'
+- id: small-mode
+  pattern: (?i)--small|small mode|less memory|-s\b
+  milestone: core
+  cases: '^[^/]+/small-mode/'
+- id: block-size
+  pattern: (?i)block size|100k|900k|-[1-9]\b|--fast|--best
+  milestone: core
+  cases: '^[^/]+/block-size/'
+- id: license-version
+  pattern: (?i)--license|--version|licen[cs]e
+  milestone: extended
+  cases: '^[^/]+/license-version/'
+- id: help
+  pattern: (?i)--help|usage
+  milestone: extended
+  cases: '^[^/]+/help/'
+- id: redundant-flags
+  pattern: (?i)--repetitive|redundant
+  milestone: extended
+  cases: '^[^/]+/redundant-flags/'
+- id: exponential
+  pattern: (?i)--exponential|work ?factor
+  milestone: core
+  cases: '^[^/]+/exponential/'
+- id: end-of-options
+  pattern: (?i)--\s|end of (options|flags)|double dash
+  milestone: extended
+  cases: '^[^/]+/end-of-options/'
+- id: environment
+  pattern: \bBZIP2?\b
+  milestone: complete
+  cases: '^[^/]+/environment/'
+- id: program-name
+  pattern: (?i)bzcat|argv\[0\]|program name|invocation name
+  milestone: complete
+  cases: '^[^/]+/program-name/'
+- id: file-suffixes
+  pattern: (?i)\.bz2|\.tbz2?|\.tar|suffix
+  milestone: extended
+  cases: '^[^/]+/file-suffixes/'
+- id: output-name-guess
+  pattern: (?i)\.out\b|guess
+  milestone: extended
+  cases: '^[^/]+/output-name-guess/'
+- id: multiple-streams
+  pattern: (?i)concatenat|multiple streams|multi-stream
+  milestone: extended
+  cases: '^[^/]+/multiple-streams/'
+- id: trailing-garbage
+  pattern: (?i)trailing garbage
+  milestone: extended
+  cases: '^[^/]+/trailing-garbage/'
+- id: crc-check
+  pattern: (?i)\bcrc\b
+  milestone: extended
+  cases: '^[^/]+/crc-check/'
+- id: truncated-input
+  pattern: (?i)ends unexpectedly|truncat
+  milestone: extended
+  cases: '^[^/]+/truncated-input/'
+- id: not-bzip2
+  pattern: (?i)not a bzip2 file|magic
+  milestone: extended
+  cases: '^[^/]+/not-bzip2/'
+- id: exit-status
+  pattern: (?i)exit (status|code|value)
+  milestone: extended
+  cases: '^[^/]+/exit-status/'
+- id: terminal-refusal
+  pattern: (?i)terminal|tty
+  milestone: extended
+- id: file-metadata
+  pattern: (?i)permission|timestamp|mtime|ownership|file attributes
+  milestone: extended
+- id: hard-links
+  pattern: (?i)hard link|other links?
+  milestone: complete
+- id: directory-input
+  pattern: (?i)directory
+  milestone: extended
+  cases: '^[^/]+/directory-input/'
+- id: long-file-name
+  pattern: (?i)suspiciously|file name.*long|name too long
+  milestone: extended
+  cases: '^[^/]+/long-file-name/'
+- id: randomised-blocks
+  pattern: (?i)randomi[sz]ed
+  milestone: complete
+components:
+- id: cli
+  pattern: (?i)\bcli\b|command line|argument|flag pars|bzip2\.c
+- id: file-driver
+  pattern: (?i)compress ?stream|uncompress ?stream|test ?stream|file handling|driver
+- id: error-reporting
+  pattern: (?i)error|panic|cleanup|clean up
+- id: stream-api
+  pattern: (?i)bzlib|stream (api|state)|bz2?_?(read|write)
+- id: block-sort
+  pattern: (?i)block ?sort|burrows|bwt|suffix sort
+- id: fallback-sort
+  pattern: (?i)fallback
+- id: mtf-rle
+  pattern: (?i)move.to.front|mtf|run.length|rle
+- id: huffman
+  pattern: (?i)huffman
+- id: bit-writer
+  pattern: (?i)bit ?(writer|stream|output)|bswriter|bs_w
+- id: bit-reader
+  pattern: (?i)bit ?reader|get_bits|bitstream read
+- id: crc
+  pattern: (?i)\bcrc\b
+- id: randomisation-table
+  pattern: (?i)rand(omi[sz]ation)? ?table|rnums
+- id: small-decoder
+  pattern: (?i)small (mode|decoder)|ll16|indexIntoF

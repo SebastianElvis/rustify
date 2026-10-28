@@ -1,0 +1,230 @@
+tier: medium
+features:
+- id: incremental
+  pattern: (?i)incremental|no-op|up to date|no work to do|dirty|mtime|timestamp
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/incremental/|^generate-scenarios/(incremental|manifest-language|options)/|^upstream-build_test/incremental/(Basic|DoubleOutputDirect|DoubleOutputIndirect|DoubleDependent|PriorityWithoutBuildLog|TwoOutputs|MultiOutIn|Chain|MakeDirs|EncounterReadyTwice|RebuildAfterFailure|RebuildWithNoInputs)-build_test$|^upstream-graph_test/incremental/(InputsCollector|CommandCollector|EdgeQueuePriority)-graph_test$'
+- id: command-change
+  pattern: (?i)command (line )?(changed|hash)|rebuild.*command
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/command-change/'
+- id: targets
+  pattern: (?i)default target|target selection|\^ ?syntax|did you mean|unknown target
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/targets/|^upstream-graph_test/incremental/(RootNodes)-graph_test$'
+- id: keep-going
+  pattern: (?i)keep going|-k N|-k 0|subcommands? failed|cannot make progress
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/keep-going/|^upstream-build_test/incremental/(Fail|SwallowFailures|SwallowFailuresLimit|SwallowFailuresPool)-build_test$'
+- id: options
+  pattern: (?i)-C DIR|-f FILE|--version|--quiet|--verbose|dry run|-n\b|usage
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/options/|^upstream-build_test/incremental/(AllCommandsShown)-build_test$'
+- id: manifest-language
+  pattern: (?i)manifest|build\.ninja|variable|scope|include|subninja|escape
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/manifest-language/|^upstream-manifest_parser_test/manifest-language/(?!(Errors|DuplicateEdgeWithMultipleOutputsError|DuplicateEdgeInIncludedFile|MissingSubNinja|BrokenInclude|ImplicitOutputDupeError|ImplicitOutputDupesError|DyndepNotInput|DefaultDefaultCycle)-\d+$)|^upstream-graph_test/incremental/(VarInOutPathEscaping|RuleVariablesInScope|PathWithCurrentDirectory|Decanonicalize)-graph_test$'
+- id: manifest-errors
+  pattern: (?i)parse error|syntax error|near here|expected .* got|bad \$-escape
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/manifest-errors/|^generate-scenarios/manifest-errors/|^upstream-manifest_parser_test/manifest-language/(Errors|DuplicateEdgeWithMultipleOutputsError|DuplicateEdgeInIncludedFile|MissingSubNinja|BrokenInclude|ImplicitOutputDupeError|ImplicitOutputDupesError|DyndepNotInput|DefaultDefaultCycle)-\d+$|^upstream-graph_test/incremental/(DependencyCycle|CycleInEdgesButNotInNodes\d|CycleWithLength\w+)-graph_test$'
+- id: warnings
+  pattern: (?i)-w FLAG|phonycycle|dupbuild|warning flag
+  milestone: core
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/warnings/'
+- id: depfile
+  pattern: (?i)depfile|\.d file|makefile-style dep
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/depfile/|^upstream-depfile_parser_test/depfile/|^upstream-build_test/incremental/(DepFileMissing|DepFileOK|DepFileParseError|DepFileCanonicalize|GeneratedPlainDepfileMtime)-build_test$|^upstream-graph_test/incremental/(FunkyMakefilePath|DepfileWithCanonicalizablePath|DepfileRemoved|DepfileOverride|DepfileOverrideParent)-graph_test$'
+- id: deps-log
+  pattern: (?i)\.ninja_deps|deps log|deps ?= ?gcc|deps ?= ?msvc
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/deps-log/|^upstream-build_test/incremental/(DepsGccWithEmptyDepfileErrorsOut|FailedDepsParse|TwoOutputsDepFile\w+)-build_test$'
+- id: build-log
+  pattern: (?i)\.ninja_log|build log|log version
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/build-log/|^upstream-build_test/incremental/(NotInLogButOnDisk)-build_test$'
+- id: restat
+  pattern: (?i)restat
+  milestone: extended
+  cases: '^replay-(core|extended|complete|persistence)/restat/|^upstream-build_test/incremental/(Restat\w+)-build_test$'
+- id: generator
+  pattern: (?i)generator|regenerat|manifest rebuild|still dirty after
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/generator/|^upstream-build_test/incremental/(ImplicitGeneratedOutOfDate2?)-build_test$'
+- id: edges
+  pattern: (?i)implicit (dep|output|input)|order-only|validation|phony
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/edges/|^upstream-build_test/incremental/(ImplicitOutput|OrderOnlyDeps|RebuildOrderOnlyDeps|Phony\w*|Validation\w*)-build_test$|^upstream-graph_test/incremental/(MissingImplicit|ModifiedImplicit|ExplicitImplicit|ImplicitOutput\w+|\w*Phony\w*|Validation)-graph_test$'
+- id: pools
+  pattern: (?i)\bpools?\b|depth|console pool
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/pools/|^upstream-build_test/incremental/(PoolsWithDepthTwo|PoolWithRedundantEdges|PoolWithFailingEdge|Console)-build_test$'
+- id: rspfile
+  pattern: (?i)rspfile|response file
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/rspfile/|^upstream-build_test/incremental/(RspFile\w+)-build_test$'
+- id: builddir
+  pattern: (?i)builddir|build dir
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/builddir/'
+- id: dyndep
+  pattern: (?i)dyndep|dynamic dependenc
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/dyndep/|^upstream-dyndep_parser_test/dyndep/|^upstream-build_test/incremental/(\w*Dyndep\w*)-build_test$|^upstream-graph_test/incremental/(Dyndep\w+)-graph_test$'
+- id: status
+  pattern: (?i)NINJA_STATUS|status line|progress|\[%f/%t\]|CLICOLOR_FORCE|color
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/status/'
+- id: smart-terminal
+  pattern: (?i)smart terminal|tty|terminal width|elide|\\r|carriage return
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/smart-terminal/'
+- id: interrupt
+  pattern: (?i)interrupt|SIGINT|SIGTERM|SIGHUP|signal|exit (code|status) 130
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/interrupt/|^upstream-build_test/incremental/(InterruptCleanup)-build_test$'
+- id: jobserver
+  pattern: (?i)jobserver|MAKEFLAGS
+  milestone: extended
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/jobserver/'
+- id: parallelism
+  pattern: (?i)-j N|parallel|-l N|load average
+  milestone: extended
+- id: debug-modes
+  pattern: (?i)-d MODE|-d explain|keepdepfile|keeprsp|-d stats|debug mode
+  milestone: extended
+  cases: '^upstream-output_test/restat/test_explain_output$'
+- id: tools
+  pattern: (?i)subtool|-t TOOL|-t list
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tools/'
+- id: tool-list
+  pattern: (?i)-t list|ninja subtools
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-list/'
+- id: tool-browse
+  pattern: (?i)\bbrowse\b
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-browse/|^replay-browse/'
+- id: tool-clean
+  pattern: (?i)-t clean|\bclean\b
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-clean/|^upstream-clean_test/tool-clean/'
+- id: tool-cleandead
+  pattern: (?i)cleandead
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-cleandead/'
+- id: tool-commands
+  pattern: (?i)-t commands|\bcommands tool
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-commands/'
+- id: tool-inputs
+  pattern: (?i)-t inputs|inputs tool|dependency-order|no-shell-escape
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-inputs/'
+- id: tool-multi-inputs
+  pattern: (?i)multi-inputs
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-multi-inputs/'
+- id: tool-deps
+  pattern: (?i)-t deps|deps tool
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-deps/'
+- id: tool-missingdeps
+  pattern: (?i)missingdeps|missing dep
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-missingdeps/'
+- id: tool-graph
+  pattern: (?i)-t graph|graphviz|\bdot\b
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-graph/'
+- id: tool-query
+  pattern: (?i)-t query|\bquery\b
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-query/'
+- id: tool-targets
+  pattern: (?i)-t targets|targets tool
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-targets/'
+- id: tool-compdb
+  pattern: (?i)compdb|compilation database
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-compdb/'
+- id: tool-recompact
+  pattern: (?i)recompact
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-recompact/'
+- id: tool-restat
+  pattern: (?i)-t restat|restat tool
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-restat/'
+- id: tool-rules
+  pattern: (?i)-t rules|rules tool
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-rules/'
+- id: tool-urtle
+  pattern: (?i)urtle
+  milestone: complete
+  cases: '^(replay-(core|extended|complete|persistence)|upstream-(output|jobserver)_test)/tool-urtle/'
+components:
+- id: main
+  pattern: (?i)\bmain\b|entry point|NinjaMain|command line|option pars
+- id: lexer
+  pattern: (?i)lexer|tokeni[sz]
+- id: manifest-parser
+  pattern: (?i)manifest parser|ManifestParser|parser
+- id: eval-env
+  pattern: (?i)eval[_ ]?env|BindingEnv|EvalString|variable (scope|expan)
+- id: state-graph
+  pattern: (?i)\bgraph\b|\bState\b|Node|Edge|DAG
+- id: dependency-scan
+  pattern: (?i)DependencyScan|dirty (check|scan)|RecomputeDirty
+- id: build-plan
+  pattern: (?i)\bPlan\b|scheduler|critical path|ready queue
+- id: builder
+  pattern: (?i)Builder|build (driver|engine|loop)
+- id: build-log
+  pattern: (?i)BuildLog|build log|\.ninja_log
+- id: deps-log
+  pattern: (?i)DepsLog|deps log|\.ninja_deps
+- id: depfile-parser
+  pattern: (?i)depfile parser|DepfileParser
+- id: dyndep
+  pattern: (?i)dyndep|DyndepLoader|DyndepParser
+- id: disk-interface
+  pattern: (?i)disk ?interface|RealDiskInterface|stat cache|filesystem
+- id: subprocess
+  pattern: (?i)subprocess|SubprocessSet|process spawn|posix_spawn
+- id: command-runner
+  pattern: (?i)command ?runner|RealCommandRunner
+- id: jobserver
+  pattern: (?i)jobserver
+- id: status-printer
+  pattern: (?i)StatusPrinter|status printer|status line
+- id: line-printer
+  pattern: (?i)LinePrinter|line printer|smart terminal
+- id: clean
+  pattern: (?i)Cleaner|\bclean\b
+- id: graphviz
+  pattern: (?i)graphviz
+- id: missing-deps
+  pattern: (?i)MissingDependencyScanner|missing ?deps
+- id: tools
+  pattern: (?i)\btools?\b|subtool
+- id: explanations
+  pattern: (?i)explanation|explain
+- id: edit-distance
+  pattern: (?i)edit distance|EditDistance|spell|did you mean
+- id: elide-middle
+  pattern: (?i)elide|ElideMiddle
+- id: json
+  pattern: (?i)\bjson\b|EncodeJSON
+- id: browse
+  pattern: (?i)browse
+- id: util
+  pattern: (?i)\butil\b|CanonicalizePath|path canonical|shell escap
+- id: metrics
+  pattern: (?i)metrics|\bstats\b
+- id: version
+  pattern: (?i)version check|ninja_required_version|kNinjaVersion

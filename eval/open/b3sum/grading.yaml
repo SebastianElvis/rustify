@@ -1,0 +1,61 @@
+tier: small
+features:
+- id: hash-files
+  pattern: (?i)file
+  milestone: core
+  cases: '^runtime/(names|missing|missing-then-good|directory|challenge-file-\d+|challenge-missing-many(-\d+)?)$'
+- id: stdin
+  pattern: (?i)standard input|stdin
+  milestone: core
+  cases: '^runtime/(empty|hello|challenge-hash-\d+)$|^upstream/upstream-\d+-hash-'
+- id: raw
+  pattern: --raw
+  milestone: extended
+  cases: '^runtime/(raw|raw-many|challenge-raw-\d+)$'
+- id: length
+  pattern: --length
+  milestone: extended
+  cases: '^runtime/(length\d+|challenge-length-\d+)$'
+- id: seek
+  pattern: --seek
+  milestone: extended
+  cases: '^runtime/challenge-seek(-length)?-\d+$'
+- id: keyed
+  pattern: --keyed
+  milestone: extended
+  cases: '^runtime/(keyed(-short|-long)?|challenge-keyed(-seek)?-\d+|challenge-key-length-\d+|challenge-audit-keyed-stdin(-\d+)?)$|^upstream/upstream-\d+-keyed_hash-'
+- id: derive-key
+  pattern: --derive-key
+  milestone: extended
+  cases: '^runtime/(derive|challenge-derive(-seek)?-\d+)$|^upstream/upstream-\d+-derive_key-'
+- id: check
+  pattern: --check
+  milestone: extended
+  cases: '^runtime/(check-(empty|malformed|missing|mismatch|valid|prefix)|challenge-checkfile-\d+-False|challenge-check-\d+-False|challenge-directory-check(-\d+)?|challenge-missing-checkfile(-\d+)?|challenge-extra-check(-\d+)?|challenge-audit-check(-\d+|-invalid-utf8(-\d+)?)?)$'
+- id: no-names
+  pattern: --no-names
+  milestone: extended
+  cases: '^runtime/no-names$'
+- id: quiet
+  pattern: --quiet
+  milestone: complete
+  cases: '^runtime/(check-quiet|challenge-check(file)?-\d+-True)$'
+- id: tag
+  pattern: --tag
+  milestone: extended
+  cases: '^runtime/(tag|challenge-name-\d+)$'
+- id: usage
+  pattern: '--help|--version|(?i:usage)'
+  milestone: extended
+  cases: '^runtime/(help|version)$'
+components:
+- id: argument-parser
+  pattern: (?i)argument|option pars|clap
+- id: hasher
+  pattern: (?i)hash_path|hasher|digest
+- id: output-writer
+  pattern: (?i)hex output|output writer|write_hex
+- id: checkfile
+  pattern: (?i)check ?file|check_one
+- id: parallel-hashing
+  pattern: (?i)rayon|parallel|thread|mmap

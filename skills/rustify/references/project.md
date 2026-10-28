@@ -6,7 +6,7 @@ The helper scripts use Python 3.11 or later with PyYAML.
 
 Rustify always reconstructs the full product with one-to-one compatibility.
 The helper `init` command records the target path and SHA-256 in `recovered/state.yaml`.
-`recovered/product.md` records the target identity, resources, platform, and environment.
+`recovered/product.md` records the target identity, resources, documentation sources, platform, and environment.
 The environment covers the locale, clock, randomness, persistence, and services.
 `recovered/roadmap.md` records the investigation limits and stopping conditions.
 A missing feature is an open gap. The agent keeps working on each open gap.

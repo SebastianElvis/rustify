@@ -1,0 +1,291 @@
+# Evaluation workflow
+
+Rustify evaluates a reconstruction against an identified original binary.
+The report separates measured behavior from unexplored behavior.
+The default reconstruction requires one-to-one product, UX, component, data, and behavior mappings.
+Each track asks the agent for the full product.
+A track scorer measures only its own cases.
+
+## Complete flow
+
+1. The evaluator selects an open-source target with test vectors and pins its binary.
+2. The evaluator records the binary origin, version, platform, license, and SHA-256.
+3. The reconstruction receives only the binary, resources, skill, and execution environment.
+4. Discovery captures product, experience, architecture, and reproducible scenarios.
+5. Planning defines acceptance checks before implementation.
+6. The reconstruction implements idiomatic Rust with unit and E2E tests.
+7. The evaluator freezes the Rust source hash and discovery artifacts.
+8. A separate evaluation pass adds challenge cases.
+9. The evaluator reveals the original source and upstream vectors.
+10. The evaluator compares product coverage, architecture recovery, and behavior separately.
+11. A failure preserves a reproducer. A repair repeats the affected checks.
+12. The final report states source access, repairs, measured coverage, and remaining gaps.
+
+The source reveal concerns source files outside the supplied artifact.
+The agent can recover embedded code from the supplied artifact.
+The report records that code's origin and exposure separately.
+
+The target project separates `recovered/`, `implementation/`, and `verification/`.
+The target project keeps the Rust design and decision records in `implementation/docs/`.
+The recovered test specifications record observable expectations and their origin.
+The verification folder records execution results.
+
+The source audit must not quietly become a source translation pass.
+The evaluator records source-assisted changes separately if they become necessary.
+The evaluator does not claim perfect isolation when one agent performs both passes.
+
+## CLI comparison
+
+Each scenario contains these fields:
+
+```yaml
+- id: encode-stdin
+  args: [-w, '0']
+  stdin_b64: aGVsbG8=
+  files: {}
+```
+
+The `stdin_b64` and file values encode raw bytes.
+Optional `env` entries configure uncontrolled variables.
+The helper reserves locale, timezone, home, and path variables.
+
+```sh
+python3 skills/rustify-probe/scripts/compare.py --reference /path/to/original --candidate /path/to/implementation --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name base64
+```
+
+The helper runs each program in a separate temporary directory.
+The helper sets the same argument-zero name and deterministic environment.
+The helper compares stdout, stderr, exit status, and resulting regular files.
+The report preserves inputs, raw byte captures, and executable hashes.
+The helper fails on time limits and execution errors even when both programs fail alike.
+The POSIX helper does not provide OS-level containment for hostile binaries.
+Other hosts use an equivalent target-specific replay tool.
+
+## Dataset
+
+The dataset has two tiers. Every track targets the full product.
+
+| Tier | Track | Reference |
+| --- | --- | --- |
+| Open source | `base64` | GNU base64 9.12 |
+| Open source | `b3sum` | b3sum 1.8.7 |
+| Open source | `xh` | xh 0.26.3 |
+| Open source | `zenity` | zenity 0.10.15 |
+| Open source | `bzip2` | bzip2 1.0.8, hardened build |
+| Open source | `lua` | Lua 5.5.1, hardened build |
+| Open source | `sqlite` | SQLite 3.54.1 shell, hardened build |
+| Open source | `ninja` | Ninja 1.13.2, hardened build |
+| Open source | `doom` | doomgeneric with Freedoom 0.13.0, hardened build |
+| Closed source | `iconutil` | macOS `/usr/bin/iconutil` |
+| Closed source | `textutil` | macOS `/usr/bin/textutil` |
+
+Each track folder in `eval/open/` or `eval/closed/` has a `README.md` with the product, the selection rationale, the reference, and the oracles.
+[The design guide](design.md) explains the indistinguishability game, the two tiers, and the relation to published benchmarks.
+`python3 eval/main.py distinguish` runs the adaptive distinguisher against a scored project.
+
+## Reference builds
+
+The first four tracks pin upstream release binaries.
+The upstream projects control their compiler flags.
+The last five tracks pin a hardened local build from pinned source.
+`python3 eval/main.py build <track>` reads `eval/open/<track>/reference.yaml` and builds the binary in `work/references/<track>/`.
+
+- The C and C++ flags are `-O3 -flto -fvisibility=hidden -DNDEBUG`.
+- The link flags are `-flto -Wl,-dead_strip`.
+- The script runs `strip` on the result.
+- The script deletes the source tree after the build.
+
+Optimization inlines code and changes its structure.
+Stripping and hidden visibility remove the symbol names.
+`-DNDEBUG` removes assertion strings that contain source paths.
+The script records a metadata audit in `build.yaml`: the defined symbols, the source-file strings, and the build-path leaks.
+Each hardened reference keeps one defined symbol.
+
+The build is deterministic for one compiler version.
+`reference.yaml` pins the binary SHA-256 and the compiler.
+The scorer rebuilds a missing reference and rejects a different hash.
+Go and Rust binaries keep more metadata after `strip`.
+Go keeps function and type names in its runtime tables.
+Rust keeps panic locations unless the build remaps or removes them.
+
+The repository stores the dataset, not agent outputs.
+Each track folder has a `run.py` scorer and its pinned reference, cases, and upstream vectors.
+`eval/harness.py` provides the shared download, freeze, Rust checks, and report steps.
+
+1. The scorer downloads and verifies the reference in `work/downloads/<track>`.
+2. The agent reconstructs that binary into `work/projects/<track>`.
+3. The agent receives only the binary and the skill.
+4. The scorer records the hash of each project file before it reveals any case.
+5. The scorer runs Cargo format, Clippy, test, and release build checks.
+6. The scorer compares the Rust executable with the reference on its own cases and upstream vectors.
+7. The scorer writes its reports in `work/evaluation/<track>/`.
+
+Git ignores `work/`.
+A run without a project still downloads the reference and then fails.
+The scorer reports the project checkpoint state but does not require it.
+
+The default evaluation scores the CLI, cryptography, and client tracks.
+The desktop option also scores the zenity track.
+The scorer does not open dialogs.
+The operator replays the five cases with host-native CUA on both executables.
+The operator saves the captures and a visual review in `verification/gui-captures/` of the project.
+The scorer accepts only captures of the reference and the selected candidate.
+
+```sh
+make evaluate
+python3 eval/main.py score --desktop
+python3 eval/open/xh/run.py --project /path/to/project
+```
+
+The first run needs internet access for pinned binaries and Cargo dependencies.
+Later runs use local inputs and loopback HTTP.
+The dataset requires macOS and the reference binaries' CPU support.
+The skill bundle remains host-neutral.
+
+## Agent evaluation
+
+The scorers above grade one project. The agent evaluation also produces the projects.
+`python3 eval/main.py agent` runs the current skill bundle with an agent command on each track.
+
+
+1. The harness downloads the pinned reference with the track's `run.py` pin.
+2. For each trial, it creates a workspace with the installed skills and a copy of the binary.
+3. It sends `/rustify BINARY PROJECT` with blind rules on standard input. The rules forbid the original source, tests, and documentation.
+4. It records the time, the return code, and the token use and cost when the agent reports them.
+5. The supervisor finishes observed agent descendants before the evaluator freezes project inputs.
+6. The grader rejects changed project inputs or installed skills.
+7. The scorer uses `--frozen` to select the executable from `verification/comparison.yaml`.
+8. The scorer checks executable identities, permissions, library restrictions, and project inputs before comparisons.
+9. The scorer checks executable identities and project inputs again after comparisons.
+10. The grader runs the parity gate and quality measures on each trial.
+
+The comparison report declares the candidate path and SHA-256.
+The candidate stays inside the project.
+Frozen scoring requires an output directory outside the project.
+Frozen scoring omits the release build.
+The format, Clippy, Rust test, and pedantic checks use a separate Cargo output directory.
+The standalone scorer builds a release executable when the command omits `--frozen`.
+The Cargo checks use one build job and a 2 GiB memory limit.
+The grader preserves each score under `trial-N/score/<timestamp>/`.
+The grade result names its score report.
+
+A successful trial requires the scorer and the full parity gate to pass.
+The trial must also complete all four phase checkpoints.
+
+The harness records both installed skill copies before the agent starts.
+The grader rejects a changed skill copy before it loads the trial's parity helper.
+The report records that helper's hash and the skill verification result.
+An older trial without an initial skill manifest uses the current trusted gate.
+That trial cannot establish the original skill bundle's integrity.
+
+```sh
+python3 eval/main.py agent run --agent "claude -p --output-format json --dangerously-skip-permissions" --trials 3
+python3 eval/main.py agent grade work/agent-eval/<stamp>
+python3 eval/main.py agent resume work/agent-eval/<stamp> --agent "claude -p --output-format json --dangerously-skip-permissions" --no-grade
+```
+
+The `resume` command continues saved sessions after agent errors or a failed parity report.
+The command keeps the installed skills and project files.
+The command records a new freeze after the agent exits.
+The command rejects a trial that already has a score folder.
+The `--no-grade` option delays grading until the blind work ends.
+
+The harness lets Claude workers finish within the outer time limit.
+The harness stops the agent process group when that limit expires.
+
+The harness never repairs a project.
+The reconstruction agent uses its frozen skills to validate, implement repairs, and repeat validation before the freeze.
+The validator supplies original evidence and ledger mappings for each repair.
+The evaluator supplies no target-specific repair hints during that cycle.
+
+The evaluator uses failed trials to diagnose the shared skills.
+The evaluator changes the skills and starts a fresh reconstruction from the original binary.
+The fresh agent receives no old implementation, recovered model, hidden case, or patch hint.
+
+The evaluator records guided product repairs as diagnostic work.
+Those repairs do not establish a skill gain.
+An optional post-score continuation uses a separate project and the validation skill to confirm outside witnesses.
+The implementation skill receives only confirmed failures and their ledger mappings.
+The evaluator records this continuation as case-assisted work.
+This continuation does not establish a fresh reconstruction gain.
+
+The evaluator keeps reference bytes, scorers, tools, and budgets equal during a prompt comparison.
+The evaluator reports stochastic variation and unmatched conditions.
+
+The blind protocol relies on agent compliance.
+The harness does not isolate filesystem or network access.
+The default tracks are base64, b3sum, and xh. The desktop track needs an operator.
+
+### Held-out tracks
+
+The public tracks are well-known programs. A model can know their source from training.
+Their scores can therefore overstate blind reconstruction.
+The evaluator keeps private held-out tracks outside the repository.
+
+- A private track is a folder with `run.py`, `grading.yaml`, and its cases.
+- Its `run.py` adds the repository `eval/` folder to `sys.path` and calls `harness.run`.
+- The evaluator writes small programs that are not public, builds them without symbols at two optimization levels, and pins their hashes.
+- The evaluator includes at least one program with persistent state and one network service.
+- The evaluator never commits the program, its source, or its cases.
+
+```sh
+python3 eval/main.py agent run --agent "AGENT COMMAND" --track /private/tracks/ledger-tool
+```
+
+### Grading data
+
+Each track has `grading.yaml` with a tier, feature patterns, and component patterns.
+The patterns come from the original source and its documentation.
+Each feature also has a milestone and a `cases` pattern that maps the track cases to the feature.
+The agent never sees `grading.yaml`.
+
+## Evaluation checks
+
+- The original passes a repeatability comparison against itself.
+- Unit tests verify encoding logic, partial results, and boundary conditions.
+- E2E cases verify command parsing, input files, and errors.
+- Challenge cases exercise malformed and generated inputs.
+- Upstream vectors run against both executables after the source reveal.
+- A deliberately wrong implementation fails the comparison.
+- Resume tests detect changes to inputs and Rust source.
+
+## Scores
+
+| Dimension | Measure | Oracle |
+| --- | --- | --- |
+| Gate | 1 when the build, the freeze, the skill copies, and the library rules pass. 0 sets every graded score to 0. | The scorer and the grader. |
+| Feature parity (FPS) | The weighted share of measured features with no witness. | The track cases and `grading.yaml`. |
+| Case pass rate (CPR) | The mean pass rate of the distinguisher classes. Each class has equal weight. | The track cases and upstream vectors. |
+| Milestone credit | The share of milestones whose features have no witness. | `grading.yaml` |
+| Feature coverage | Features with at least one case, divided by all features. | `grading.yaml` |
+| Self-check gap | The agent's own comparison pass rate minus the CPR. | `verification/comparison.yaml` |
+| Reliability | pass@k and pass^k over the trials. A trial passes when its scorer, the parity gate, and the checkpoints pass. | The track scorer. |
+| Product recall | Feature patterns found in the requirements, divided by all feature patterns. | `grading.yaml` |
+| Architecture recall | Component patterns found in the recovered components, divided by all component patterns. | `grading.yaml` |
+| Structural fidelity | Original components with their own Rust module, divided by all original components. | The reflexion check. |
+| Edge convergence | Converged original edges, divided by converged and absent edges. | The reflexion check. |
+| Parity gate | The assessment, errors, and gap count. | `parity.py` |
+| Test adequacy | The mutation score from `cargo mutants`. | `verification/checks.yaml` |
+| Rust quality | Clippy pedantic warnings and `unsafe` uses. | Clippy and the source. |
+| Cost | Wall time, tokens, and cost. | The agent output. |
+
+Pattern recall is a coarse measure. A match does not prove a correct requirement.
+The evaluator audits a sample of requirements against the source to estimate precision.
+An unsuccessful reference repeatability check makes the score invalid.
+An invalid score has no candidate pass rate.
+The graded scores exclude the `repeatability`, `parsers-format`, and `parse-outputs` reports.
+Those auxiliary checks still block full acceptance when they fail.
+
+[The design guide](design.md#graded-scores-and-targets) defines the graded scores and the tier targets.
+
+## Parity gate
+
+The parity gate reads the ledger `recovered/model.yaml`.
+It computes each requirement result from evidence and captures and runs the reflexion check.
+It checks that the documents name every requirement, component, and open gap.
+A passing machine gate does not prove that the declared inventory covers every original feature.
+The agent must justify that inventory with evidence.
+
+```sh
+python3 skills/rustify-validate/scripts/parity.py --project PROJECT --report PROJECT/verification/parity.yaml
+```

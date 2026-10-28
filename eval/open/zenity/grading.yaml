@@ -1,0 +1,54 @@
+tier: medium
+features:
+- id: entry
+  pattern: --entry|(?i:entry dialog)
+  milestone: core
+  cases: '^gui/entry-'
+- id: question
+  pattern: --question|(?i:question dialog)
+  milestone: core
+  cases: '^gui/question-'
+- id: info
+  pattern: --info|(?i:information dialog)
+  milestone: core
+  cases: '^gui/info-'
+- id: warning
+  pattern: --warning|(?i:warning dialog)
+  milestone: extended
+- id: error
+  pattern: --error|(?i:error dialog)
+  milestone: extended
+- id: file-selection
+  pattern: --file-selection|(?i:file (selection|chooser))
+  milestone: extended
+- id: list
+  pattern: --list|(?i:list dialog)
+  milestone: extended
+- id: progress
+  pattern: --progress|(?i:progress dialog)
+  milestone: extended
+- id: password
+  pattern: --password|(?i:password dialog)
+  milestone: extended
+- id: scale
+  pattern: --scale|(?i:scale dialog)
+  milestone: complete
+- id: color-selection
+  pattern: --color-selection|(?i:colou?r (selection|picker))
+  milestone: complete
+- id: calendar
+  pattern: --calendar|(?i:calendar dialog)
+  milestone: complete
+- id: notification
+  pattern: --notification|(?i:notification)
+  milestone: complete
+- id: forms
+  pattern: --forms|(?i:forms dialog)
+  milestone: complete
+components:
+- id: cli
+  pattern: (?i)\bcli\b|command line|flag pars|argument
+- id: dialogs
+  pattern: (?i)dialog
+- id: platform-backend
+  pattern: (?i)osascript|\bjxa\b|applescript|appkit|cocoa

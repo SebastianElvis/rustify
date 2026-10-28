@@ -1,0 +1,61 @@
+tier: medium
+features:
+- id: get
+  pattern: \bGET\b
+  milestone: core
+  cases: '/(get-text|get-json|get-query|basic_get)$'
+- id: head
+  pattern: \bHEAD\b
+  milestone: extended
+  cases: '/(head|basic_head)$'
+- id: post
+  pattern: \bPOST\b
+  milestone: core
+  cases: '/(empty-post|inferred-post|post_empty_body)$'
+- id: json-fields
+  pattern: (?i)json
+  milestone: core
+  cases: '/(json-fields|json-order|json-replace|json-get|basic_json_post|json_param|forced_json|request_json_keys_order_is_preserved)$'
+- id: typed-json
+  pattern: :=
+  milestone: extended
+  cases: '/json-types$'
+- id: raw-body
+  pattern: --raw
+  milestone: extended
+  cases: '/(raw-post|raw-empty|body_from_raw)$'
+- id: headers
+  pattern: (?i)header
+  milestone: core
+  cases: '/(custom-header|header-equals|string-operator|custom-accept|custom-content-type|header|multiple_headers_with_same_key)$'
+- id: follow
+  pattern: --follow
+  milestone: extended
+  cases: '/(redirect-stop|redirect-follow|post-30[237]|method_is_(not_)?changed_when_following_30[27]_redirect)$'
+- id: status-exit
+  pattern: (?i)exit (status|code)
+  milestone: extended
+  cases: '/status-(404|500)$'
+- id: check-status
+  pattern: --(no-)?check-status
+  milestone: extended
+  cases: '/(status-ignore|check_status_warning)$'
+- id: print
+  pattern: --print|--body|--headers
+  milestone: extended
+- id: pretty
+  pattern: --pretty
+  milestone: complete
+components:
+- id: cli
+  pattern: (?i)\bcli\b|argument|clap
+- id: request-items
+  pattern: (?i)request item
+- id: client
+  pattern: (?i)client|transport
+- id: redirect
+  pattern: (?i)redirect
+- id: printer
+  pattern: (?i)printer|output
+- id: status
+  pattern: (?i)status

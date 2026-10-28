@@ -1,0 +1,209 @@
+tier: medium
+features:
+- id: help
+  pattern: (?i)-help|usage
+  milestone: core
+  cases: '^[^/]+/help/'
+- id: info
+  pattern: (?i)-info|document information|file information
+  milestone: core
+  cases: '^[^/]+/info/'
+- id: convert
+  pattern: (?i)-convert|convert
+  milestone: core
+  cases: '^(surface-manual|replay-core)/convert/'
+- id: cat
+  pattern: (?i)-cat|concatenat
+  milestone: core
+  cases: '^[^/]+/cat/'
+- id: txt
+  pattern: (?i)plain text|\btxt\b
+  milestone: core
+  cases: '^[^/]+/txt/'
+- id: html
+  pattern: (?i)\bhtml\b
+  milestone: core
+  cases: '^[^/]+/html/'
+- id: rtf
+  pattern: (?i)\brtf\b|rich text
+  milestone: core
+  cases: '^[^/]+/rtf/'
+- id: rtfd
+  pattern: (?i)\brtfd\b|rich text with graphics
+  milestone: extended
+  cases: '^[^/]+/rtfd/'
+- id: doc
+  pattern: (?i)\bdoc\b|word (97|binary)|word format
+  milestone: extended
+  cases: '^[^/]+/doc/'
+- id: docx
+  pattern: (?i)\bdocx\b|office open xml|ooxml
+  milestone: extended
+  cases: '^[^/]+/docx/'
+- id: wordml
+  pattern: (?i)wordml|word xml|word 2003
+  milestone: complete
+  cases: '^[^/]+/wordml/'
+- id: odt
+  pattern: (?i)\bodt\b|opendocument|open document
+  milestone: extended
+  cases: '^[^/]+/odt/'
+- id: webarchive
+  pattern: (?i)web ?archive
+  milestone: extended
+  cases: '^[^/]+/webarchive/'
+- id: extension
+  pattern: (?i)-extension|output extension
+  milestone: extended
+  cases: '^[^/]+/extension/'
+- id: output
+  pattern: (?i)-output|output (file|path|name)
+  milestone: core
+  cases: '^[^/]+/output/'
+- id: stdin
+  pattern: (?i)-stdin|standard input|stdin
+  milestone: extended
+  cases: '^[^/]+/stdin/'
+- id: stdout
+  pattern: (?i)-stdout|standard output|stdout
+  milestone: extended
+  cases: '^[^/]+/stdout/'
+- id: encoding
+  pattern: (?i)-encoding|output encoding|NSStringEncoding|IANA
+  milestone: extended
+  cases: '^[^/]+/encoding/'
+- id: inputencoding
+  pattern: (?i)-inputencoding|input encoding|\bBOM\b|byte order mark
+  milestone: extended
+  cases: '^[^/]+/inputencoding/'
+- id: format
+  pattern: (?i)-format|force.*(input|format)|input format
+  milestone: extended
+  cases: '^[^/]+/format/'
+- id: font
+  pattern: (?i)-font\b|font name
+  milestone: extended
+  cases: '^[^/]+/font/'
+- id: fontsize
+  pattern: (?i)-fontsize|font size
+  milestone: extended
+  cases: '^[^/]+/fontsize/'
+- id: noload
+  pattern: (?i)-noload|(not|no) load.*resource
+  milestone: complete
+  cases: '^[^/]+/noload/'
+- id: nostore
+  pattern: (?i)-nostore|(not|no) (write|store).*resource
+  milestone: complete
+  cases: '^[^/]+/nostore/'
+- id: baseurl
+  pattern: (?i)-baseurl|base url
+  milestone: complete
+  cases: '^[^/]+/baseurl/'
+- id: timeout
+  pattern: (?i)-timeout|time ?out
+  milestone: complete
+  cases: '^[^/]+/timeout/'
+- id: textsizemultiplier
+  pattern: (?i)-textsizemultiplier|text size multiplier|font sizes? (factor|multipl)
+  milestone: complete
+  cases: '^[^/]+/textsizemultiplier/'
+- id: excludedelements
+  pattern: (?i)-excludedelements|exclude[ds]? (html )?elements
+  milestone: complete
+  cases: '^[^/]+/excludedelements/'
+- id: prefixspaces
+  pattern: (?i)-prefixspaces|indent.*nested|prefix spaces
+  milestone: complete
+  cases: '^[^/]+/prefixspaces/'
+- id: strip
+  pattern: (?i)-strip|strip.*metadata|do not copy metadata
+  milestone: extended
+  cases: '^[^/]+/strip/'
+- id: title
+  pattern: (?i)-title|title (metadata|attribute)
+  milestone: extended
+  cases: '^[^/]+/title/'
+- id: author
+  pattern: (?i)-author|author
+  milestone: extended
+  cases: '^[^/]+/author/'
+- id: subject
+  pattern: (?i)-subject|subject
+  milestone: extended
+  cases: '^[^/]+/subject/'
+- id: keywords
+  pattern: (?i)-keywords|keyword
+  milestone: extended
+  cases: '^[^/]+/keywords/'
+- id: comment
+  pattern: (?i)-comment|comment
+  milestone: extended
+  cases: '^[^/]+/comment/'
+- id: editor
+  pattern: (?i)-editor|last editor
+  milestone: complete
+  cases: '^[^/]+/editor/'
+- id: company
+  pattern: (?i)-company|company
+  milestone: complete
+  cases: '^[^/]+/company/'
+- id: creationtime
+  pattern: (?i)-creationtime|creation (time|date)
+  milestone: complete
+  cases: '^[^/]+/creationtime/'
+- id: modificationtime
+  pattern: (?i)-modificationtime|modification (time|date)|last modified
+  milestone: complete
+  cases: '^[^/]+/modificationtime/'
+- id: noversion
+  pattern: (?i)-noversion|cocoa ?version
+  milestone: complete
+  cases: '^[^/]+/noversion/'
+- id: end-of-options
+  pattern: (?i)(^|\s)--(\s|$)|end of options|further arguments are file names
+  milestone: complete
+  cases: '^[^/]+/end-of-options/'
+- id: errors
+  pattern: (?i)error (reading|writing)|invalid (output|input|font|prefix|multiplier|timeout)|multiple .* specified|no .* specified
+  milestone: core
+  cases: '^[^/]+/errors/'
+- id: exit-status
+  pattern: (?i)exit (status|code)|exits? (0|1)
+  milestone: core
+  cases: '^[^/]+/exit-status/'
+- id: metadata-copy
+  pattern: '(?i)(cop(y|ies)|keeps?|preserves?) (the )?(input |source )?(document )?(metadata|document attributes)|metadata (copy|from (the )?input)'
+  milestone: extended
+  cases: '^replay-metadata/convert/'
+components:
+- id: argument-parser
+  pattern: (?i)argument|option pars|command[- ]line|NSProcessInfo
+- id: usage-printer
+  pattern: (?i)usage|help (text|printer|message)
+- id: info-reporter
+  pattern: (?i)info(rmation)? (report|print|command)|document attributes
+- id: document-reader
+  pattern: (?i)reader|import|initWith(URL|Data):options:documentAttributes
+- id: document-writer
+  pattern: (?i)writer|export|dataFromRange|fileWrapperFromRange
+- id: concatenator
+  pattern: (?i)concat|appendAttributedString
+- id: attributed-text-model
+  pattern: (?i)attributed (string|text)|text storage|document model|rich text model
+- id: web-resource-loader
+  pattern: (?i)TextutilWebDelegate|resource load|subresource|web ?view delegate
+- id: web-archive-builder
+  pattern: (?i)web ?archive (builder|writer)|initWithMainResource|WebResource
+- id: font-resolver
+  pattern: (?i)font (resol|lookup|match|manager)|fontWithFamily|userFontOfSize|availableMembersOfFontFamily
+- id: text-encoding
+  pattern: (?i)encod(ing|er) (table|convert|lookup|registry)|charset|IANA
+- id: metadata-attributes
+  pattern: (?i)metadata|document attribute
+- id: property-list-parser
+  pattern: (?i)property ?list|plist|old-style list
+- id: rtfd-package
+  pattern: (?i)rtfd (package|bundle)|file ?wrapper|attachment
+- id: output-naming
+  pattern: (?i)output (path|name|naming)|path extension|stringByAppendingPathExtension
