@@ -65,6 +65,6 @@ The agent derives the surface from help text, error text, strings, and imported 
 ## Acceptance claim
 
 Acceptance needs zero confirmed witnesses in every class.
-`verification/compatibility.md` states the claim per class with its budget.
+`implementation/docs/compatibility.md` states the claim per class with its budget.
 For example: "Replay: 0 witnesses in 412 scenarios. Generate: 0 witnesses in 5,000 probes, seed 7. Adaptive: 0 witnesses in 300 probes."
 The claim holds only for the probes that ran. It does not prove equivalence for all inputs.

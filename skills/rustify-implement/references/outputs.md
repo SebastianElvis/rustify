@@ -2,8 +2,8 @@
 
 | Artifact | Required content |
 | --- | --- |
-| `implementation/` | Rust source, locked dependencies, unit tests, and acceptance tests. |
-| `implementation/docs/` | The design and ADRs from planning, with new ADRs for implementation decisions. |
+| `implementation/` | Rust source, locked dependencies, tests, and the files in [the repository rules](repository.md). |
+| `implementation/docs/` | The design and ADRs from planning, new ADRs for implementation decisions, and the migration guide. |
 | `verification/checks.yaml` | The records that the helper's `check` command writes. |
 | `verification/logs/` | The check logs and their failures. |
 
@@ -12,7 +12,7 @@
 The agent does not write `checks.yaml` by hand.
 The `check` command records each command, its return code, its log path, and the log SHA-256.
 It records the combined hash of the implementation files at the time of the run.
-The `--mutants` option adds the caught, missed, timeout, and unviable counts and the score.
+The `--coverage` option adds the line and region coverage. The `--mutants` option adds the caught, missed, timeout, and unviable counts and the score.
 The command keeps earlier records. The latest record for each command counts.
 The implementation checkpoint rejects checks for different implementation bytes or changed logs.
 

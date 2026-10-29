@@ -53,9 +53,9 @@
  \node[heading,font=\ttfamily\bfseries] at (.8,3.35) {recovered/};
  \node[files] at (.8,2.95) {model.yaml\quad evidence.yaml\\product.md\quad ux.md\\architecture.md\quad evidence/\\scenarios.yaml\quad tests.yaml\\state.yaml\quad roadmap.md};
  \node[heading,font=\ttfamily\bfseries] at (9.1,3.35) {implementation/};
- \node[files] at (9.1,2.95) {Cargo.toml\quad Cargo.lock\\src/\quad tests/\\docs/design.md\\docs/adr/};
+ \node[files] at (9.1,2.95) {Cargo.toml\quad src/\quad tests/\\README.md\quad LICENSE\\docs/design.md\quad docs/adr/\\docs/compatibility.md};
  \node[heading,font=\ttfamily\bfseries] at (17.0,3.35) {verification/};
- \node[files] at (17.0,2.95) {checks.yaml\quad comparison.yaml\\fuzz.yaml\quad parity.yaml\\compatibility.md\quad logs/};
+ \node[files] at (17.0,2.95) {checks.yaml\quad comparison.yaml\\fuzz.yaml\quad parity.yaml\\logs/};
  \draw[flow] (validate.east) -- (25.15,11.9) -- node[label,right,text width=18mm]{\step{6} Deliver} (25.15,3.7) -- (24.3,3.7);
  \node[label,anchor=west] at (.2,-.3) {\texttt{project.py} checks phases and Rust code. \texttt{parity.py} checks evidence and mappings.};
  \node[label,anchor=west] at (.2,-.85) {Validation differences reopen the affected phase. The full gate requires zero open gaps.};

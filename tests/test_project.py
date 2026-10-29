@@ -42,7 +42,7 @@ class ProjectTests(unittest.TestCase):
 
     def checks(self, returncode=0):
         records = []
-        for name in ("fmt", "clippy", "test"):
+        for name in project.BASE:
             self.write(f"verification/logs/{name}.log", "log\n")
             records.append({"name": name, "returncode": returncode, "log": f"verification/logs/{name}.log", "log_sha256": project.digest(self.root / f"verification/logs/{name}.log")})
         self.write("verification/checks.yaml", yaml.safe_dump({"status": "passed", "inputs_sha256": project.combined(project.tree(self.root, "implementation")), "commands": records}))
@@ -55,6 +55,7 @@ class ProjectTests(unittest.TestCase):
             elif name != "verification/parity.yaml":
                 self.write(name, yaml.safe_dump({"content": True}) if name.endswith(".yaml") else "content\n")
         if phase == "implement":
+            self.write("implementation/Cargo.toml", '[package]\ndescription = "d"\nlicense = "MIT"\nrust-version = "1.85"\n')
             self.write("implementation/src/main.rs", "fn main() {}\n")
             self.checks()
         if phase == "validate":
@@ -155,6 +156,7 @@ class ProjectTests(unittest.TestCase):
                 self.checks()
                 project.checkpoint(self.root, "implement")
         self.write("implementation/target/build-output", "ignored")
+        self.write("implementation/docs/compatibility.md", "validation output")
         self.write("implementation/.git/index", "ignored")
         self.assertIsNone(project.status(self.root)["stale"])
         link = self.root / "implementation/src/linked.txt"
@@ -180,6 +182,11 @@ class ProjectTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     project.checkpoint(self.root, "implement")
         self.checks()
+        self.write("implementation/Cargo.toml", '[package]\nlicense = "MIT"\n')
+        self.checks()
+        with self.assertRaisesRegex(ValueError, "description"):
+            project.checkpoint(self.root, "implement")
+        self.artifacts("implement")
         project.checkpoint(self.root, "implement")
         self.write("implementation/src/main.rs", "fn main() { println!(); }\n")
         with self.assertRaisesRegex(ValueError, "current implementation"):
@@ -192,14 +199,16 @@ class ProjectTests(unittest.TestCase):
         tools.mkdir()
         cargo = tools / "cargo"
         cargo.write_text("#!/bin/sh\n"
+            "if [ \"$1\" = llvm-cov ]; then echo '{\"data\": [{\"totals\": {\"lines\": {\"percent\": 90.0}, \"regions\": {\"percent\": 80.0}}}]}' > \"$6\"; fi\n"
             "if [ \"$1\" = mutants ]; then mkdir -p \"$3/mutants.out\"; echo '{\"caught\": 3, \"missed\": 1, \"timeout\": 0, \"unviable\": 2}' > \"$3/mutants.out/outcomes.json\"; exit 2; fi\n"
             "echo \"ran $1\"; exit ${FAKE_STATUS:-0}\n")
         cargo.chmod(0o755)
         environment = {"PATH": f"{tools}:{os.environ['PATH']}"}
         with patch.dict(os.environ, environment):
-            result = project.check(self.root, ["mutants"])
+            result = project.check(self.root, ["coverage", "mutants"])
         self.assertEqual(result["status"], "failed")
         checks = yaml.safe_load((self.root / "verification/checks.yaml").read_text())
+        self.assertEqual(checks["commands"][-2]["coverage"], {"lines": 90.0, "regions": 80.0})
         self.assertEqual(checks["commands"][-1]["mutation"], {"caught": 3, "missed": 1, "timeout": 0, "unviable": 2, "score": 0.75})
         with self.assertRaisesRegex(ValueError, "current implementation"):
             project.checkpoint(self.root, "implement")
@@ -213,7 +222,7 @@ class ProjectTests(unittest.TestCase):
         with patch.object(project.supervisor, "execute", return_value=(completed, "The process group exceeded the memory limit.", {})), patch("sys.argv", ["project.py", "check", str(self.root), "--mutants"]):
             self.assertEqual(project.main(), 1)
         checks = yaml.safe_load((self.root / "verification/checks.yaml").read_text())
-        self.assertTrue(checks["status"] == "failed" and all(record["returncode"] == 1 and record["error"] for record in checks["commands"][-4:]))
+        self.assertTrue(checks["status"] == "failed" and all(record["returncode"] == 1 and record["error"] for record in checks["commands"][-5:]))
 
     def test_plan_needs_one_skeleton_an_acyclic_graph_and_full_coverage(self):
         self.through("discover")

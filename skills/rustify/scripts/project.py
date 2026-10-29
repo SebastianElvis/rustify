@@ -11,6 +11,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import time
+import tomllib
 
 import yaml
 
@@ -23,13 +24,16 @@ PHASES = ("discover", "plan", "implement", "validate")
 REQUIRED = {
     "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.yaml", "recovered/scenarios.yaml", "recovered/tests.yaml", "recovered/roadmap.md", "recovered/model.yaml#inventory,surface,requirements,components,edges"),
     "plan": ("recovered/model.yaml#correspondences,slices", "implementation/docs/design.md"),
-    "implement": ("implementation/Cargo.toml", "implementation/Cargo.lock", "verification/checks.yaml"),
-    "validate": ("verification/comparison.yaml", "verification/parity.yaml", "verification/compatibility.md"),
+    "implement": ("implementation/Cargo.toml", "implementation/Cargo.lock", "verification/checks.yaml", *(f"implementation/{name}" for name in ("README.md", "LICENSE", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", "docs/migration.md", ".github/workflows/ci.yml", ".github/workflows/release.yml"))),
+    "validate": ("verification/comparison.yaml", "verification/parity.yaml", "implementation/docs/compatibility.md"),
 }
+BASE = ("fmt", "clippy", "test", "doc")
 CHECKS = {
     "fmt": ["cargo", "fmt", "--check"],
     "clippy": ["cargo", "clippy", "--locked", "--all-targets", "--", "-D", "warnings"],
     "test": ["cargo", "test", "--locked"],
+    "doc": ["cargo", "doc", "--locked", "--no-deps"],
+    "coverage": ["cargo", "llvm-cov", "--locked", "--json", "--summary-only", "--output-path"],
     "deny": ["cargo", "deny", "check"],
     "mutants": ["cargo", "mutants", "--output"],
 }
@@ -97,6 +101,8 @@ def tree(root, name):
             raise ValueError("An input directory cannot be a symlink.")
         for filename in files:
             path = Path(directory) / filename
+            if path == base / "docs/compatibility.md":
+                continue
             if path.is_symlink() or not path.is_file():
                 raise ValueError("Inputs must use regular files without symlinks.")
             hashes[path.relative_to(root).as_posix()] = digest(path)
@@ -191,9 +197,12 @@ def files_for(root, phase, state):
         if not any(name.endswith(".rs") for name in inputs):
             raise ValueError("The implementation must contain Rust source.")
         hashes.update(inputs)
+        package = tomllib.loads((root / "implementation/Cargo.toml").read_text()).get("package", {})
+        if not all(package.get(key) for key in ("description", "license", "rust-version")):
+            raise ValueError("The package needs a description, a license, and a rust-version.")
         checks = yaml.safe_load((root / "verification/checks.yaml").read_text())
         latest = {record.get("name"): record for record in checks.get("commands", [])}
-        if checks.get("status") != "passed" or checks.get("inputs_sha256") != combined(inputs) or any(latest.get(name, {}).get("returncode") != 0 for name in ("fmt", "clippy", "test")):
+        if checks.get("status") != "passed" or checks.get("inputs_sha256") != combined(inputs) or any(latest.get(name, {}).get("returncode") != 0 for name in BASE):
             raise ValueError("The latest requested checks must pass for the current implementation.")
         if any(digest(artifact(root, record["log"], False)) != record["log_sha256"] for record in latest.values()):
             raise ValueError("A check log differs from its record.")
@@ -227,12 +236,12 @@ def check(project, extra=()):
     records = yaml.safe_load(path.read_text()).get("commands", []) if path.is_file() else []
     inputs = tree(root, "implementation")
     status = "passed"
-    for name in ("fmt", "clippy", "test", *extra):
+    for name in (*BASE, *extra):
         stamp = f"{name}-{time.time_ns()}"
         log = root / "verification/logs" / f"{stamp}.log"
-        command = CHECKS[name] + ([str(log.with_suffix(""))] if name == "mutants" else [])
+        command = CHECKS[name] + ([str(log.with_suffix(""))] if name == "mutants" else [str(log.with_suffix(".json"))] if name == "coverage" else [])
         log.parent.mkdir(parents=True, exist_ok=True)
-        result, error, resources = supervisor.execute(command, cwd=root / "implementation", timeout=3600 if name == "mutants" else 900, memory_mib=8192)
+        result, error, resources = supervisor.execute(command, cwd=root / "implementation", env={**os.environ, "RUSTDOCFLAGS": "-D warnings"}, timeout=3600 if name == "mutants" else 900, memory_mib=8192)
         returncode = result.returncode or int(error is not None)
         log.write_bytes(result.stdout + result.stderr + (error.encode() if error else b""))
         record = {"name": name, "command": command, "returncode": returncode, "error": error, "resources": resources, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
@@ -244,11 +253,14 @@ def check(project, extra=()):
             record["mutation"] = {key: counts.get(key) for key in ("caught", "missed", "timeout", "unviable")}
             tested = sum(counts.get(key, 0) for key in ("caught", "missed", "timeout"))
             record["mutation"]["score"] = counts["caught"] / tested if tested else None
+        if name == "coverage":
+            totals = json.loads(log.with_suffix(".json").read_text())["data"][0]["totals"] if log.with_suffix(".json").is_file() else {}
+            record["coverage"] = {key: totals.get(key, {}).get("percent") for key in ("lines", "regions")}
         records.append(record)
     if tree(root, "implementation") != inputs:
         status = "failed"
     path.write_text(yaml.safe_dump({"status": status, "inputs_sha256": combined(inputs), "commands": records}, sort_keys=False))
-    return {"status": status, "commands": [{key: record[key] for key in ("name", "returncode")} for record in records[-len(extra) - 3:]]}
+    return {"status": status, "commands": [{key: record[key] for key in ("name", "returncode")} for record in records[-len(extra) - len(BASE):]]}
 
 
 def freshness(root, state):
@@ -300,6 +312,7 @@ def main():
     verify.add_argument("project")
     verify.add_argument("--deny", action="store_true")
     verify.add_argument("--mutants", action="store_true")
+    verify.add_argument("--coverage", action="store_true")
     record = commands.add_parser("checkpoint")
     record.add_argument("project")
     record.add_argument("phase", choices=PHASES)
@@ -310,7 +323,7 @@ def main():
         elif args.command == "status":
             result = status(args.project)
         elif args.command == "check":
-            result = check(args.project, [name for name in ("deny", "mutants") if getattr(args, name)])
+            result = check(args.project, [name for name in ("deny", "mutants", "coverage") if getattr(args, name)])
         else:
             result = checkpoint(args.project, args.phase)
         print(yaml.safe_dump(result, sort_keys=False), end="")

@@ -31,7 +31,7 @@ The agent distinguishes submitted operations from completed operations through o
 The agent distinguishes stable caches from retained growth that follows completed operations.
 A short run does not establish the absence of a leak.
 The agent preserves samples, process-tree identities, peaks, and the termination reason in YAML.
-The agent links raw evidence and unresolved limits in `verification/compatibility.md`.
+The agent links raw evidence and unresolved limits in `implementation/docs/compatibility.md`.
 A crash, unexplained resource growth, budget violation, or missing applicable measurement blocks acceptance.
 
 The agent selects time, memory, process, and output limits before an untrusted workload.

@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include: [{{RELEASE_TARGETS}}]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - run: cargo build --locked --release --target ${{ matrix.target }}
+      - shell: bash
+        run: |
+          name={{BINARY}}-${{ github.ref_name }}-${{ matrix.target }}
+          mkdir "$name"
+          cp target/${{ matrix.target }}/release/{{BINARY}}${{ matrix.ext }} README.md LICENSE "$name"/
+          tar czf "$name.tar.gz" "$name"
+          shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: "*.tar.gz*"
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - run: cargo install --locked cargo-cyclonedx && cargo cyclonedx --format json
+      - run: gh release create "${{ github.ref_name }}" --notes-file CHANGELOG.md *.tar.gz* *.cdx.json
+        env:
+          GH_TOKEN: ${{ github.token }}
