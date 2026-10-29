@@ -576,9 +576,34 @@ Six background runs of `browse.py` at the same time also pass all 9 cases.
 
 ### 7.2 Skill results
 
-No agent evaluation has run with the graded scores yet.
-The first run of `python3 eval/main.py` with three trials sets the baseline for each track.
-This section will report, for each track: the gate result, the CPR, the median FPS with its standard error, the milestone credit, the strict result, product and architecture recall, the self-check gap, and the cost.
+The first agent evaluation ran one Doom trial with Claude Code.
+The baseline for each track still needs three trials of `python3 eval/main.py`.
+
+**Graded trial.** The harness stopped the agent after 4,184 seconds.
+The process group reached 33 processes, and the agent limit was 32.
+The agent had completed discovery and planning.
+The project had no comparison report, so the trial scored 0.
+The agent limits are now 256 processes and 16,384 MiB.
+
+**Resumed project.** A second session resumed the same project outside the harness with the same blind prompt.
+The second session cost 120.35 USD. The harness did not record the cost of the first session.
+The scorer then measured the result. The result is not a graded trial, because the harness did not freeze the project.
+
+| Measure | Result |
+| --- | --- |
+| Gate | 1 |
+| CPR | 0.82 |
+| FPS | 0.707 (the large-tier target is 0.70) |
+| Feature coverage | 0.576 |
+| Milestone credit | 0.333 (`complete` only) |
+| Strict | 0 |
+| Class pass rates | replay 0.959, generate 0.75, upstream 0.75 |
+
+- 19 of 20 witnesses differ in the written files. Each of these cases writes savegames. The agent reported the savegame layout after the header as an open gap.
+- The other witness, `memory/mb-1`, differs in its steps.
+- Eight manual checks have no evidence, so the strict result stays 0.
+- The agent's own gate reports `incomplete`, with 455 of 479 requirements passed and 406 open gaps.
+- The [rustify-doom](https://github.com/SebastianElvis/rustify-doom) repository publishes the Rust code and these results.
 
 ## 8. Threats to validity
 

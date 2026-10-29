@@ -147,6 +147,7 @@ The [architecture guide](docs/architecture.md) includes the diagram's editable L
 
 The [rustify-doom](https://github.com/SebastianElvis/rustify-doom) repository holds the Rustify reconstruction of Doom.
 Rustify built it from a stripped doomgeneric binary and the Freedoom game data.
+Its [compatibility report](https://github.com/SebastianElvis/rustify-doom/blob/main/COMPATIBILITY.md) gives the measured parity and the open gaps.
 
 ## Evaluation
 
