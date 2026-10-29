@@ -58,8 +58,8 @@ The target project has three folders.
 | Folder | Contents |
 | --- | --- |
 | `recovered/` | `state.yaml`, `model.yaml`, `product.md`, `ux.md`, `architecture.md`, `evidence.yaml`, `evidence/`, `scenarios.yaml`, `tests.yaml`, and `roadmap.md`. |
-| `implementation/` | `Cargo.toml`, `Cargo.lock`, `src/`, `tests/`, `docs/design.md`, and `docs/adr/`. |
-| `verification/` | `checks.yaml`, `comparison.yaml`, `fuzz.yaml`, `parity.yaml`, `compatibility.md`, and `logs/`. |
+| `implementation/` | The open-source repository: `Cargo.toml`, `src/`, `tests/`, `README.md`, `LICENSE`, CI workflows, `docs/design.md`, `docs/adr/`, `docs/migration.md`, and `docs/compatibility.md`. |
+| `verification/` | `checks.yaml`, `comparison.yaml`, `fuzz.yaml`, `parity.yaml`, and `logs/`. |
 
 `recovered/model.yaml` is the single traceability record.
 Each phase owns its ledger sections. A section change reopens its owning phase.

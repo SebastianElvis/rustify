@@ -44,8 +44,8 @@ The runner does not claim a fresh GUI replay.
 ## Target project
 
 - `recovered/` contains the ledger, product, UX, architecture, state, evidence, declarative tests, and a parity backlog.
-- `implementation/` contains the Rust crate, source, Rust tests, the Rust design, and decision records.
-- `verification/` contains executed check results, comparison and fuzz reports, the gate result, the assurance case, and logs.
+- `implementation/` is the open-source Rust repository. It contains the crate, tests, the Rust design, decision records, and the compatibility document.
+- `verification/` contains executed check results, comparison and fuzz reports, the gate result, and logs.
 
 The ledger `recovered/model.yaml` links requirements, components, Rust modules, slices, and gaps.
 The agent workspace holds only temporary worker shards and progress notes.

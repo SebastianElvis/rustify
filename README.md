@@ -112,8 +112,8 @@ The target project contains three folders:
 | Folder | Contents |
 | --- | --- |
 | `recovered/` | The traceability ledger, product and UX specifications, architecture, diagrams, data models, state, evidence, declarative tests, and a parity backlog. |
-| `implementation/` | The Rust project, dependencies, source, executable tests, the Rust design, and decision records. |
-| `verification/` | Executed check results, original-to-Rust comparisons, fuzz reports, the parity gate result, the assurance case, and logs. |
+| `implementation/` | The open-source Rust repository: source, tests, rustdoc, README, license, CI, design, decision records, migration guide, and compatibility document. |
+| `verification/` | Executed check results, original-to-Rust comparisons, fuzz reports, the parity gate result, and logs. |
 
 The ledger `recovered/model.yaml` links each EARS requirement to evidence, tests, components, Rust modules, slices, and gaps.
 The agent produces diagrams and data models when the evidence supports them.

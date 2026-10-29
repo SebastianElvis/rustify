@@ -5,7 +5,7 @@
 | `verification/comparison.yaml` | Executed cases with exact results, executable identities, and failures. |
 | `verification/fuzz.yaml` | The fuzz search, its seed, and each divergence. |
 | `verification/parity.yaml` | The gate result, the per-requirement and per-slice results, the reflexion check, and input hashes. |
-| `verification/compatibility.md` | The assurance case for the parity claim. |
+| `implementation/docs/compatibility.md` | The compatible features, the incompatible features, the limitations, and the assurance case. |
 
 The agent preserves current captures in `verification/raw/` and logs in `verification/logs/`.
 
@@ -40,7 +40,10 @@ The `semantic_truth_verified` field stays `false`. The evaluator still judges re
 
 ## Assurance case
 
-The agent starts `compatibility.md` from [the assurance case template](../assets/compatibility.md).
+The agent starts `implementation/docs/compatibility.md` from [the compatibility template](../assets/compatibility.md).
+The document is the only published compatibility record. It does not link to paths outside `implementation/`.
+Each open gap appears in the Incompatible table or the Limitations table.
+A known failure goes into the Incompatible table. An unknown result or an untested item goes into the Limitations table.
 The structure follows the GSN Community Standard and ISO/IEC/IEEE 15026-2.
 
 | GSN element | Rustify content |

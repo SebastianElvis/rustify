@@ -12,6 +12,7 @@ The agent does not select a different architecture for convenience.
 
 - The agent reads [the implementation workflow](references/workflow.md) before coding or repairs.
 - The agent reads [the output rules](references/outputs.md) before recording checks.
+- The agent reads [the repository rules](references/repository.md) for documentation, tests, and the open-source repository files.
 - The agent follows [the shared project format](../rustify/references/project.md) for paths and checkpoints.
 
 The agent uses current slice captures and mapped traces before coding.

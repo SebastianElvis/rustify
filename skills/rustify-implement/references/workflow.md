@@ -12,9 +12,10 @@ The agent implements the walking skeleton first and then each slice in plan orde
 For each slice, the agent follows the outer and inner loops of Freeman and Pryce.
 
 1. **Outer loop.** The agent writes the process or application acceptance test for each slice requirement.
-   The test uses the declarative expectation from `recovered/tests.yaml`.
+   The test copies the declarative expectation from `recovered/tests.yaml` into a fixture under `implementation/tests/fixtures/`.
    The agent runs it and confirms that it fails.
 2. **Inner loop.** The agent writes a failing unit test, makes it pass, and refactors (Beck).
+   The agent adds property tests and rustdoc for the slice modules.
    The agent repeats this loop until the acceptance test passes.
 3. **Compare.** The agent runs the slice scenarios against the original and the Rust implementation.
 4. **Check.** The agent runs `python3 <rustify>/scripts/project.py check PROJECT`.
@@ -65,11 +66,13 @@ A fix or refactor adds no more code than it removes.
 
 ## Checks
 
-The `check` command runs `cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, and `cargo test --locked`.
+The `check` command runs `cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, `cargo test --locked`, and `cargo doc --locked --no-deps`.
+All commands use `RUSTDOCFLAGS="-D warnings"`.
 The agent cleans copied package artifacts for each Cargo target and profile before checks.
 Compiled tests can retain old executable and fixture paths.
 The agent verifies that rebuilt tests use the current executable and fixture paths.
 The agent adds `--deny` when `cargo-deny` is installed.
+The agent adds `--coverage` when `cargo-llvm-cov` is installed.
 The agent adds `--mutants` when `cargo-mutants` is installed. The mutation score describes only the executed suite.
 The agent challenges relevant surviving mutants with the affected acceptance and quality checks.
 A missed mutant in a requirement path needs a new test or a recorded gap.

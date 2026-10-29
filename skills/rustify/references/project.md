@@ -20,12 +20,14 @@ PROJECT/
     product.md  ux.md  architecture.md  roadmap.md
     evidence.yaml  evidence/  scenarios.yaml  tests.yaml
   implementation/
-    Cargo.toml  Cargo.lock  src/  tests/
-    docs/design.md  docs/adr/
+    Cargo.toml  Cargo.lock  src/  tests/  fuzz/  .github/workflows/
+    README.md  LICENSE  CHANGELOG.md  CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
+    docs/design.md  docs/adr/  docs/migration.md  docs/compatibility.md
   verification/
-    checks.yaml  comparison.yaml  parity.yaml  compatibility.md  logs/
+    checks.yaml  comparison.yaml  parity.yaml  logs/
 ```
 
+The user publishes only `implementation/` as an open-source repository.
 The agent workspace stays outside the project.
 A project named `app` uses the sibling workspace `.app-rustify` by default.
 The agent can select another external path with `init --work-dir WORK`.
@@ -92,8 +94,8 @@ The implementation keeps executable tests under `implementation/tests/` and Rust
 | --- | --- |
 | `discover` | The recovered documents, evidence, scenarios, tests, and the discovery sections of `model.yaml`. |
 | `plan` | The planning sections of `model.yaml` and `implementation/docs/design.md`. |
-| `implement` | The Cargo files, the Rust sources, and a `checks.yaml` from the helper's `check` command. |
-| `validate` | `comparison.yaml`, `parity.yaml`, and `compatibility.md`. |
+| `implement` | The Cargo files, the Rust sources, the repository files, and a `checks.yaml` from the helper's `check` command. |
+| `validate` | `comparison.yaml`, `parity.yaml`, and `implementation/docs/compatibility.md`. |
 
 ```sh
 python3 <rustify>/scripts/project.py check PROJECT [--deny] [--mutants]
@@ -103,10 +105,13 @@ python3 <rustify>/scripts/project.py status PROJECT
 
 The helper writes state atomically in `recovered/state.yaml`.
 The helper hashes each required artifact. It hashes only the owned sections of `model.yaml`.
+The implementation hash excludes `implementation/docs/compatibility.md`, because validation owns it.
+The `implement` checkpoint requires `description`, `license`, and `rust-version` in the `Cargo.toml` package.
 A change to a section reopens the phase that owns it.
 The `plan` checkpoint requires one walking skeleton, an acyclic slice graph, and a slice for each requirement.
-The `check` command runs `cargo fmt`, `cargo clippy`, and `cargo test` and records the logs and their hashes.
+The `check` command runs `cargo fmt`, `cargo clippy`, `cargo test`, and `cargo doc` and records the logs and their hashes.
 The `--deny` option adds `cargo deny check`. The `--mutants` option adds `cargo mutants` and records the mutation score.
+The `--coverage` option adds `cargo llvm-cov` and records the line and region coverage.
 The `implement` checkpoint accepts the checks only for the current implementation bytes.
 The `validate` checkpoint requires `full_parity_pass`.
 These gates check structure, integrity, and recorded results.
