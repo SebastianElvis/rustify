@@ -21,8 +21,8 @@ class ParityTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name).resolve()
-        self.write("src/main.rs", "mod codec;\nfn main() { codec::run(); }\n")
-        self.write("src/codec.rs", "pub fn run() {}\n")
+        self.write("crates/demo/src/main.rs", "mod codec;\nfn main() { codec::run(); }\n")
+        self.write("crates/demo/src/codec.rs", "pub fn run() {}\n")
         self.write(".rustify/recovered/evidence/original.yaml", {"returncode": 0})
         self.write(".rustify/recovered/product.md", "REQ-1\n")
         self.write(".rustify/recovered/ux.md", "No visual surface.\n")
@@ -47,7 +47,7 @@ class ParityTests(unittest.TestCase):
                 {"id": "C-2", "name": "Codec", "level": "component", "responsibility": "Encode bytes.", "classification": "observed", "evidence": ["E1"]},
             ],
             "edges": [{"id": "EDGE-1", "source": "C-1", "target": "C-2", "kind": "control", "classification": "observed", "evidence": ["E1"]}],
-            "correspondences": [{"original": "C-1", "rust": "src/main.rs"}, {"original": "C-2", "rust": "src/codec.rs"}],
+            "correspondences": [{"original": "C-1", "rust": "crates/demo/src/main.rs"}, {"original": "C-2", "rust": "crates/demo/src/codec.rs"}],
             "slices": [{"id": "SLICE-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "high"}],
             "gaps": [],
         }
@@ -70,7 +70,7 @@ class ParityTests(unittest.TestCase):
         self.assertEqual((result["assessment"], result["status"]), ("full_parity_pass", "passed"))
         self.assertIs(result["semantic_truth_verified"], False)
         self.assertEqual((result["reflexion"]["convergences"], result["slices"]), (["EDGE-1"], {"SLICE-1": True}))
-        self.assertEqual(result["inputs"]["src/main.rs"], self.sha("src/main.rs"))
+        self.assertEqual(result["inputs"]["crates/demo/src/main.rs"], self.sha("crates/demo/src/main.rs"))
         self.write(".rustify/recovered/ux.md", "The candidate bytes change.\n")
         self.assertIn("The comparison uses a different executable identity.", self.run_check()["errors"])
 
@@ -91,30 +91,39 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(self.run_check()["status"], "passed")
 
     def test_reflexion_reports_absence_merge_divergence_and_extra_modules(self):
-        self.write("src/main.rs", "mod codec;\nfn main() {}\n")
+        self.write("crates/demo/src/main.rs", "mod codec;\nfn main() {}\n")
         self.assertIn("EDGE-1: The reflexion check reports absences.", self.run_check()["gaps"])
-        self.write("src/main.rs", "mod codec;\nfn main() { codec::run(); }\n")
-        self.write("src/codec.rs", "pub fn run() { util::help(); }\n")
-        self.write("src/util.rs", "pub fn help() {}\n")
+        self.write("crates/demo/src/main.rs", "mod codec;\nfn main() { codec::run(); }\n")
+        self.write("crates/demo/src/codec.rs", "pub fn run() { util::help(); }\n")
+        self.write("crates/demo/src/util.rs", "pub fn help() {}\n")
         self.model["components"].append({"id": "C-3", "name": "Util", "level": "component", "responsibility": "Help.", "classification": "observed", "evidence": ["E1"]})
-        self.model["correspondences"].append({"original": "C-3", "rust": "src/util.rs"})
+        self.model["correspondences"].append({"original": "C-3", "rust": "crates/demo/src/util.rs"})
         self.write(".rustify/recovered/architecture.md", "C-1 C-2 C-3\n")
         self.write("docs/design.md", "C-1 C-2 C-3\n")
         result = self.run_check()
-        self.assertEqual(result["reflexion"]["divergences"], ["src/codec.rs -> src/util.rs"])
-        self.model["correspondences"][2]["rust"] = "src/codec.rs"
+        self.assertEqual(result["reflexion"]["divergences"], ["crates/demo/src/codec.rs -> crates/demo/src/util.rs"])
+        self.model["correspondences"][2]["rust"] = "crates/demo/src/codec.rs"
         result = self.run_check()
-        self.assertEqual(result["reflexion"]["merged"], ["src/codec.rs"])
-        self.assertEqual(result["reflexion"]["extra_modules"], ["src/util.rs"])
+        self.assertEqual(result["reflexion"]["merged"], ["crates/demo/src/codec.rs"])
+        self.assertEqual(result["reflexion"]["extra_modules"], ["crates/demo/src/util.rs"])
         self.model["correspondences"].pop()
         self.assertEqual(self.run_check()["reflexion"]["unmapped"], ["C-3"])
 
+    def test_reflexion_follows_references_to_a_library_crate(self):
+        (self.root / "crates/demo/src/codec.rs").unlink()
+        self.write("crates/demo-codec/src/lib.rs", "pub fn run() {}\n")
+        self.model["correspondences"][1]["rust"] = "crates/demo-codec/src/lib.rs"
+        self.write("crates/demo/src/main.rs", "fn main() { demo_codec::run(); }\n")
+        self.assertEqual(self.run_check()["reflexion"]["convergences"], ["EDGE-1"])
+        self.model["correspondences"][1]["rust"] = "src/codec.rs"
+        self.assertTrue(self.run_check()["errors"])
+
     def test_extra_module_and_unfinished_requirement_block_the_full_pass(self):
-        self.write("src/extra.rs", "pub fn extra() {}\n")
+        self.write("crates/demo/src/extra.rs", "pub fn extra() {}\n")
         result = self.run_check()
-        self.assertIn("src/extra.rs: The reflexion check reports extra modules.", result["gaps"])
+        self.assertIn("crates/demo/src/extra.rs: The reflexion check reports extra modules.", result["gaps"])
         self.assertEqual(result["assessment"], "incomplete")
-        (self.root / "src/extra.rs").unlink()
+        (self.root / "crates/demo/src/extra.rs").unlink()
         self.model["requirements"].append({**copy.deepcopy(self.model["requirements"][0]), "id": "REQ-2", "tests": [], "classification": "unknown"})
         self.write(".rustify/recovered/product.md", "REQ-1 REQ-2\n")
         result = self.run_check()
@@ -174,8 +183,8 @@ class ParityTests(unittest.TestCase):
             lambda: self.model["requirements"][0].update(components=["C-9"]),
             lambda: self.model["requirements"][0].update(dimension="components"),
             lambda: self.model["edges"][0].update(target="C-9"),
-            lambda: self.model["correspondences"].append({"original": "C-1", "rust": "src/codec.rs"}),
-            lambda: self.model["correspondences"][0].update(rust="src/missing.rs"),
+            lambda: self.model["correspondences"].append({"original": "C-1", "rust": "crates/demo/src/codec.rs"}),
+            lambda: self.model["correspondences"][0].update(rust="crates/demo/src/missing.rs"),
             lambda: self.tests[0].update(expect={}),
             lambda: self.report.update(passed=2),
             lambda: self.state["target"].update(sha256="unknown"),
@@ -207,15 +216,15 @@ class ParityTests(unittest.TestCase):
 
     def test_copyable_ledger_stays_incomplete_until_verified(self):
         text = (SCRIPT.parents[2] / "rustify/assets/model.yaml").read_text()
-        for name, value in {"TRIGGER": "the user supplies input", "SYSTEM": "demo", "RESPONSE": "write the encoded result", "EVIDENCE_ID": "E1", "TEST_ID": "T1", "COMPONENT_NAME": "Entry", "RESPONSIBILITY": "Parse input."}.items():
+        for name, value in {"TRIGGER": "the user supplies input", "SYSTEM": "demo", "PRODUCT": "demo", "RESPONSE": "write the encoded result", "EVIDENCE_ID": "E1", "TEST_ID": "T1", "COMPONENT_NAME": "Entry", "RESPONSIBILITY": "Parse input."}.items():
             text = text.replace("{{" + name + "}}", value)
         self.model = yaml.safe_load(text)
         self.write(".rustify/recovered/product.md", "REQ-001\n")
         self.write(".rustify/recovered/architecture.md", "C-001\n")
         self.write("docs/design.md", "C-001\n")
         self.write(".rustify/recovered/roadmap.md", "GAP-001\n")
-        self.write("src/codec.rs", "")
-        (self.root / "src/codec.rs").unlink()
+        self.write("crates/demo/src/codec.rs", "")
+        (self.root / "crates/demo/src/codec.rs").unlink()
         result = self.run_check()
         self.assertEqual(result["assessment"], "incomplete")
         self.assertFalse(result["errors"])

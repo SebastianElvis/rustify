@@ -15,7 +15,8 @@ A missing feature is an open gap. The agent keeps working on each open gap.
 
 ```text
 PROJECT/
-  Cargo.toml  Cargo.lock  src/  tests/  fuzz/  .github/workflows/  .gitignore
+  Cargo.toml  Cargo.lock  fuzz/  .github/workflows/  .gitignore
+  crates/<product>/  crates/<product>-<name>/
   README.md  LICENSE  CHANGELOG.md  CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
   docs/design.md  docs/adr/  docs/migration.md  docs/compatibility.md
   .rustify/
@@ -86,7 +87,7 @@ The origin is `observed`, `inferred`, or `proposed`.
   expect: {returncode: 0, stdout_b64: YUdWc2JHOD0K, stderr_b64: ''}
 ```
 
-The implementation keeps executable tests under `tests/` and Rust source modules.
+The implementation keeps executable tests under `crates/<crate>/tests/` and in Rust source modules.
 
 ## Checkpoints
 
@@ -106,7 +107,7 @@ python3 <rustify>/scripts/project.py status PROJECT
 The helper writes state atomically in `.rustify/state.yaml`.
 The helper hashes each required artifact. It hashes only the owned sections of `model.yaml`.
 The implementation hash covers the project root. It excludes `.rustify/`, `.git/`, `target/`, and `docs/compatibility.md`, because validation owns that document.
-The `implement` checkpoint requires `description`, `license`, `rust-version`, and the `exclude` entry `/.rustify` in the `Cargo.toml` package.
+The `implement` checkpoint requires `license` and `rust-version` in `[workspace.package]` and a `description` in each crate under `crates/`.
 The `implement` checkpoint requires the `/.rustify/` line in `.gitignore`.
 A change to a section reopens the phase that owns it.
 The `plan` checkpoint requires one walking skeleton, an acyclic slice graph, and a slice for each requirement.

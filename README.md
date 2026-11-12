@@ -112,7 +112,7 @@ The gitignored `.rustify/` directory holds the private records:
 
 | Folder | Contents |
 | --- | --- |
-| Project root | The open-source Rust repository: source, tests, rustdoc, README, license, CI, design, decision records, migration guide, and compatibility document. |
+| Project root | The open-source Rust repository as a Cargo workspace: crates, tests, rustdoc, README, license, CI, design, decision records, migration guide, and compatibility document. |
 | `.rustify/recovered/` | The traceability ledger, product and UX specifications, architecture, diagrams, data models, evidence, declarative tests, and a parity backlog. |
 | `.rustify/verification/` | Executed check results, original-to-Rust comparisons, fuzz reports, the parity gate result, and logs. |
 

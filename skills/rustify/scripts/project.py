@@ -194,9 +194,10 @@ def files_for(root, phase, state):
         if not any(name.endswith(".rs") for name in inputs):
             raise ValueError("The implementation must contain Rust source.")
         hashes.update(inputs)
-        package = tomllib.loads((root / "Cargo.toml").read_text()).get("package", {})
-        if not all(package.get(key) for key in ("description", "license", "rust-version")) or "/.rustify" not in package.get("exclude", []):
-            raise ValueError("The package needs a description, a license, a rust-version, and the exclude entry /.rustify.")
+        shared = tomllib.loads((root / "Cargo.toml").read_text()).get("workspace", {}).get("package", {})
+        crates = [tomllib.loads(path.read_text()).get("package", {}) for path in sorted(root.glob("crates/*/Cargo.toml"))]
+        if not all(shared.get(key) for key in ("license", "rust-version")) or not crates or not all(item.get("description") for item in crates):
+            raise ValueError("The workspace needs a license and a rust-version. Each crate in crates/ needs a description.")
         if "/.rustify/" not in artifact(root, ".gitignore").read_text().splitlines():
             raise ValueError("The .gitignore file must list /.rustify/.")
         checks = yaml.safe_load((root / ".rustify/verification/checks.yaml").read_text())

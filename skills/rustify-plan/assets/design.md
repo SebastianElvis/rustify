@@ -11,6 +11,10 @@ The design preserves {{ordering_blocking_cancellation_and_failure_rules}}.
 
 ## Building blocks
 
+| Crate | Kind | Original container | Public contract |
+| --- | --- | --- | --- |
+| `{{crate_name}}` | {{bin_or_lib}} | {{container_id}} | {{public_api_or_none}} |
+
 | Original component | Rust module | Responsibility and boundary | Preserved state and interfaces |
 | --- | --- | --- | --- |
 | {{component_id}} | `{{rust_path}}` | {{matching_responsibility}} | {{preserved_state_and_interfaces}} |

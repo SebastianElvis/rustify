@@ -7,7 +7,7 @@ The helper hashes them for the `plan` checkpoint.
 
 | Section | Record fields |
 | --- | --- |
-| `correspondences` | `original` component ID and `rust` source path under `src/`. |
+| `correspondences` | `original` component ID and `rust` source path under `crates/<crate>/src/`. |
 | `slices` | `id`, `kind` (`skeleton` or `slice`), `requirements`, `depends_on`, and `risk` (`high`, `medium`, or `low`). |
 
 The parity gate reports each slice as passed only when all its requirements pass.
@@ -17,7 +17,7 @@ No plan record claims a measured result.
 
 The agent starts from [the design template](../assets/design.md).
 The design follows arc42 sections for the Rust implementation.
-It names every original component ID with its Rust module.
+It names every original container with its crate and every original component ID with its Rust module.
 It explains the execution model and each dependency choice.
 It links each decision to its ADR.
 

@@ -11,6 +11,7 @@
 - The main skill coordinates focused sibling skills.
 - The skills use host-native invocation and task tools.
 - The target project root is the open-source Rust repository.
+- The target project is a Cargo workspace with its crates in `crates/`.
 - The target project keeps private records in the gitignored `.rustify/` directory.
 - The target project keeps the Rust design and its decision records in `docs/`.
 - The agent keeps temporary worker shards and progress notes only in `.rustify/work/`.

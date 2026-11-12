@@ -35,7 +35,7 @@ class ProjectTests(unittest.TestCase):
             "inventory": {"complete": True}, "surface": [],
             "requirements": [{"id": "REQ-1", "components": ["C-1"]}],
             "components": [{"id": "C-1"}], "edges": [],
-            "correspondences": [{"original": "C-1", "rust": "src/main.rs"}],
+            "correspondences": [{"original": "C-1", "rust": "crates/demo/src/main.rs"}],
             "slices": [{"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "high"}],
             "gaps": [],
         }
@@ -56,8 +56,9 @@ class ProjectTests(unittest.TestCase):
             elif name != ".rustify/verification/parity.yaml":
                 self.write(name, yaml.safe_dump({"content": True}) if name.endswith(".yaml") else "content\n")
         if phase == "implement":
-            self.write("Cargo.toml", '[package]\ndescription = "d"\nlicense = "MIT"\nrust-version = "1.85"\nexclude = ["/.rustify"]\n')
-            self.write("src/main.rs", "fn main() {}\n")
+            self.write("Cargo.toml", '[workspace]\nmembers = ["crates/*"]\n\n[workspace.package]\nlicense = "MIT"\nrust-version = "1.85"\n')
+            self.write("crates/demo/Cargo.toml", '[package]\nname = "demo"\ndescription = "d"\n')
+            self.write("crates/demo/src/main.rs", "fn main() {}\n")
             self.checks()
         if phase == "validate":
             self.write("target/release/base64", "candidate binary")
@@ -128,17 +129,17 @@ class ProjectTests(unittest.TestCase):
 
     def test_source_changes_and_additions_reopen_implementation(self):
         self.through("validate")
-        self.write("src/main.rs", "fn main() { println!(\"change\"); }\n")
+        self.write("crates/demo/src/main.rs", "fn main() { println!(\"change\"); }\n")
         self.assertEqual(project.status(self.root)["stale"], "implement")
         self.checks()
         project.checkpoint(self.root, "implement")
-        self.write("src/new.rs", "pub fn new() {}\n")
+        self.write("crates/demo/src/new.rs", "pub fn new() {}\n")
         self.assertEqual(project.status(self.root)["stale"], "implement")
 
     def test_all_implementation_inputs_reopen_implementation(self):
         self.through("validate")
         for name, content in (
-            ("src/help.txt", "changed help"), ("src/version.txt", "changed version"),
+            ("crates/demo/src/help.txt", "changed help"), ("crates/demo/src/version.txt", "changed version"),
             ("tests/empty.bin", ""), ("tests/malformed.yaml", "invalid: [yaml"),
             (".cargo/config.toml", '[build]\nrustflags = []\n'),
         ):
@@ -161,7 +162,7 @@ class ProjectTests(unittest.TestCase):
         self.write(".git/index", "ignored")
         self.write(".rustify/work/notes.md", "ignored")
         self.assertIsNone(project.status(self.root)["stale"])
-        link = self.root / "src/linked.txt"
+        link = self.root / "crates/demo/src/linked.txt"
         link.symlink_to(self.target)
         self.assertEqual(project.status(self.root)["stale"], "implement")
         with self.assertRaisesRegex(ValueError, "symlink"):
@@ -184,14 +185,12 @@ class ProjectTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     project.checkpoint(self.root, "implement")
         self.checks()
-        self.write("Cargo.toml", '[package]\nlicense = "MIT"\n')
-        self.checks()
-        with self.assertRaisesRegex(ValueError, "description"):
-            project.checkpoint(self.root, "implement")
-        self.write("Cargo.toml", '[package]\ndescription = "d"\nlicense = "MIT"\nrust-version = "1.85"\n')
-        self.checks()
-        with self.assertRaisesRegex(ValueError, "exclude"):
-            project.checkpoint(self.root, "implement")
+        for name, data in (("Cargo.toml", '[workspace]\n[workspace.package]\nlicense = "MIT"\n'), ("crates/demo/Cargo.toml", '[package]\nname = "demo"\n')):
+            self.artifacts("implement")
+            self.write(name, data)
+            self.checks()
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "rust-version"):
+                project.checkpoint(self.root, "implement")
         self.artifacts("implement")
         self.write(".gitignore", "/target/\n")
         self.checks()
@@ -200,7 +199,7 @@ class ProjectTests(unittest.TestCase):
         self.write(".gitignore", "/.rustify/\n")
         self.artifacts("implement")
         project.checkpoint(self.root, "implement")
-        self.write("src/main.rs", "fn main() { println!(); }\n")
+        self.write("crates/demo/src/main.rs", "fn main() { println!(); }\n")
         with self.assertRaisesRegex(ValueError, "current implementation"):
             project.checkpoint(self.root, "implement")
 
@@ -257,7 +256,7 @@ class ProjectTests(unittest.TestCase):
         project.checkpoint(self.root, "discover")
         with self.assertRaisesRegex(ValueError, "Every requirement"):
             project.checkpoint(self.root, "plan")
-        self.model(correspondences=[{"original": "C-9", "rust": "src/main.rs"}])
+        self.model(correspondences=[{"original": "C-9", "rust": "crates/demo/src/main.rs"}])
         project.checkpoint(self.root, "discover")
         with self.assertRaisesRegex(ValueError, "unknown original"):
             project.checkpoint(self.root, "plan")

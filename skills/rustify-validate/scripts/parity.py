@@ -67,7 +67,7 @@ def records(values, key="id"):
 def module(path):
     path = Path(path)
     name = path.parent.name if path.name == "mod.rs" else path.stem
-    return None if name in {"main", "lib"} else name
+    return path.parts[1].replace("-", "_") if name == "lib" else None if name == "main" else name
 
 
 def reflexion(root, model, components, inputs):
@@ -75,7 +75,7 @@ def reflexion(root, model, components, inputs):
     for item in model["correspondences"]:
         if item["original"] in mapped:
             raise ValueError("Each original component needs exactly one correspondence.")
-        if not item["rust"].startswith("src/") or not item["rust"].endswith(".rs"):
+        if not re.fullmatch(r"crates/[^/]+/src/.+\.rs", item["rust"]):
             raise ValueError("A correspondence must name one Rust source file.")
         read(root, item["rust"], inputs, False)
         mapped[item["original"]] = item["rust"]
@@ -93,14 +93,14 @@ def reflexion(root, model, components, inputs):
     for path in owners:
         text = (root / path).read_text(errors="replace")
         uses.update((path, other) for other in owners if other != path and module(other) and re.search(rf"\b{re.escape(module(other))}::", text))
-    sources = {path.relative_to(root).as_posix() for path in (root / "src").rglob("*.rs")}
+    sources = {path.relative_to(root).as_posix() for path in root.glob("crates/*/src/**/*.rs")}
     return {
         "convergences": sorted(identity for pair, identity in expected.items() if pair in uses),
         "absences": sorted(identity for pair, identity in expected.items() if pair not in uses),
         "divergences": sorted(f"{source} -> {target}" for source, target in uses if (source, target) not in expected),
         "merged": sorted(path for path, names in owners.items() if len(names) > 1),
         "unmapped": sorted(set(components) - set(mapped)),
-        "extra_modules": sorted(path for path in sources - set(owners) if module(path)),
+        "extra_modules": sorted(path for path in sources - set(owners) if Path(path).name not in {"lib.rs", "main.rs"}),
     }
 
 

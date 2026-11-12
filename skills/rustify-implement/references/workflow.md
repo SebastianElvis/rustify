@@ -12,7 +12,7 @@ The agent implements the walking skeleton first and then each slice in plan orde
 For each slice, the agent follows the outer and inner loops of Freeman and Pryce.
 
 1. **Outer loop.** The agent writes the process or application acceptance test for each slice requirement.
-   The test copies the declarative expectation from `.rustify/recovered/tests.yaml` into a fixture under `tests/fixtures/`.
+   The test copies the declarative expectation from `.rustify/recovered/tests.yaml` into a fixture under `crates/<crate>/tests/fixtures/`.
    The agent runs it and confirms that it fails.
 2. **Inner loop.** The agent writes a failing unit test, makes it pass, and refactors (Beck).
    The agent adds property tests and rustdoc for the slice modules.
@@ -30,7 +30,8 @@ The agent never edits a recovered expectation to make a test pass.
 ## Structure
 
 Each original component has its planned Rust module.
-A module that depends on another module uses an explicit path, such as `codec::encode`.
+Each original container has its planned crate.
+A module that depends on another module uses an explicit path, such as `codec::encode` or `product_codec::encode`.
 The agent adds no module without an original component.
 The agent puts file, clock, network, and terminal access in the modules that own those boundaries in the original.
 

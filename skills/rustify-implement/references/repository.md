@@ -1,14 +1,15 @@
 # Open-source repository
 
 The project root is the open-source repository.
-`.rustify/` holds the private working records. `.gitignore` and the `Cargo.toml` `exclude` list keep it out of the repository and the package.
+`.rustify/` holds the private working records. `.gitignore` keeps it out of the repository.
+Cargo packages only the crate folders under `crates/`.
 The agent completes these files during implementation. No separate release phase exists.
 
 ## Self-containment
 
 No public file links to or reads `.rustify/` or a path outside the project.
 Every test runs without the original and without `.rustify/`.
-Each acceptance test keeps its expected result as a YAML fixture under `tests/fixtures/`.
+Each acceptance test keeps its expected result as a YAML fixture under `crates/<crate>/tests/fixtures/`.
 Documents name requirement and component identifiers as plain text, not as links.
 
 ## Required files
@@ -34,8 +35,11 @@ The agent does not push, tag, or publish the repository.
 
 ## Package metadata
 
-`Cargo.toml` sets `description`, `license`, `rust-version`, and `exclude = ["/.rustify"]` in `[package]`.
-It sets `repository` and `homepage` only when the user supplies them.
+The root `Cargo.toml` is a virtual workspace with `members = ["crates/*"]`.
+`[workspace.package]` sets `license`, `rust-version`, and `edition`. It sets `repository` and `homepage` only when the user supplies them.
+`[workspace.dependencies]` and `[workspace.lints]` hold the shared dependency versions and lints.
+Each crate inherits these values with `workspace = true` and sets its own `description`.
+A crate that is not useful to the public sets `publish = false`.
 The `rust-version` is the oldest toolchain that passes the CI `msrv` job.
 
 ## Rustdoc
@@ -50,8 +54,8 @@ The `rust-version` is the oldest toolchain that passes the CI `msrv` job.
 | Kind | Location | Rule |
 | --- | --- | --- |
 | Unit | `#[cfg(test)]` modules | The inner loop of the slice workflow writes them. |
-| Acceptance | `tests/` | Each test runs the built executable through its real interface. Its name contains its `TEST` identifier. |
-| Property | `tests/` with [proptest](https://docs.rs/proptest/latest/proptest/) | One property for each round trip, invariant, or metamorphic relation in the requirements. The agent keeps `proptest-regressions/`. |
+| Acceptance | `tests/` of the crate that owns the executable | Each test runs the built executable through its real interface. Its name contains its `TEST` identifier. |
+| Property | `tests/` of the owning crate with [proptest](https://docs.rs/proptest/latest/proptest/) | One property for each round trip, invariant, or metamorphic relation in the requirements. The agent keeps `proptest-regressions/`. |
 | Documentation | Doc comments | `cargo test` runs them. |
 | Fuzz | `fuzz/` with [cargo-fuzz](https://rust-fuzz.github.io/book/cargo-fuzz.html) | One target for each parser of external input. |
 

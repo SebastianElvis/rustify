@@ -57,7 +57,7 @@ The target project root is the open-source repository.
 
 | Folder | Contents |
 | --- | --- |
-| Project root | The open-source repository: `Cargo.toml`, `src/`, `tests/`, `README.md`, `LICENSE`, CI workflows, `docs/design.md`, `docs/adr/`, `docs/migration.md`, and `docs/compatibility.md`. |
+| Project root | The open-source repository: the workspace `Cargo.toml`, `crates/`, `README.md`, `LICENSE`, CI workflows, `docs/design.md`, `docs/adr/`, `docs/migration.md`, and `docs/compatibility.md`. |
 | `.rustify/` | `state.yaml`. The folder is gitignored. |
 | `.rustify/recovered/` | `model.yaml`, `product.md`, `ux.md`, `architecture.md`, `evidence.yaml`, `evidence/`, `scenarios.yaml`, `tests.yaml`, and `roadmap.md`. |
 | `.rustify/verification/` | `checks.yaml`, `comparison.yaml`, `fuzz.yaml`, `parity.yaml`, and `logs/`. |

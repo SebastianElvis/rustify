@@ -110,7 +110,7 @@ def rust(project, logs, candidate=None):
     return Path(binary), {
         "commands": commands, "rust_tests": sum(map(int, re.findall(rb"test result: ok\. (\d+) passed", (logs / "test.log").read_bytes()))),
         "pedantic_warnings": next(item["warnings"] for item in commands if "-W" in item["command"]),
-        "unsafe_uses": sum(len(re.findall(r"\bunsafe\b", path.read_text(errors="replace"))) for path in (project / "src").rglob("*.rs")),
+        "unsafe_uses": sum(len(re.findall(r"\bunsafe\b", path.read_text(errors="replace"))) for path in (project / "crates").rglob("*.rs")),
     }
 
 

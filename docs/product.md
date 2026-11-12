@@ -43,7 +43,7 @@ The runner does not claim a fresh GUI replay.
 
 ## Target project
 
-- The project root is the open-source Rust repository. It contains the crate, tests, the Rust design, decision records, and the compatibility document.
+- The project root is the open-source Rust repository. It is a Cargo workspace. It contains the crates, tests, the Rust design, decision records, and the compatibility document.
 - The gitignored `.rustify/` directory holds the state and the private records.
 - `.rustify/recovered/` contains the ledger, product, UX, architecture, evidence, declarative tests, and a parity backlog.
 - `.rustify/verification/` contains executed check results, comparison and fuzz reports, the gate result, and logs.

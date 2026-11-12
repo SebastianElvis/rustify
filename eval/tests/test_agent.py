@@ -23,9 +23,10 @@ PROJECT = {
     ".rustify/recovered/product.md": "REQ-1: The upper program shall write uppercase bytes.\n",
     ".rustify/recovered/architecture.md": "C-1 is the entry component.\n",
     ".rustify/verification/bin/upper": "#!" + sys.executable + "\nimport sys\nsys.stdout.buffer.write(sys.stdin.buffer.read().upper())\n",
-    "Cargo.toml": '[package]\nname = "upper"\nversion = "0.1.0"\nedition = "2021"\n',
+    "Cargo.toml": '[workspace]\nmembers = ["crates/upper"]\nresolver = "2"\n',
+    "crates/upper/Cargo.toml": '[package]\nname = "upper"\nversion = "0.1.0"\nedition = "2021"\n',
     "Cargo.lock": 'version = 3\n\n[[package]]\nname = "upper"\nversion = "0.1.0"\n',
-    "src/main.rs": "use std::io::{Read, Write};\n\nfn main() {\n    let mut data = Vec::new();\n    std::io::stdin().read_to_end(&mut data).unwrap();\n    std::io::stdout()\n        .write_all(&data.to_ascii_lowercase())\n        .unwrap();\n}\n",
+    "crates/upper/src/main.rs": "use std::io::{Read, Write};\n\nfn main() {\n    let mut data = Vec::new();\n    std::io::stdin().read_to_end(&mut data).unwrap();\n    std::io::stdout()\n        .write_all(&data.to_ascii_lowercase())\n        .unwrap();\n}\n",
 }
 AGENT = f"""import shlex, sys
 from pathlib import Path
@@ -86,7 +87,7 @@ if __name__ == "__main__":
         self.assertEqual(trial["product_recall"], {"rate": 0.5, "missing": ["help"]})
         self.assertEqual(trial["architecture_recall"]["rate"], 1.0)
         self.assertEqual((bool(trial["parity"]["errors"]), trial["success"]), (True, False))
-        (stamp / TRACK / "trial-2/project/src/main.rs").write_text("fn main() {}\n")
+        (stamp / TRACK / "trial-2/project/crates/upper/src/main.rs").write_text("fn main() {}\n")
         report = agent.grade(stamp)
         self.assertIn("changed after the freeze", report["trials"][1]["error"])
         self.assertEqual((report["summary"][TRACK]["pass_at_k"], report["summary"][TRACK]["pass_hat_k"]), (False, False), report["trials"])
