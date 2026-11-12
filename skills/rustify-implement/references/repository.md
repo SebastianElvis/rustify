@@ -1,14 +1,14 @@
 # Open-source repository
 
-The user publishes only `implementation/` as an open-source repository.
-`recovered/` and `verification/` stay private working records.
+The project root is the open-source repository.
+`.rustify/` holds the private working records. `.gitignore` and the `Cargo.toml` `exclude` list keep it out of the repository and the package.
 The agent completes these files during implementation. No separate release phase exists.
 
 ## Self-containment
 
-No file under `implementation/` links to or reads a path outside `implementation/`.
-Every test runs without the original and without `recovered/`.
-Each acceptance test keeps its expected result as a YAML fixture under `implementation/tests/fixtures/`.
+No public file links to or reads `.rustify/` or a path outside the project.
+Every test runs without the original and without `.rustify/`.
+Each acceptance test keeps its expected result as a YAML fixture under `tests/fixtures/`.
 Documents name requirement and component identifiers as plain text, not as links.
 
 ## Required files
@@ -34,7 +34,7 @@ The agent does not push, tag, or publish the repository.
 
 ## Package metadata
 
-`Cargo.toml` sets `description`, `license`, and `rust-version` in `[package]`.
+`Cargo.toml` sets `description`, `license`, `rust-version`, and `exclude = ["/.rustify"]` in `[package]`.
 It sets `repository` and `homepage` only when the user supplies them.
 The `rust-version` is the oldest toolchain that passes the CI `msrv` job.
 

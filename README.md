@@ -107,15 +107,16 @@ The agent saves checkpoints and reopens affected phases when inputs change.
 
 ### Output
 
-The target project contains three folders:
+The target project root is a ready open-source Rust repository.
+The gitignored `.rustify/` directory holds the private records:
 
 | Folder | Contents |
 | --- | --- |
-| `recovered/` | The traceability ledger, product and UX specifications, architecture, diagrams, data models, state, evidence, declarative tests, and a parity backlog. |
-| `implementation/` | The open-source Rust repository: source, tests, rustdoc, README, license, CI, design, decision records, migration guide, and compatibility document. |
-| `verification/` | Executed check results, original-to-Rust comparisons, fuzz reports, the parity gate result, and logs. |
+| Project root | The open-source Rust repository: source, tests, rustdoc, README, license, CI, design, decision records, migration guide, and compatibility document. |
+| `.rustify/recovered/` | The traceability ledger, product and UX specifications, architecture, diagrams, data models, evidence, declarative tests, and a parity backlog. |
+| `.rustify/verification/` | Executed check results, original-to-Rust comparisons, fuzz reports, the parity gate result, and logs. |
 
-The ledger `recovered/model.yaml` links each EARS requirement to evidence, tests, components, Rust modules, slices, and gaps.
+The ledger `.rustify/recovered/model.yaml` links each EARS requirement to evidence, tests, components, Rust modules, slices, and gaps.
 The agent produces diagrams and data models when the evidence supports them.
 The [project format](skills/rustify/references/project.md) defines the output formats.
 The [standards guide](skills/rustify/references/standards.md) defines the writing rules, the terminology, and the requirement and architecture forms.

@@ -22,7 +22,7 @@ For a native workflow, the agent uses this sequence with actual schema arguments
 3. The agent follows `xrefs`, `procedure_callers`, and `procedure_callees` for one bounded question.
 4. The agent uses `analyze_function` when the function dossier can resolve that question.
 5. The agent records Evidence IDs, addresses, binary identity, limitations, and unresolved indirect calls.
-6. The agent exports evidence with `export_evidence_bundle` into `recovered/evidence/`.
+6. The agent exports evidence with `export_evidence_bundle` into `.rustify/recovered/evidence/`.
 7. The agent closes its owned session with `close_binary` after export.
 
 Workers coordinate ownership before they switch a shared native target.

@@ -2,7 +2,7 @@
 
 The product specification describes what the original does.
 The parity backlog describes what remains to reproduce.
-The ledger `recovered/model.yaml` holds the requirement records.
+The ledger `.rustify/recovered/model.yaml` holds the requirement records.
 The documents name each ledger identifier and explain it.
 
 ## Requirement records

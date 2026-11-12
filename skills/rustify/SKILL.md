@@ -33,14 +33,15 @@ The guide sets the writing rules, the glossary, the EARS requirement form, and t
 - The agent asks for the binary path or the project path when the request lacks one.
 - The agent runs `python3 <rustify>/scripts/project.py init PROJECT --target BINARY --profile cli`.
 - The agent selects `cli`, `desktop`, `service`, or `game` for the actual target.
-- The agent records each resource and documentation source from the request in `recovered/product.md`.
-- Observed original behavior takes precedence over documentation. The agent records each contradiction in `recovered/evidence.yaml`.
+- The agent records each resource and documentation source from the request in `.rustify/recovered/product.md`.
+- Observed original behavior takes precedence over documentation. The agent records each contradiction in `.rustify/recovered/evidence.yaml`.
 - The agent preserves user data and uses separate experiment data.
 - The agent runs the helper with `status PROJECT` after an interruption and resumes the first incomplete or stale phase.
 
 Here, `<rustify>` means this installed skill folder.
-The target project contains only `recovered/`, `implementation/`, and `verification/`.
-The agent workspace in `work_dir` holds only temporary worker shards and progress notes.
+The target project root is the open-source Rust repository.
+The gitignored `.rustify/` directory holds `recovered/`, `verification/`, and `work/`.
+The agent workspace `.rustify/work/` holds only temporary worker shards and progress notes.
 
 ## Coordinate the reconstruction
 
@@ -48,10 +49,10 @@ The agent workspace in `work_dir` holds only temporary worker shards and progres
    The agent compares the original against itself before a Rust candidate exists.
 2. **Discover.** The agent invokes `rustify-product`, `rustify-design`, and `rustify-architecture` **in parallel** when parallel agents are available.
    The agent otherwise runs these skills in sequence.
-   Each worker receives the project path and a separate shard path in `work_dir`.
+   Each worker receives the project path and a separate shard path in `.rustify/work/`.
    The discovery workers request additional captures and traces through `rustify-probe`.
    The agent coordinates exclusive access to shared REA sessions or application state.
-3. **Merge.** The agent merges the shards into `recovered/model.yaml`, `evidence.yaml`, `scenarios.yaml`, and `tests.yaml`.
+3. **Merge.** The agent merges the shards into `.rustify/recovered/model.yaml`, `evidence.yaml`, `scenarios.yaml`, and `tests.yaml`.
    The agent resolves contradictions and duplicate requirements.
    The agent completes the `discover` checkpoint.
 4. **Plan.** The agent invokes `rustify-plan` only after the `discover` checkpoint succeeds.

@@ -43,7 +43,7 @@ If an exact mapping is not feasible, the agent records the lost behavior or boun
 The lost behavior or boundary stays an open gap until a repair closes it.
 An architectural preference does not close a gap.
 
-The parity backlog in `recovered/roadmap.md` lists every open gap first.
+The parity backlog in `.rustify/recovered/roadmap.md` lists every open gap first.
 The agent does not add product improvements to the faithful reconstruction.
 
 The agent defines applicable [quality acceptance budgets](../../rustify-validate/references/quality.md) before implementation.

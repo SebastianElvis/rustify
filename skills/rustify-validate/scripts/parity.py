@@ -23,9 +23,9 @@ PATTERNS = {
 METHODS = {"test", "inspection", "analysis", "demonstration"}
 CLASSES = {"observed", "inferred", "unknown"}
 DOCUMENTS = (
-    ("requirements", ("recovered/product.md", "recovered/ux.md")),
-    ("components", ("recovered/architecture.md",)),
-    ("components", ("implementation/docs/design.md",)),
+    ("requirements", (".rustify/recovered/product.md", ".rustify/recovered/ux.md")),
+    ("components", (".rustify/recovered/architecture.md",)),
+    ("components", ("docs/design.md",)),
 )
 
 
@@ -33,7 +33,7 @@ def file(root, name):
     path = Path(name)
     if path.is_absolute() or ".." in path.parts:
         raise ValueError("An input must stay inside the project.")
-    if path.as_posix() in {"recovered/state.yaml", "verification/parity.yaml"}:
+    if path.as_posix() in {".rustify/state.yaml", ".rustify/verification/parity.yaml"}:
         raise ValueError("Operational state and gate output cannot be parity inputs.")
     path = root / path
     for parent in (path, *path.parents):
@@ -75,7 +75,7 @@ def reflexion(root, model, components, inputs):
     for item in model["correspondences"]:
         if item["original"] in mapped:
             raise ValueError("Each original component needs exactly one correspondence.")
-        if not item["rust"].startswith("implementation/src/") or not item["rust"].endswith(".rs"):
+        if not item["rust"].startswith("src/") or not item["rust"].endswith(".rs"):
             raise ValueError("A correspondence must name one Rust source file.")
         read(root, item["rust"], inputs, False)
         mapped[item["original"]] = item["rust"]
@@ -93,7 +93,7 @@ def reflexion(root, model, components, inputs):
     for path in owners:
         text = (root / path).read_text(errors="replace")
         uses.update((path, other) for other in owners if other != path and module(other) and re.search(rf"\b{re.escape(module(other))}::", text))
-    sources = {path.relative_to(root).as_posix() for path in (root / "implementation/src").rglob("*.rs")}
+    sources = {path.relative_to(root).as_posix() for path in (root / "src").rglob("*.rs")}
     return {
         "convergences": sorted(identity for pair, identity in expected.items() if pair in uses),
         "absences": sorted(identity for pair, identity in expected.items() if pair not in uses),
@@ -104,15 +104,15 @@ def reflexion(root, model, components, inputs):
     }
 
 
-def check(project, comparisons=("verification/comparison.yaml",), allow_partial=False):
+def check(project, comparisons=(".rustify/verification/comparison.yaml",), allow_partial=False):
     root = Path(project).resolve()
     result = {"status": "failed", "assessment": "incomplete", "full_parity_gate_pass": False, "semantic_truth_verified": False, "inputs": {}, "errors": [], "gaps": []}
     try:
         inputs = result["inputs"]
-        model = read(root, "recovered/model.yaml", inputs)
-        evidence = records(read(root, "recovered/evidence.yaml", inputs))
-        tests = records(read(root, "recovered/tests.yaml", inputs))
-        target = result["target_sha256"] = yaml.safe_load((root / "recovered/state.yaml").read_text())["target"]["sha256"]
+        model = read(root, ".rustify/recovered/model.yaml", inputs)
+        evidence = records(read(root, ".rustify/recovered/evidence.yaml", inputs))
+        tests = records(read(root, ".rustify/recovered/tests.yaml", inputs))
+        target = result["target_sha256"] = yaml.safe_load((root / ".rustify/state.yaml").read_text())["target"]["sha256"]
         if not isinstance(target, str) or not re.fullmatch(r"[0-9a-f]{64}", target):
             raise ValueError("The original identity must be a lowercase SHA-256 value.")
         for item in evidence.values():
@@ -122,9 +122,8 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
                 read(root, item["path"], inputs, False)
                 if inputs[item["path"]] != item["sha256"]:
                     raise ValueError(f"The evidence file hash differs: {item['id']}")
-        base = root / "implementation"
-        for directory, folders, files in os.walk(base):
-            folders[:] = [name for name in folders if name != ".git" and (Path(directory) != base or name != "target")]
+        for directory, folders, files in os.walk(root):
+            folders[:] = [name for name in folders if name != ".git" and (Path(directory) != root or name not in {"target", ".rustify"})]
             for name in files:
                 read(root, (Path(directory) / name).relative_to(root).as_posix(), inputs, False)
         cases = {}
@@ -208,8 +207,8 @@ def check(project, comparisons=("verification/comparison.yaml",), allow_partial=
         for kind, names in DOCUMENTS:
             text = "".join(read(root, name, inputs, False) for name in names)
             gaps += [f"{identity}: {' or '.join(names)} does not name this item." for identity in (requirements if kind == "requirements" else components) if not re.search(rf"\b{re.escape(identity)}\b", text)]
-        roadmap = read(root, "recovered/roadmap.md", inputs, False)
-        gaps += [f"{name}: recovered/roadmap.md does not name this open gap." for name in open_gaps if name not in roadmap]
+        roadmap = read(root, ".rustify/recovered/roadmap.md", inputs, False)
+        gaps += [f"{name}: .rustify/recovered/roadmap.md does not name this open gap." for name in open_gaps if name not in roadmap]
         if model["inventory"]["complete"] is not True:
             gaps.append("The original inventory remains incomplete.")
         result["gaps"] = sorted(set(gaps))
@@ -234,7 +233,7 @@ def main():
     parser.add_argument("--report", required=True)
     parser.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args()
-    result = check(args.project, args.comparison or ["verification/comparison.yaml"], args.allow_partial)
+    result = check(args.project, args.comparison or [".rustify/verification/comparison.yaml"], args.allow_partial)
     path = Path(args.report)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(result))

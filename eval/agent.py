@@ -88,7 +88,7 @@ def recall(patterns, text):
 def text(project, documents, key, fields):
     parts = [(project / name).read_text(errors="replace") for name in documents if (project / name).is_file()]
     try:
-        parts += [str(item.get(field, "")) for item in yaml.safe_load((project / "recovered/model.yaml").read_text()).get(key, []) for field in fields]
+        parts += [str(item.get(field, "")) for item in yaml.safe_load((project / ".rustify/recovered/model.yaml").read_text()).get(key, []) for field in fields]
     except (OSError, yaml.YAMLError, AttributeError):
         pass
     return "\n".join(parts)
@@ -112,30 +112,30 @@ def grade_trial(workspace, directory, grading):
     result.update(score_report=str(output / "report.yaml"), success=score["status"] == "passed", scorer_status=score["status"], scorer_error=score.get("error"), expected_failures=len(score.get("failures", [])))
     result.update({name: score.get("scores", {}).get(name) for name in ("gate", "cpr", "fps", "coverage", "milestones", "milestone_credit")})
     try:
-        own = yaml.safe_load((project / "verification/comparison.yaml").read_text())
+        own = yaml.safe_load((project / ".rustify/verification/comparison.yaml").read_text())
         result["self_check_gap"] = round(own["passed"] / (own["passed"] + own["failed"]) - result["cpr"], 3)
     except (OSError, yaml.YAMLError, KeyError, TypeError, ZeroDivisionError):
         result["self_check_gap"] = None
-    result["product_recall"] = recall(grading["features"], text(project, ("recovered/product.md", "recovered/ux.md"), "requirements", ("statement",)))
-    result["architecture_recall"] = recall(grading["components"], text(project, ("recovered/architecture.md",), "components", ("name", "responsibility")))
+    result["product_recall"] = recall(grading["features"], text(project, (".rustify/recovered/product.md", ".rustify/recovered/ux.md"), "requirements", ("statement",)))
+    result["architecture_recall"] = recall(grading["components"], text(project, (".rustify/recovered/architecture.md",), "components", ("name", "responsibility")))
     gate_path = (workspace / ".agents/skills" if skills is not None else ROOT / "skills") / "rustify-validate/scripts/parity.py"
     gate = load("trial_parity", gate_path).check(project)
     result["success"] = result["success"] and gate["full_parity_gate_pass"] and score.get("checkpoints", {}).get("completed") == ["discover", "plan", "implement", "validate"]
     if result.get("gate"):
         reference_path = reference(directory)[0]
-        candidate = project / yaml.safe_load((project / "verification/comparison.yaml").read_text())["executables"]["candidate"]["path"]
+        candidate = project / yaml.safe_load((project / ".rustify/verification/comparison.yaml").read_text())["executables"]["candidate"]["path"]
         game = distinguish.play(reference_path, candidate, AGENT, 200, reference_path.name, workspace / "adaptive", 10, None)
         result["adaptive"] = {name: game[name] for name in ("status", "probes", "witnesses", "inconclusive", "query_complexity")}
     result["success"] = result["success"] and result.get("adaptive", {}).get("status") == "passed"
     result["parity"] = {"assessment": gate["assessment"], "errors": gate["errors"], "gaps": len(gate["gaps"]), "helper_sha256": harness.digest(gate_path)}
     result["structural_fidelity"] = result["edge_convergence"] = None
     if structure := gate.get("reflexion"):
-        model = yaml.safe_load((project / "recovered/model.yaml").read_text())
+        model = yaml.safe_load((project / ".rustify/recovered/model.yaml").read_text())
         merged = sum(item["rust"] in structure["merged"] for item in model["correspondences"])
         components, edges = len(model["components"]), len(structure["convergences"]) + len(structure["absences"])
         result["structural_fidelity"] = round((components - len(structure["unmapped"]) - merged) / components, 3) if components else None
         result["edge_convergence"] = round(len(structure["convergences"]) / edges, 3) if edges else None
-    checks = project / "verification/checks.yaml"
+    checks = project / ".rustify/verification/checks.yaml"
     mutation = [item["mutation"] for item in yaml.safe_load(checks.read_text()).get("commands", []) if "mutation" in item] if checks.is_file() else []
     result["mutation_score"] = mutation[-1]["score"] if mutation else None
     result.update({name: score.get("rust", {}).get(name) for name in ("pedantic_warnings", "unsafe_uses")})

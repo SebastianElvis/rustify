@@ -31,7 +31,7 @@ components:
 edges: []
 correspondences:
 - original: C-001
-  rust: implementation/src/main.rs
+  rust: src/main.rs
 slices:
 - id: SLICE-001
   kind: skeleton

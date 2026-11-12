@@ -3,7 +3,7 @@
 ## Inputs
 
 The agent reads the ledger, the recovered documents, the evidence, and the tests.
-`implementation/docs/design.md` and its ADRs supply the design.
+`docs/design.md` and its ADRs supply the design.
 Rustify always implements the full product without a product difference.
 
 ## Slice loop
@@ -12,7 +12,7 @@ The agent implements the walking skeleton first and then each slice in plan orde
 For each slice, the agent follows the outer and inner loops of Freeman and Pryce.
 
 1. **Outer loop.** The agent writes the process or application acceptance test for each slice requirement.
-   The test copies the declarative expectation from `recovered/tests.yaml` into a fixture under `implementation/tests/fixtures/`.
+   The test copies the declarative expectation from `.rustify/recovered/tests.yaml` into a fixture under `tests/fixtures/`.
    The agent runs it and confirms that it fails.
 2. **Inner loop.** The agent writes a failing unit test, makes it pass, and refactors (Beck).
    The agent adds property tests and rustdoc for the slice modules.

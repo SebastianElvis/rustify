@@ -22,7 +22,8 @@ class ProjectTests(unittest.TestCase):
         self.root = self.base / "target"
         self.target = self.base / "original"
         self.target.write_bytes(b"original binary")
-        self.workspace = Path(project.init(self.root, self.target, "cli")["work_dir"])
+        project.init(self.root, self.target, "cli")
+        self.workspace = self.root / ".rustify/work"
 
     def write(self, name, data):
         path = self.root / name
@@ -34,34 +35,34 @@ class ProjectTests(unittest.TestCase):
             "inventory": {"complete": True}, "surface": [],
             "requirements": [{"id": "REQ-1", "components": ["C-1"]}],
             "components": [{"id": "C-1"}], "edges": [],
-            "correspondences": [{"original": "C-1", "rust": "implementation/src/main.rs"}],
+            "correspondences": [{"original": "C-1", "rust": "src/main.rs"}],
             "slices": [{"id": "S-1", "kind": "skeleton", "requirements": ["REQ-1"], "depends_on": [], "risk": "high"}],
             "gaps": [],
         }
-        self.write("recovered/model.yaml", yaml.safe_dump({**model, **changes}))
+        self.write(".rustify/recovered/model.yaml", yaml.safe_dump({**model, **changes}))
 
     def checks(self, returncode=0):
         records = []
         for name in project.BASE:
-            self.write(f"verification/logs/{name}.log", "log\n")
-            records.append({"name": name, "returncode": returncode, "log": f"verification/logs/{name}.log", "log_sha256": project.digest(self.root / f"verification/logs/{name}.log")})
-        self.write("verification/checks.yaml", yaml.safe_dump({"status": "passed", "inputs_sha256": project.combined(project.tree(self.root, "implementation")), "commands": records}))
+            self.write(f".rustify/verification/logs/{name}.log", "log\n")
+            records.append({"name": name, "returncode": returncode, "log": f".rustify/verification/logs/{name}.log", "log_sha256": project.digest(self.root / f".rustify/verification/logs/{name}.log")})
+        self.write(".rustify/verification/checks.yaml", yaml.safe_dump({"status": "passed", "inputs_sha256": project.combined(project.tree(self.root, ".")), "commands": records}))
 
     def artifacts(self, phase):
         for name in project.REQUIRED[phase]:
             name = name.partition("#")[0]
-            if name == "recovered/model.yaml":
+            if name == ".rustify/recovered/model.yaml":
                 self.model()
-            elif name != "verification/parity.yaml":
+            elif name != ".rustify/verification/parity.yaml":
                 self.write(name, yaml.safe_dump({"content": True}) if name.endswith(".yaml") else "content\n")
         if phase == "implement":
-            self.write("implementation/Cargo.toml", '[package]\ndescription = "d"\nlicense = "MIT"\nrust-version = "1.85"\n')
-            self.write("implementation/src/main.rs", "fn main() {}\n")
+            self.write("Cargo.toml", '[package]\ndescription = "d"\nlicense = "MIT"\nrust-version = "1.85"\nexclude = ["/.rustify"]\n')
+            self.write("src/main.rs", "fn main() {}\n")
             self.checks()
         if phase == "validate":
-            self.write("implementation/target/release/base64", "candidate binary")
-            candidate = self.root / "implementation/target/release/base64"
-            self.write("verification/comparison.yaml", yaml.safe_dump({
+            self.write("target/release/base64", "candidate binary")
+            candidate = self.root / "target/release/base64"
+            self.write(".rustify/verification/comparison.yaml", yaml.safe_dump({
                 "status": "passed", "passed": 1, "failed": 0,
                 "cases": [{"passed": True, "differences": []}],
                 "executables": {
@@ -72,8 +73,8 @@ class ProjectTests(unittest.TestCase):
             self.parity()
 
     def parity(self, **changes):
-        valid = {"assessment": "full_parity_pass", "errors": [], "gaps": [], "target_sha256": project.digest(self.target), "inputs": {name: project.digest(self.root / name) for name in ("recovered/product.md", "recovered/model.yaml")}}
-        self.write("verification/parity.yaml", yaml.safe_dump({**valid, **changes}))
+        valid = {"assessment": "full_parity_pass", "errors": [], "gaps": [], "target_sha256": project.digest(self.target), "inputs": {name: project.digest(self.root / name) for name in (".rustify/recovered/product.md", ".rustify/recovered/model.yaml")}}
+        self.write(".rustify/verification/parity.yaml", yaml.safe_dump({**valid, **changes}))
 
     def through(self, last):
         for phase in project.PHASES:
@@ -93,11 +94,11 @@ class ProjectTests(unittest.TestCase):
 
     def test_missing_empty_and_invalid_artifacts_fail(self):
         self.artifacts("discover")
-        (self.root / "recovered/evidence.yaml").unlink()
+        (self.root / ".rustify/recovered/evidence.yaml").unlink()
         for data in (None, "", "  \n", "{}", "[]", "invalid", "null", "invalid: [yaml"):
             with self.subTest(data=data):
                 if data is not None:
-                    self.write("recovered/evidence.yaml", data)
+                    self.write(".rustify/recovered/evidence.yaml", data)
                 with self.assertRaises((ValueError, OSError, yaml.YAMLError)):
                     project.checkpoint(self.root, "discover")
         self.assertEqual(project.status(self.root)["next"], "discover")
@@ -111,27 +112,27 @@ class ProjectTests(unittest.TestCase):
 
     def test_stale_artifact_invalidates_later_phases(self):
         self.through("validate")
-        self.write("recovered/product.md", "The new evidence changes this product.\n")
+        self.write(".rustify/recovered/product.md", "The new evidence changes this product.\n")
         self.assertEqual(project.status(self.root), {"completed": [], "next": "discover", "stale": "discover"})
         with self.assertRaises(ValueError):
             project.checkpoint(self.root, "validate")
         project.checkpoint(self.root, "discover")
         self.assertEqual(project.status(self.root)["next"], "plan")
-        state = yaml.safe_load((self.root / "recovered/state.yaml").read_text())
+        state = yaml.safe_load((self.root / ".rustify/state.yaml").read_text())
         self.assertEqual(list(state["checkpoints"]), ["discover"])
 
     def test_missing_artifact_reopens_phase(self):
         self.through("plan")
-        (self.root / "recovered/ux.md").unlink()
+        (self.root / ".rustify/recovered/ux.md").unlink()
         self.assertEqual(project.status(self.root)["stale"], "discover")
 
     def test_source_changes_and_additions_reopen_implementation(self):
         self.through("validate")
-        self.write("implementation/src/main.rs", "fn main() { println!(\"change\"); }\n")
+        self.write("src/main.rs", "fn main() { println!(\"change\"); }\n")
         self.assertEqual(project.status(self.root)["stale"], "implement")
         self.checks()
         project.checkpoint(self.root, "implement")
-        self.write("implementation/src/new.rs", "pub fn new() {}\n")
+        self.write("src/new.rs", "pub fn new() {}\n")
         self.assertEqual(project.status(self.root)["stale"], "implement")
 
     def test_all_implementation_inputs_reopen_implementation(self):
@@ -142,11 +143,11 @@ class ProjectTests(unittest.TestCase):
             (".cargo/config.toml", '[build]\nrustflags = []\n'),
         ):
             with self.subTest(name=name):
-                self.write("implementation/" + name, content)
+                self.write(name, content)
                 self.assertEqual(project.status(self.root)["stale"], "implement")
                 self.checks()
                 project.checkpoint(self.root, "implement")
-                path = self.root / "implementation" / name
+                path = self.root / name
                 path.write_text(content + "changed")
                 self.assertEqual(project.status(self.root)["stale"], "implement")
                 self.checks()
@@ -155,11 +156,12 @@ class ProjectTests(unittest.TestCase):
                 self.assertEqual(project.status(self.root)["stale"], "implement")
                 self.checks()
                 project.checkpoint(self.root, "implement")
-        self.write("implementation/target/build-output", "ignored")
-        self.write("implementation/docs/compatibility.md", "validation output")
-        self.write("implementation/.git/index", "ignored")
+        self.write("target/build-output", "ignored")
+        self.write("docs/compatibility.md", "validation output")
+        self.write(".git/index", "ignored")
+        self.write(".rustify/work/notes.md", "ignored")
         self.assertIsNone(project.status(self.root)["stale"])
-        link = self.root / "implementation/src/linked.txt"
+        link = self.root / "src/linked.txt"
         link.symlink_to(self.target)
         self.assertEqual(project.status(self.root)["stale"], "implement")
         with self.assertRaisesRegex(ValueError, "symlink"):
@@ -168,7 +170,7 @@ class ProjectTests(unittest.TestCase):
     def test_required_checks_bind_to_the_current_implementation(self):
         self.through("plan")
         self.artifacts("implement")
-        path = self.root / "verification/checks.yaml"
+        path = self.root / ".rustify/verification/checks.yaml"
         valid = yaml.safe_load(path.read_text())
         for invalid in (
             {**valid, "status": "failed"},
@@ -182,13 +184,23 @@ class ProjectTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     project.checkpoint(self.root, "implement")
         self.checks()
-        self.write("implementation/Cargo.toml", '[package]\nlicense = "MIT"\n')
+        self.write("Cargo.toml", '[package]\nlicense = "MIT"\n')
         self.checks()
         with self.assertRaisesRegex(ValueError, "description"):
             project.checkpoint(self.root, "implement")
+        self.write("Cargo.toml", '[package]\ndescription = "d"\nlicense = "MIT"\nrust-version = "1.85"\n')
+        self.checks()
+        with self.assertRaisesRegex(ValueError, "exclude"):
+            project.checkpoint(self.root, "implement")
+        self.artifacts("implement")
+        self.write(".gitignore", "/target/\n")
+        self.checks()
+        with self.assertRaisesRegex(ValueError, "gitignore"):
+            project.checkpoint(self.root, "implement")
+        self.write(".gitignore", "/.rustify/\n")
         self.artifacts("implement")
         project.checkpoint(self.root, "implement")
-        self.write("implementation/src/main.rs", "fn main() { println!(); }\n")
+        self.write("src/main.rs", "fn main() { println!(); }\n")
         with self.assertRaisesRegex(ValueError, "current implementation"):
             project.checkpoint(self.root, "implement")
 
@@ -207,7 +219,7 @@ class ProjectTests(unittest.TestCase):
         with patch.dict(os.environ, environment):
             result = project.check(self.root, ["coverage", "mutants"])
         self.assertEqual(result["status"], "failed")
-        checks = yaml.safe_load((self.root / "verification/checks.yaml").read_text())
+        checks = yaml.safe_load((self.root / ".rustify/verification/checks.yaml").read_text())
         self.assertEqual(checks["commands"][-2]["coverage"], {"lines": 90.0, "regions": 80.0})
         self.assertEqual(checks["commands"][-1]["mutation"], {"caught": 3, "missed": 1, "timeout": 0, "unviable": 2, "score": 0.75})
         with self.assertRaisesRegex(ValueError, "current implementation"):
@@ -221,7 +233,7 @@ class ProjectTests(unittest.TestCase):
         completed = type("Completed", (), {"returncode": 0, "stdout": b"", "stderr": b""})()
         with patch.object(project.supervisor, "execute", return_value=(completed, "The process group exceeded the memory limit.", {})), patch("sys.argv", ["project.py", "check", str(self.root), "--mutants"]):
             self.assertEqual(project.main(), 1)
-        checks = yaml.safe_load((self.root / "verification/checks.yaml").read_text())
+        checks = yaml.safe_load((self.root / ".rustify/verification/checks.yaml").read_text())
         self.assertTrue(checks["status"] == "failed" and all(record["returncode"] == 1 and record["error"] for record in checks["commands"][-5:]))
 
     def test_plan_needs_one_skeleton_an_acyclic_graph_and_full_coverage(self):
@@ -245,7 +257,7 @@ class ProjectTests(unittest.TestCase):
         project.checkpoint(self.root, "discover")
         with self.assertRaisesRegex(ValueError, "Every requirement"):
             project.checkpoint(self.root, "plan")
-        self.model(correspondences=[{"original": "C-9", "rust": "implementation/src/main.rs"}])
+        self.model(correspondences=[{"original": "C-9", "rust": "src/main.rs"}])
         project.checkpoint(self.root, "discover")
         with self.assertRaisesRegex(ValueError, "unknown original"):
             project.checkpoint(self.root, "plan")
@@ -261,14 +273,14 @@ class ProjectTests(unittest.TestCase):
         ):
             self.model(**changes)
             self.assertEqual(project.status(self.root)["stale"], phase)
-        self.write("recovered/model.yaml", yaml.safe_dump({"requirements": []}))
+        self.write(".rustify/recovered/model.yaml", yaml.safe_dump({"requirements": []}))
         with self.assertRaisesRegex(ValueError, "section"):
             project.checkpoint(self.root, "discover")
 
     def test_failed_or_empty_comparison_cannot_complete(self):
         self.through("implement")
         self.artifacts("validate")
-        path = self.root / "verification/comparison.yaml"
+        path = self.root / ".rustify/verification/comparison.yaml"
         original = yaml.safe_load(path.read_text())
         for changes in (
             {"status": "failed"}, {"failed": 1}, {"passed": 0},
@@ -283,7 +295,7 @@ class ProjectTests(unittest.TestCase):
     def test_wrong_target_or_changed_candidate_cannot_complete(self):
         self.through("implement")
         self.artifacts("validate")
-        path = self.root / "verification/comparison.yaml"
+        path = self.root / ".rustify/verification/comparison.yaml"
         report = yaml.safe_load(path.read_text())
         report["executables"]["reference"]["sha256"] = "bad"
         path.write_text(yaml.safe_dump(report))
@@ -291,16 +303,16 @@ class ProjectTests(unittest.TestCase):
             project.checkpoint(self.root, "validate")
         self.artifacts("validate")
         project.checkpoint(self.root, "validate")
-        self.write("implementation/target/release/base64", "changed candidate")
+        self.write("target/release/base64", "changed candidate")
         self.assertEqual(project.status(self.root)["stale"], "validate")
         with self.assertRaisesRegex(ValueError, "candidate changed"):
             project.checkpoint(self.root, "validate")
 
     def test_symlinks_and_external_artifacts_fail(self):
         self.artifacts("discover")
-        (self.root / "recovered/evidence.yaml").unlink()
+        (self.root / ".rustify/recovered/evidence.yaml").unlink()
         (self.base / "outside").write_text("content: true\n")
-        (self.root / "recovered/evidence.yaml").symlink_to(self.base / "outside")
+        (self.root / ".rustify/recovered/evidence.yaml").symlink_to(self.base / "outside")
         with self.assertRaisesRegex(ValueError, "symlink"):
             project.checkpoint(self.root, "discover")
         with self.assertRaisesRegex(ValueError, "inside"):
@@ -310,51 +322,46 @@ class ProjectTests(unittest.TestCase):
 
     def test_state_hashes_match_actual_artifacts(self):
         self.through("discover")
-        state = yaml.safe_load((self.root / "recovered/state.yaml").read_text())
-        expected = hashlib.sha256((self.root / "recovered/evidence.yaml").read_bytes()).hexdigest()
-        self.assertEqual(state["checkpoints"]["discover"]["recovered/evidence.yaml"], expected)
+        state = yaml.safe_load((self.root / ".rustify/state.yaml").read_text())
+        expected = hashlib.sha256((self.root / ".rustify/recovered/evidence.yaml").read_bytes()).hexdigest()
+        self.assertEqual(state["checkpoints"]["discover"][".rustify/recovered/evidence.yaml"], expected)
 
-    def test_workspace_stays_outside_the_three_project_directories(self):
-        self.assertEqual({p.name for p in self.root.iterdir()}, {"recovered", "implementation", "verification"})
-        self.assertEqual(self.workspace, self.base / ".target-rustify")
-        self.assertTrue((self.root / "recovered/state.yaml").is_file())
-        self.through("plan")
-        self.assertTrue((self.root / "implementation/docs/design.md").is_file())
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_custom_workspace_and_separation_guards(self):
+    def test_init_keeps_private_records_in_an_ignored_directory(self):
+        self.assertEqual({p.name for p in self.root.iterdir()}, {".rustify", ".gitignore"})
+        self.assertEqual({p.name for p in (self.root / ".rustify").iterdir()}, {"state.yaml", "recovered", "verification", "work"})
         other = self.base / "other"
-        custom = self.base / "agent"
-        state = project.init(other, self.target, "cli", custom)
-        self.assertEqual(state["work_dir"], str(custom))
-        self.assertEqual(state["version"], 3)
-        for workspace in (self.base / "unused", self.base / "unused/agent"):
-            with self.subTest(workspace=workspace), self.assertRaisesRegex(ValueError, "outside"):
-                project.init(self.base / "unused", self.target, "cli", workspace)
-        link = self.base / "agent-link"
-        link.symlink_to(custom, target_is_directory=True)
+        other.mkdir()
+        (other / ".gitignore").write_text("/build/\n/target/\n")
+        self.assertEqual(project.init(other, self.target, "cli")["version"], 4)
+        self.assertEqual((other / ".gitignore").read_text(), "/build/\n/target/\n/.rustify/\n")
+        link = self.base / "linked"
+        link.mkdir()
+        (link / ".gitignore").symlink_to(other / ".gitignore")
         with self.assertRaisesRegex(ValueError, "symlink"):
-            project.init(self.base / "unused", self.target, "cli", link)
+            project.init(link, self.target, "cli")
+        self.through("plan")
+        self.assertTrue((self.root / "docs/design.md").is_file())
+        self.assertEqual(list(self.workspace.iterdir()), [])
 
     def test_plan_edits_reopen_planning(self):
         self.through("validate")
-        self.write("implementation/docs/design.md", "The design changes.\n")
+        self.write("docs/design.md", "The design changes.\n")
         self.assertEqual(project.status(self.root), {"completed": ["discover"], "next": "plan", "stale": "plan"})
         with self.assertRaises(ValueError):
             project.checkpoint(self.root, "implement")
 
     def test_raw_evidence_edits_and_deletions_reopen_discovery(self):
-        self.write("recovered/evidence/stdout.bin", "")
+        self.write(".rustify/recovered/evidence/stdout.bin", "")
         self.through("validate")
-        self.write("recovered/evidence/stdout.bin", "new capture")
+        self.write(".rustify/recovered/evidence/stdout.bin", "new capture")
         self.assertEqual(project.status(self.root)["stale"], "discover")
         project.checkpoint(self.root, "discover")
-        (self.root / "recovered/evidence/stdout.bin").unlink()
+        (self.root / ".rustify/recovered/evidence/stdout.bin").unlink()
         self.assertEqual(project.status(self.root)["stale"], "discover")
 
     def test_declarative_tests_are_required(self):
         self.artifacts("discover")
-        path = self.root / "recovered/tests.yaml"
+        path = self.root / ".rustify/recovered/tests.yaml"
         path.unlink()
         with self.assertRaises((OSError, ValueError)):
             project.checkpoint(self.root, "discover")
@@ -368,7 +375,7 @@ class ProjectTests(unittest.TestCase):
     def test_validation_requires_a_full_parity_pass(self):
         self.through("implement")
         self.artifacts("validate")
-        for changes in ({"assessment": "scoped_pass"}, {"assessment": "incomplete"}, {"gaps": ["unknown feature"]}, {"errors": ["mismatch"]}, {"target_sha256": "wrong"}, {"inputs": {"recovered/product.md": "stale"}}, {"inputs": {}}):
+        for changes in ({"assessment": "scoped_pass"}, {"assessment": "incomplete"}, {"gaps": ["unknown feature"]}, {"errors": ["mismatch"]}, {"target_sha256": "wrong"}, {"inputs": {".rustify/recovered/product.md": "stale"}}, {"inputs": {}}):
             with self.subTest(changes=changes):
                 self.parity(**changes)
                 with self.assertRaises(ValueError):
@@ -377,18 +384,11 @@ class ProjectTests(unittest.TestCase):
         project.checkpoint(self.root, "validate")
         self.assertIsNone(project.status(self.root)["next"])
 
-    def test_evidence_and_workspace_symlinks_fail(self):
+    def test_evidence_symlink_reopens_discovery(self):
         self.through("discover")
-        (self.root / "recovered/evidence").rmdir()
-        (self.root / "recovered/evidence").symlink_to(self.workspace, target_is_directory=True)
+        (self.root / ".rustify/recovered/evidence").rmdir()
+        (self.root / ".rustify/recovered/evidence").symlink_to(self.workspace, target_is_directory=True)
         self.assertEqual(project.status(self.root)["stale"], "discover")
-        (self.root / "recovered/evidence").unlink()
-        (self.root / "recovered/evidence").mkdir()
-        real = self.base / "moved-agent"
-        self.workspace.rename(real)
-        self.workspace.symlink_to(real, target_is_directory=True)
-        with self.assertRaisesRegex(ValueError, "symlink"):
-            project.status(self.root)
 
 
 if __name__ == "__main__":

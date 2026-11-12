@@ -2,10 +2,10 @@
 
 | Artifact | Required content |
 | --- | --- |
-| `implementation/` | Rust source, locked dependencies, tests, and the files in [the repository rules](repository.md). |
-| `implementation/docs/` | The design and ADRs from planning, new ADRs for implementation decisions, and the migration guide. |
-| `verification/checks.yaml` | The records that the helper's `check` command writes. |
-| `verification/logs/` | The check logs and their failures. |
+| Project root | Rust source, locked dependencies, tests, and the files in [the repository rules](repository.md). |
+| `docs/` | The design and ADRs from planning, new ADRs for implementation decisions, and the migration guide. |
+| `.rustify/verification/checks.yaml` | The records that the helper's `check` command writes. |
+| `.rustify/verification/logs/` | The check logs and their failures. |
 
 ## Check records
 

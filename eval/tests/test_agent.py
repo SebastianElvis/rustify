@@ -20,12 +20,12 @@ agent = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(agent)
 TRACK = f"rustify-test-upper-{agent.os.getpid()}"
 PROJECT = {
-    "recovered/product.md": "REQ-1: The upper program shall write uppercase bytes.\n",
-    "recovered/architecture.md": "C-1 is the entry component.\n",
-    "verification/bin/upper": "#!" + sys.executable + "\nimport sys\nsys.stdout.buffer.write(sys.stdin.buffer.read().upper())\n",
-    "implementation/Cargo.toml": '[package]\nname = "upper"\nversion = "0.1.0"\nedition = "2021"\n',
-    "implementation/Cargo.lock": 'version = 3\n\n[[package]]\nname = "upper"\nversion = "0.1.0"\n',
-    "implementation/src/main.rs": "use std::io::{Read, Write};\n\nfn main() {\n    let mut data = Vec::new();\n    std::io::stdin().read_to_end(&mut data).unwrap();\n    std::io::stdout()\n        .write_all(&data.to_ascii_lowercase())\n        .unwrap();\n}\n",
+    ".rustify/recovered/product.md": "REQ-1: The upper program shall write uppercase bytes.\n",
+    ".rustify/recovered/architecture.md": "C-1 is the entry component.\n",
+    ".rustify/verification/bin/upper": "#!" + sys.executable + "\nimport sys\nsys.stdout.buffer.write(sys.stdin.buffer.read().upper())\n",
+    "Cargo.toml": '[package]\nname = "upper"\nversion = "0.1.0"\nedition = "2021"\n',
+    "Cargo.lock": 'version = 3\n\n[[package]]\nname = "upper"\nversion = "0.1.0"\n',
+    "src/main.rs": "use std::io::{Read, Write};\n\nfn main() {\n    let mut data = Vec::new();\n    std::io::stdin().read_to_end(&mut data).unwrap();\n    std::io::stdout()\n        .write_all(&data.to_ascii_lowercase())\n        .unwrap();\n}\n",
 }
 AGENT = f"""import shlex, sys
 from pathlib import Path
@@ -33,8 +33,8 @@ project = Path(shlex.split(sys.stdin.readline())[2])
 for name, text in {PROJECT!r}.items():
     (project / name).parent.mkdir(parents=True, exist_ok=True)
     (project / name).write_text(text)
-(project / "verification/bin/upper").chmod(0o755)
-(project / "verification/comparison.yaml").write_text({yaml.safe_dump({"executables": {"candidate": {"path": "verification/bin/upper", "sha256": hashlib.sha256(PROJECT["verification/bin/upper"].encode()).hexdigest()}, "reference": {"sha256": hashlib.sha256(PROJECT["verification/bin/upper"].encode()).hexdigest()}}})!r})
+(project / ".rustify/verification/bin/upper").chmod(0o755)
+(project / ".rustify/verification/comparison.yaml").write_text({yaml.safe_dump({"executables": {"candidate": {"path": ".rustify/verification/bin/upper", "sha256": hashlib.sha256(PROJECT[".rustify/verification/bin/upper"].encode()).hexdigest()}, "reference": {"sha256": hashlib.sha256(PROJECT[".rustify/verification/bin/upper"].encode()).hexdigest()}}})!r})
 """
 
 
@@ -46,7 +46,7 @@ class AgentEvaluationTests(unittest.TestCase):
         self.addCleanup(lambda: (ROOT / "work/downloads" / TRACK).unlink(missing_ok=True))
         self.root = Path(temporary.name)
         reference = self.root / "upper"
-        reference.write_text(PROJECT["verification/bin/upper"])
+        reference.write_text(PROJECT[".rustify/verification/bin/upper"])
         reference.chmod(0o755)
         self.track = self.root / TRACK
         self.track.mkdir()
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         self.assertEqual(trial["product_recall"], {"rate": 0.5, "missing": ["help"]})
         self.assertEqual(trial["architecture_recall"]["rate"], 1.0)
         self.assertEqual((bool(trial["parity"]["errors"]), trial["success"]), (True, False))
-        (stamp / TRACK / "trial-2/project/implementation/src/main.rs").write_text("fn main() {}\n")
+        (stamp / TRACK / "trial-2/project/src/main.rs").write_text("fn main() {}\n")
         report = agent.grade(stamp)
         self.assertIn("changed after the freeze", report["trials"][1]["error"])
         self.assertEqual((report["summary"][TRACK]["pass_at_k"], report["summary"][TRACK]["pass_hat_k"]), (False, False), report["trials"])

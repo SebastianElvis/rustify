@@ -2,17 +2,17 @@
 
 | Output | Required content |
 | --- | --- |
-| `verification/comparison.yaml` | Executed cases with exact results, executable identities, and failures. |
-| `verification/fuzz.yaml` | The fuzz search, its seed, and each divergence. |
-| `verification/parity.yaml` | The gate result, the per-requirement and per-slice results, the reflexion check, and input hashes. |
-| `implementation/docs/compatibility.md` | The compatible features, the incompatible features, the limitations, and the assurance case. |
+| `.rustify/verification/comparison.yaml` | Executed cases with exact results, executable identities, and failures. |
+| `.rustify/verification/fuzz.yaml` | The fuzz search, its seed, and each divergence. |
+| `.rustify/verification/parity.yaml` | The gate result, the per-requirement and per-slice results, the reflexion check, and input hashes. |
+| `docs/compatibility.md` | The compatible features, the incompatible features, the limitations, and the assurance case. |
 
-The agent preserves current captures in `verification/raw/` and logs in `verification/logs/`.
+The agent preserves current captures in `.rustify/verification/raw/` and logs in `.rustify/verification/logs/`.
 
 ## Deterministic gate
 
 ```sh
-python3 <rustify-validate>/scripts/parity.py --project PROJECT --report PROJECT/verification/parity.yaml [--allow-partial] [--comparison verification/other.yaml]
+python3 <rustify-validate>/scripts/parity.py --project PROJECT --report PROJECT/.rustify/verification/parity.yaml [--allow-partial] [--comparison .rustify/verification/other.yaml]
 ```
 
 The gate reads the target hash from `state.yaml`.
@@ -24,7 +24,7 @@ It computes each requirement result from evidence and captures. It does not read
 - A requirement fails when the Rust capture differs from the original or from the expected assertion.
 - Each statement must match its EARS pattern and contain exactly one "shall".
 - The reflexion check reports convergences, absences, divergences, merged modules, unmapped components, and extra modules.
-- Each requirement must appear in `product.md` or `ux.md`. Each component must appear in `architecture.md` and `implementation/docs/design.md`.
+- Each requirement must appear in `product.md` or `ux.md`. Each component must appear in `architecture.md` and `docs/design.md`.
 - Each open gap must appear in `roadmap.md`.
 - Each surface item must name at least one requirement. An empty surface inventory is a gap.
 
@@ -40,8 +40,8 @@ The `semantic_truth_verified` field stays `false`. The evaluator still judges re
 
 ## Assurance case
 
-The agent starts `implementation/docs/compatibility.md` from [the compatibility template](../assets/compatibility.md).
-The document is the only published compatibility record. It does not link to paths outside `implementation/`.
+The agent starts `docs/compatibility.md` from [the compatibility template](../assets/compatibility.md).
+The document is the only published compatibility record. It does not link to `.rustify/` or to paths outside the project.
 Each open gap appears in the Incompatible table or the Limitations table.
 A known failure goes into the Incompatible table. An unknown result or an untested item goes into the Limitations table.
 The structure follows the GSN Community Standard and ISO/IEC/IEEE 15026-2.

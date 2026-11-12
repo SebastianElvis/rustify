@@ -30,7 +30,7 @@ Each argument uses a YAML string or a `!!binary` scalar for raw bytes.
 The agent quotes an argument that YAML reads as a number, a boolean, or null.
 
 ```sh
-python3 <rustify-probe>/scripts/compare.py --reference ORIGINAL --candidate IMPLEMENTATION --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name PROGRAM
+python3 <rustify-probe>/scripts/compare.py --reference ORIGINAL --candidate IMPLEMENTATION --cases PROJECT/.rustify/recovered/scenarios.yaml --report PROJECT/.rustify/verification/comparison.yaml --name PROGRAM
 ```
 
 The helper gives both processes the same argv[0] and deterministic environment.
@@ -48,7 +48,7 @@ It also keeps each input that produces a new pair of exit status and diagnostic 
 This steering follows NEZHA (Petsios et al., IEEE S&P 2017).
 
 ```sh
-python3 <rustify-probe>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEMENTATION --seeds PROJECT/recovered/scenarios.yaml --report PROJECT/verification/fuzz.yaml --name PROGRAM --iterations 500 --seed 0
+python3 <rustify-probe>/scripts/fuzz.py --reference ORIGINAL --candidate IMPLEMENTATION --seeds PROJECT/.rustify/recovered/scenarios.yaml --report PROJECT/.rustify/verification/fuzz.yaml --name PROGRAM --iterations 500 --seed 0
 ```
 
 The report lists each divergence with both captures.

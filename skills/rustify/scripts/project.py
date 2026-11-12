@@ -22,10 +22,10 @@ PROBE.loader.exec_module(supervisor)
 
 PHASES = ("discover", "plan", "implement", "validate")
 REQUIRED = {
-    "discover": ("recovered/product.md", "recovered/ux.md", "recovered/architecture.md", "recovered/evidence.yaml", "recovered/scenarios.yaml", "recovered/tests.yaml", "recovered/roadmap.md", "recovered/model.yaml#inventory,surface,requirements,components,edges"),
-    "plan": ("recovered/model.yaml#correspondences,slices", "implementation/docs/design.md"),
-    "implement": ("implementation/Cargo.toml", "implementation/Cargo.lock", "verification/checks.yaml", *(f"implementation/{name}" for name in ("README.md", "LICENSE", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", "docs/migration.md", ".github/workflows/ci.yml", ".github/workflows/release.yml"))),
-    "validate": ("verification/comparison.yaml", "verification/parity.yaml", "implementation/docs/compatibility.md"),
+    "discover": (".rustify/recovered/product.md", ".rustify/recovered/ux.md", ".rustify/recovered/architecture.md", ".rustify/recovered/evidence.yaml", ".rustify/recovered/scenarios.yaml", ".rustify/recovered/tests.yaml", ".rustify/recovered/roadmap.md", ".rustify/recovered/model.yaml#inventory,surface,requirements,components,edges"),
+    "plan": (".rustify/recovered/model.yaml#correspondences,slices", "docs/design.md"),
+    "implement": ("Cargo.toml", "Cargo.lock", ".rustify/verification/checks.yaml", "README.md", "LICENSE", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", "docs/migration.md", ".github/workflows/ci.yml", ".github/workflows/release.yml"),
+    "validate": (".rustify/verification/comparison.yaml", ".rustify/verification/parity.yaml", "docs/compatibility.md"),
 }
 BASE = ("fmt", "clippy", "test", "doc")
 CHECKS = {
@@ -51,13 +51,13 @@ def project_root(project):
     return path.resolve()
 
 
-def work_root(root, value):
+def outside(root, value):
     path = Path(value).absolute()
     if any(parent.is_symlink() for parent in (path, *path.parents)):
-        raise ValueError("The agent workspace cannot use a symlink.")
+        raise ValueError("The external path cannot use a symlink.")
     path = path.resolve()
     if path == root or root in path.parents:
-        raise ValueError("The agent workspace must stay outside the project.")
+        raise ValueError("The path must stay outside the project.")
     return path
 
 
@@ -95,8 +95,8 @@ def tree(root, name):
     hashes = {}
     base = root / name
     for directory, folders, files in os.walk(base):
-        if name == "implementation":
-            folders[:] = [folder for folder in folders if folder != ".git" and (Path(directory) != base or folder != "target")]
+        if name == ".":
+            folders[:] = [folder for folder in folders if folder != ".git" and (Path(directory) != base or folder not in {"target", ".rustify"})]
         if Path(directory).is_symlink() or any((Path(directory) / folder).is_symlink() for folder in folders):
             raise ValueError("An input directory cannot be a symlink.")
         for filename in files:
@@ -143,7 +143,7 @@ def check_plan(model):
 
 
 def save(root, state):
-    directory = root / "recovered"
+    directory = root / ".rustify"
     if directory.is_symlink() or (directory / "state.yaml").is_symlink():
         raise ValueError("The state cannot use a symlink.")
     directory.mkdir(parents=True, exist_ok=True)
@@ -156,30 +156,27 @@ def save(root, state):
         Path(name).unlink(missing_ok=True)
 
 
-def init(project, target, profile, work_dir=None):
+def init(project, target, profile):
     root = project_root(project)
-    workspace = work_root(root, work_dir if work_dir is not None else root.parent / ("." + root.name + "-rustify"))
-    if (root / "recovered/state.yaml").exists() or (root / "recovered").is_symlink() or (root / "recovered/state.yaml").is_symlink():
-        raise ValueError("The project already has state.")
+    ignore = root / ".gitignore"
+    if (root / ".rustify").exists() or (root / ".rustify").is_symlink() or ignore.is_symlink():
+        raise ValueError("The project already has state or uses a symlink.")
     binary = Path(target).absolute()
     if binary.is_symlink() or not binary.is_file():
         raise ValueError("The target must be a regular file without a symlink.")
-    for name in ("recovered/evidence", "implementation", "verification/logs"):
-        path = root / name
-        if path.is_symlink() or any(parent.is_symlink() for parent in path.parents if parent != root):
-            raise ValueError("A project directory cannot use a symlink.")
-        path.mkdir(parents=True, exist_ok=True)
-    workspace.mkdir(parents=True, exist_ok=True)
-    state = {"version": 3, "profile": profile, "target": {"path": str(binary.resolve()), "sha256": digest(binary)}, "work_dir": str(workspace), "checkpoints": {}}
+    for name in ("recovered/evidence", "verification/logs", "work"):
+        (root / ".rustify" / name).mkdir(parents=True)
+    lines = ignore.read_text().splitlines() if ignore.is_file() else []
+    ignore.write_text("\n".join(lines + [line for line in ("/.rustify/", "/target/") if line not in lines]) + "\n")
+    state = {"version": 4, "profile": profile, "target": {"path": str(binary.resolve()), "sha256": digest(binary)}, "checkpoints": {}}
     save(root, state)
     return state
 
 
 def load(root):
-    state = yaml.safe_load(artifact(root, "recovered/state.yaml").read_text())
-    if state["version"] != 3 or not Path(state["work_dir"]).is_absolute():
-        raise ValueError("The project state must use version 3 and an absolute agent workspace.")
-    work_root(root, state["work_dir"])
+    state = yaml.safe_load(artifact(root, ".rustify/state.yaml").read_text())
+    if state["version"] != 4:
+        raise ValueError("The project state must use version 4.")
     target = Path(state["target"]["path"])
     if target.is_symlink() or not target.is_file() or digest(target) != state["target"]["sha256"]:
         raise ValueError("The target changed. Start a new project for the new target.")
@@ -189,31 +186,33 @@ def load(root):
 def files_for(root, phase, state):
     hashes = {name: section(root, name) for name in REQUIRED[phase]}
     if phase == "discover":
-        hashes.update(tree(root, "recovered/evidence"))
+        hashes.update(tree(root, ".rustify/recovered/evidence"))
     if phase == "plan":
-        check_plan(yaml.safe_load((root / "recovered/model.yaml").read_text()))
+        check_plan(yaml.safe_load((root / ".rustify/recovered/model.yaml").read_text()))
     if phase == "implement":
-        inputs = tree(root, "implementation")
+        inputs = tree(root, ".")
         if not any(name.endswith(".rs") for name in inputs):
             raise ValueError("The implementation must contain Rust source.")
         hashes.update(inputs)
-        package = tomllib.loads((root / "implementation/Cargo.toml").read_text()).get("package", {})
-        if not all(package.get(key) for key in ("description", "license", "rust-version")):
-            raise ValueError("The package needs a description, a license, and a rust-version.")
-        checks = yaml.safe_load((root / "verification/checks.yaml").read_text())
+        package = tomllib.loads((root / "Cargo.toml").read_text()).get("package", {})
+        if not all(package.get(key) for key in ("description", "license", "rust-version")) or "/.rustify" not in package.get("exclude", []):
+            raise ValueError("The package needs a description, a license, a rust-version, and the exclude entry /.rustify.")
+        if "/.rustify/" not in artifact(root, ".gitignore").read_text().splitlines():
+            raise ValueError("The .gitignore file must list /.rustify/.")
+        checks = yaml.safe_load((root / ".rustify/verification/checks.yaml").read_text())
         latest = {record.get("name"): record for record in checks.get("commands", [])}
         if checks.get("status") != "passed" or checks.get("inputs_sha256") != combined(inputs) or any(latest.get(name, {}).get("returncode") != 0 for name in BASE):
             raise ValueError("The latest requested checks must pass for the current implementation.")
         if any(digest(artifact(root, record["log"], False)) != record["log_sha256"] for record in latest.values()):
             raise ValueError("A check log differs from its record.")
     if phase == "validate":
-        parity = yaml.safe_load((root / "verification/parity.yaml").read_text())
+        parity = yaml.safe_load((root / ".rustify/verification/parity.yaml").read_text())
         if parity.get("assessment") != "full_parity_pass" or parity.get("errors") != [] or parity.get("target_sha256") != state["target"]["sha256"] or parity.get("gaps") != []:
             raise ValueError("The parity gate must report full_parity_pass.")
         inputs = parity.get("inputs", {})
         if not inputs or any(digest(artifact(root, name, False)) != value for name, value in inputs.items()):
             raise ValueError("The parity evidence changed after the gate.")
-        report = yaml.safe_load((root / "verification/comparison.yaml").read_text())
+        report = yaml.safe_load((root / ".rustify/verification/comparison.yaml").read_text())
         cases = report.get("cases", [])
         if report.get("status") != "passed" or report.get("failed") != 0 or not cases or report.get("passed") != len(cases):
             raise ValueError("The comparison must pass every recorded case.")
@@ -232,16 +231,16 @@ def files_for(root, phase, state):
 def check(project, extra=()):
     root = project_root(project)
     load(root)
-    path = root / "verification/checks.yaml"
+    path = root / ".rustify/verification/checks.yaml"
     records = yaml.safe_load(path.read_text()).get("commands", []) if path.is_file() else []
-    inputs = tree(root, "implementation")
+    inputs = tree(root, ".")
     status = "passed"
     for name in (*BASE, *extra):
         stamp = f"{name}-{time.time_ns()}"
-        log = root / "verification/logs" / f"{stamp}.log"
+        log = root / ".rustify/verification/logs" / f"{stamp}.log"
         command = CHECKS[name] + ([str(log.with_suffix(""))] if name == "mutants" else [str(log.with_suffix(".json"))] if name == "coverage" else [])
         log.parent.mkdir(parents=True, exist_ok=True)
-        result, error, resources = supervisor.execute(command, cwd=root / "implementation", env={**os.environ, "RUSTDOCFLAGS": "-D warnings"}, timeout=3600 if name == "mutants" else 900, memory_mib=8192)
+        result, error, resources = supervisor.execute(command, cwd=root, env={**os.environ, "RUSTDOCFLAGS": "-D warnings"}, timeout=3600 if name == "mutants" else 900, memory_mib=8192)
         returncode = result.returncode or int(error is not None)
         log.write_bytes(result.stdout + result.stderr + (error.encode() if error else b""))
         record = {"name": name, "command": command, "returncode": returncode, "error": error, "resources": resources, "log": log.relative_to(root).as_posix(), "log_sha256": digest(log)}
@@ -257,7 +256,7 @@ def check(project, extra=()):
             totals = json.loads(log.with_suffix(".json").read_text())["data"][0]["totals"] if log.with_suffix(".json").is_file() else {}
             record["coverage"] = {key: totals.get(key, {}).get("percent") for key in ("lines", "regions")}
         records.append(record)
-    if tree(root, "implementation") != inputs:
+    if tree(root, ".") != inputs:
         status = "failed"
     path.write_text(yaml.safe_dump({"status": status, "inputs_sha256": combined(inputs), "commands": records}, sort_keys=False))
     return {"status": status, "commands": [{key: record[key] for key in ("name", "returncode")} for record in records[-len(extra) - len(BASE):]]}
@@ -306,7 +305,6 @@ def main():
     create.add_argument("project")
     create.add_argument("--target", required=True)
     create.add_argument("--profile", choices=("cli", "desktop", "service", "game"), default="cli")
-    create.add_argument("--work-dir")
     commands.add_parser("status").add_argument("project")
     verify = commands.add_parser("check")
     verify.add_argument("project")
@@ -319,7 +317,7 @@ def main():
     args = parser.parse_args()
     try:
         if args.command == "init":
-            result = init(args.project, args.target, args.profile, args.work_dir)
+            result = init(args.project, args.target, args.profile)
         elif args.command == "status":
             result = status(args.project)
         elif args.command == "check":
