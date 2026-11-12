@@ -29,9 +29,9 @@ The user controls publication of the resulting repository.
 ## Fidelity
 
 Rustify always reconstructs the full product with one-to-one compatibility.
-`recovered/state.yaml` records the target path and SHA-256.
-`recovered/product.md` records the resources, version, platform, environment, and compatibility constraints.
-`recovered/roadmap.md` records the investigation limits and stopping conditions.
+`.rustify/state.yaml` records the target path and SHA-256.
+`.rustify/recovered/product.md` records the resources, version, platform, environment, and compatibility constraints.
+`.rustify/recovered/roadmap.md` records the investigation limits and stopping conditions.
 
 Rustify supports CLI, desktop, local service, and game investigation profiles.
 The dataset covers utilities, hashing, HTTP, compression, databases, interpreters, build tools, games, dialogs, and document conversion.
@@ -43,12 +43,13 @@ The runner does not claim a fresh GUI replay.
 
 ## Target project
 
-- `recovered/` contains the ledger, product, UX, architecture, state, evidence, declarative tests, and a parity backlog.
-- `implementation/` is the open-source Rust repository. It contains the crate, tests, the Rust design, decision records, and the compatibility document.
-- `verification/` contains executed check results, comparison and fuzz reports, the gate result, and logs.
+- The project root is the open-source Rust repository. It is a Cargo workspace. It contains the crates, tests, the Rust design, decision records, and the compatibility document.
+- The gitignored `.rustify/` directory holds the state and the private records.
+- `.rustify/recovered/` contains the ledger, product, UX, architecture, evidence, declarative tests, and a parity backlog.
+- `.rustify/verification/` contains executed check results, comparison and fuzz reports, the gate result, and logs.
 
-The ledger `recovered/model.yaml` links requirements, components, Rust modules, slices, and gaps.
-The agent workspace holds only temporary worker shards and progress notes.
+The ledger `.rustify/recovered/model.yaml` links requirements, components, Rust modules, slices, and gaps.
+The agent workspace `.rustify/work/` holds only temporary worker shards and progress notes.
 The probe skill supplies controlled captures and execution traces throughout discovery, planning, implementation, and validation.
 The declarative tests state observable requirements before the Rust tests implement them.
 Each test records its observed, inferred, or proposed origin.

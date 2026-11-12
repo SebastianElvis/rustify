@@ -1,7 +1,7 @@
 # {{target_name}}: faithful Rust design
 
 This design implements the full product for target SHA-256 `{{target_sha256}}`.
-It follows arc42 sections. The ledger `recovered/model.yaml` holds the records.
+It follows arc42 sections. The ledger `.rustify/recovered/model.yaml` holds the records.
 
 ## Solution strategy
 
@@ -10,6 +10,10 @@ The Rust execution model is {{matching_execution_model}}.
 The design preserves {{ordering_blocking_cancellation_and_failure_rules}}.
 
 ## Building blocks
+
+| Crate | Kind | Original container | Public contract |
+| --- | --- | --- | --- |
+| `{{crate_name}}` | {{bin_or_lib}} | {{container_id}} | {{public_api_or_none}} |
 
 | Original component | Rust module | Responsibility and boundary | Preserved state and interfaces |
 | --- | --- | --- | --- |

@@ -32,7 +32,7 @@ The component table records those responsibilities.
 | `fuzz.py` | The helper searches for inputs that make the original and the Rust implementation differ. | `skills/rustify-probe/scripts/fuzz.py` |
 | Standards guide | The guide sets the writing rules, glossary, EARS form, and architecture viewpoints. | `skills/rustify/references/standards.md` |
 | REA | The external backend supplies binary and runtime evidence to the probe and discovery skills. | `skills/rustify-probe/references/rea.md` |
-| Target project | The directory contains recovered/, implementation/, and verification/. | `skills/rustify/references/project.md` |
+| Target project | The root is the Rust repository. The gitignored `.rustify/` directory holds the private records. | `skills/rustify/references/project.md` |
 
 ## Flow and boundaries
 
@@ -45,7 +45,7 @@ The component table records those responsibilities.
 7. Validation differences reopen the affected discovery, planning, or implementation work.
 
 The host runs discovery sequentially when parallel agents are unavailable.
-Workers write shards in the agent workspace and coordinate access to shared REA sessions.
+Workers write shards in `.rustify/work/` and coordinate access to shared REA sessions.
 Discovery, planning, implementation, and validation request captures and traces from the probe skill.
 The probe skill exports REA evidence into the target project.
 Discovery skills also query REA directly for domain analysis.
@@ -53,15 +53,17 @@ The probe skill supplies shared experiment methods and capture provenance.
 The validator also requests independent challenges after the freeze.
 REA remains an external investigation backend.
 
-The target project has three folders.
+The target project root is the open-source repository.
 
 | Folder | Contents |
 | --- | --- |
-| `recovered/` | `state.yaml`, `model.yaml`, `product.md`, `ux.md`, `architecture.md`, `evidence.yaml`, `evidence/`, `scenarios.yaml`, `tests.yaml`, and `roadmap.md`. |
-| `implementation/` | The open-source repository: `Cargo.toml`, `src/`, `tests/`, `README.md`, `LICENSE`, CI workflows, `docs/design.md`, `docs/adr/`, `docs/migration.md`, and `docs/compatibility.md`. |
-| `verification/` | `checks.yaml`, `comparison.yaml`, `fuzz.yaml`, `parity.yaml`, and `logs/`. |
+| Project root | The open-source repository: the workspace `Cargo.toml`, `crates/`, `README.md`, `LICENSE`, CI workflows, `docs/design.md`, `docs/adr/`, `docs/migration.md`, and `docs/compatibility.md`. |
+| `.rustify/` | `state.yaml`. The folder is gitignored. |
+| `.rustify/recovered/` | `model.yaml`, `product.md`, `ux.md`, `architecture.md`, `evidence.yaml`, `evidence/`, `scenarios.yaml`, `tests.yaml`, and `roadmap.md`. |
+| `.rustify/verification/` | `checks.yaml`, `comparison.yaml`, `fuzz.yaml`, `parity.yaml`, and `logs/`. |
+| `.rustify/work/` | Temporary worker shards and progress notes. |
 
-`recovered/model.yaml` is the single traceability record.
+`.rustify/recovered/model.yaml` is the single traceability record.
 Each phase owns its ledger sections. A section change reopens its owning phase.
 The parity gate derives each requirement result from evidence and captures.
 It also runs the reflexion check of the recovered component graph against the Rust module graph.

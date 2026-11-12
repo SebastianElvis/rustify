@@ -36,7 +36,7 @@ def save(path, value):
 
 
 def freeze(project, ignored=(), binaries=()):
-    hashes = {path.relative_to(project).as_posix(): (digest(path) if os.access(path, os.R_OK) else ("unreadable", *(info := path.stat())[:7], info.st_mtime_ns, info.st_ctime_ns)) for path in sorted(project.rglob("*")) if path.is_file() and not set(ignored).intersection(path.relative_to(project).parts) and path.relative_to(project).parts[:2] != ("implementation", "target")}
+    hashes = {path.relative_to(project).as_posix(): (digest(path) if os.access(path, os.R_OK) else ("unreadable", *(info := path.stat())[:7], info.st_mtime_ns, info.st_ctime_ns)) for path in sorted(project.rglob("*")) if path.is_file() and not set(ignored).intersection(path.relative_to(project).parts) and path.relative_to(project).parts[0] != "target"}
     return {**hashes, **{str(path): [digest(path), path.stat().st_mode, any(item.is_symlink() for item in (path, *path.parents))] for path in binaries}}
 
 
@@ -94,7 +94,7 @@ def rust(project, logs, candidate=None):
     for label, args in (("fmt", ["fmt", "--check"]), ("clippy", ["clippy", "--locked", "--all-targets", "--", "-D", "warnings"]), ("test", ["test", "--locked"]), ("pedantic", ["clippy", "--locked", "--", "-W", "clippy::pedantic"]), ("build", ["build", "--release", "--locked", "--message-format=json"])):
         if label == "build" and candidate is not None:
             continue
-        result, error, resources = compare.execute(["cargo", *args], cwd=project / "implementation", env={**os.environ, "CARGO_BUILD_JOBS": "1", **({"CARGO_TARGET_DIR": str(logs / "target")} if candidate else {})}, timeout=900, memory_mib=2048, process_limit=32)
+        result, error, resources = compare.execute(["cargo", *args], cwd=project, env={**os.environ, "CARGO_BUILD_JOBS": "1", **({"CARGO_TARGET_DIR": str(logs / "target")} if candidate else {})}, timeout=900, memory_mib=2048, process_limit=32)
         returncode = result.returncode or int(error is not None)
         log = logs / f"{label}.log"
         log.parent.mkdir(parents=True, exist_ok=True)
@@ -110,7 +110,7 @@ def rust(project, logs, candidate=None):
     return Path(binary), {
         "commands": commands, "rust_tests": sum(map(int, re.findall(rb"test result: ok\. (\d+) passed", (logs / "test.log").read_bytes()))),
         "pedantic_warnings": next(item["warnings"] for item in commands if "-W" in item["command"]),
-        "unsafe_uses": sum(len(re.findall(r"\bunsafe\b", path.read_text(errors="replace"))) for path in (project / "implementation/src").rglob("*.rs")),
+        "unsafe_uses": sum(len(re.findall(r"\bunsafe\b", path.read_text(errors="replace"))) for path in (project / "crates").rglob("*.rs")),
     }
 
 
@@ -164,14 +164,14 @@ def run(track, pin, score):
     parser.add_argument("--output", type=Path, default=REPOSITORY / "work/evaluation" / track)
     parser.add_argument("--frozen", action="store_true", help="Score the executable from the frozen comparison report.")
     args = parser.parse_args()
-    project, output = args.project.resolve(), project_helper.work_root(args.project.resolve(), args.output.resolve()) if args.frozen else args.output.resolve()
+    project, output = args.project.resolve(), project_helper.outside(args.project.resolve(), args.output.resolve()) if args.frozen else args.output.resolve()
     report, reports, ineligible = {"track": track, "project": str(project), "status": "failed"}, {}, []
     try:
         executable = reference(track, pin)
         report["reference_sha256"] = pin["sha256"]
-        if not (project / "implementation/Cargo.toml").is_file():
+        if not (project / "Cargo.toml").is_file():
             raise ValueError(f"The project is missing. Reconstruct {executable} into {project}.")
-        identity = yaml.safe_load((project / "verification/comparison.yaml").read_text())["executables"] if args.frozen else None
+        identity = yaml.safe_load((project / ".rustify/verification/comparison.yaml").read_text())["executables"] if args.frozen else None
         candidate = project_helper.artifact(project, (project / identity["candidate"]["path"]).relative_to(project).as_posix(), False) if args.frozen else None
         if args.frozen and (identity["reference"]["sha256"] != pin["sha256"] or digest(candidate) != identity["candidate"]["sha256"] or candidate_failures(executable, candidate, pin)):
             raise ValueError("The frozen executable identity or eligibility check failed.")

@@ -55,7 +55,7 @@ def verify(directory, hashes):
 
 
 def score(reference, candidate, project):
-    directory = project / "verification/gui-captures"
+    directory = project / ".rustify/verification/gui-captures"
     hashes = {"reference": PIN["sha256"], "candidate": harness.digest(candidate.read_bytes())}
     if not (directory / "visual-review.yaml").is_file():
         return {}, [f"The project has no GUI captures in {directory}."]

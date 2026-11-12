@@ -19,7 +19,7 @@ One witness is enough to distinguish two deterministic programs. A witness is ne
 | Interface | Screenshots, accessibility trees, titles, focus, and visible state changes. |
 | Persistence | Configuration, logs, caches, and databases that later runs read. |
 
-`recovered/product.md` names the channels of the target.
+`.rustify/recovered/product.md` names the channels of the target.
 Wall time and memory are not functional channels. The agent reports them separately.
 A variable field needs evidence from the original and an explicit equivalence rule. An unexplained difference is a witness.
 
@@ -29,7 +29,7 @@ The agent plays each distinguisher against its own Rust program before acceptanc
 
 | Class | Probes |
 | --- | --- |
-| Replay | Every scenario in `recovered/scenarios.yaml`. |
+| Replay | Every scenario in `.rustify/recovered/scenarios.yaml`. |
 | Surface | One probe for each item of the surface checklist below. |
 | Generate | The fuzz helper with recorded seeds and iteration counts. |
 | Metamorphic | Probe pairs related by a product property, such as a round trip. |
@@ -65,6 +65,6 @@ The agent derives the surface from help text, error text, strings, and imported 
 ## Acceptance claim
 
 Acceptance needs zero confirmed witnesses in every class.
-`implementation/docs/compatibility.md` states the claim per class with its budget.
+`docs/compatibility.md` states the claim per class with its budget.
 For example: "Replay: 0 witnesses in 412 scenarios. Generate: 0 witnesses in 5,000 probes, seed 7. Adaptive: 0 witnesses in 300 probes."
 The claim holds only for the probes that ran. It does not prove equivalence for all inputs.

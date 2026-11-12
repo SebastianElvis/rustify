@@ -55,7 +55,7 @@ The build is deterministic for one compiler version. `reference.yaml` names that
 
 The zenity scorer does not open dialogs.
 The agent replays the five zenity cases with host-native CUA on both executables.
-The agent saves the captures and a visual review in `verification/gui-captures/` of the project.
+The agent saves the captures and a visual review in `.rustify/verification/gui-captures/` of the project.
 The scorer checks the captures against the reference and the candidate hashes.
 
 ## Add a private held-out track
@@ -79,7 +79,7 @@ Never commit the program, its source, or its cases.
 The probe skill provides the replay helper that the scorers use:
 
 ```sh
-python3 skills/rustify-probe/scripts/compare.py --reference ORIGINAL --candidate RUST --cases PROJECT/recovered/scenarios.yaml --report PROJECT/verification/comparison.yaml --name NAME
+python3 skills/rustify-probe/scripts/compare.py --reference ORIGINAL --candidate RUST --cases PROJECT/.rustify/recovered/scenarios.yaml --report PROJECT/.rustify/verification/comparison.yaml --name NAME
 ```
 
 Each case has an `id`, `args`, and optional `stdin_b64`, `files`, and `env` fields.

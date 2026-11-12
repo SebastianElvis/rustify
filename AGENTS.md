@@ -10,10 +10,12 @@
 - The skill bundle follows the Agent Skills format.
 - The main skill coordinates focused sibling skills.
 - The skills use host-native invocation and task tools.
-- The target project contains `recovered/`, `implementation/`, and `verification/`.
-- The target project keeps the Rust design and its decision records in `implementation/docs/`.
-- The agent keeps only temporary worker shards and progress notes outside the target project.
-- The ledger `recovered/model.yaml` is the single record for each original-to-Rust mapping.
+- The target project root is the open-source Rust repository.
+- The target project is a Cargo workspace with its crates in `crates/`.
+- The target project keeps private records in the gitignored `.rustify/` directory.
+- The target project keeps the Rust design and its decision records in `docs/`.
+- The agent keeps temporary worker shards and progress notes only in `.rustify/work/`.
+- The ledger `.rustify/recovered/model.yaml` is the single record for each original-to-Rust mapping.
 - Every skill follows `skills/rustify/references/standards.md`.
 - Each recovered requirement uses one EARS pattern and one "shall".
 - The agent evaluation runs the current skills on held-out tracks.

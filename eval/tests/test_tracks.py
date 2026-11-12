@@ -90,8 +90,7 @@ class HarnessTests(unittest.TestCase):
         harness = zenity.harness
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "implementation").mkdir()
-            (binary := root / "implementation/Cargo.toml").write_bytes(b"binary")
+            (binary := root / "Cargo.toml").write_bytes(b"binary")
             for quality, controls, reference_failure in (({}, ["The negative control passes."], None), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 1, "log": "fmt.log"}]}, [], None), ({}, [], None), ({}, [], "repeatability"), ({}, [], "upstream"), ({}, [], "capture"), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 0, "log": "fmt.log"}]}, [], "closure"), ({"commands": [{"command": ["cargo", "fmt"], "returncode": 0, "log": "fmt.log"}]}, [], "mode")):
                 binary.chmod(0o644 if reference_failure == "mode" else 0o755)
                 reports = {"replay": {"status": "passed" if quality or controls else "failed", "passed": int(bool(quality or controls)), "failed": 0 if quality or controls else 3, "cases": [] if quality or controls else [{"input": {"id": "shared/case"}, "passed": False}, {"id": "custom/case", "passed": False}, {"id": "timeout/case", "passed": False, "differences": ["execution_error"], "reference": {"error": "timeout" if reference_failure == "capture" else None}}]}}

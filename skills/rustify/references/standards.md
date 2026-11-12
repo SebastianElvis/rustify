@@ -56,7 +56,7 @@ Each statement uses exactly one EARS pattern and exactly one "shall".
 | `optional` | Where `<feature>`, the `<system>` shall `<response>`. |
 | `complex` | A combination of the `While`, `When`, `If`, and `Where` clauses, in that order. |
 
-The `<system>` is the original product name from `recovered/product.md`.
+The `<system>` is the original product name from `.rustify/recovered/product.md`.
 The `<response>` states an observable result: bytes, status, state, effect, or interface change.
 The statement does not name a Rust type, a library, or an inferred intent.
 
@@ -76,7 +76,7 @@ The requirement set must also be complete, consistent, and free of duplicates.
 
 ### Attributes
 
-Each requirement record in `recovered/model.yaml` has these attributes.
+Each requirement record in `.rustify/recovered/model.yaml` has these attributes.
 
 | Attribute | Content |
 | --- | --- |
@@ -127,7 +127,7 @@ The source column names the standard that defines the concept.
 | Term | Meaning | Source |
 | --- | --- | --- |
 | original | The shipped software under reconstruction. Reports use the identifier `reference` for it. | Rustify |
-| Rust implementation | The reconstruction in `implementation/`. Reports use the identifier `candidate` for it. | Rustify |
+| Rust implementation | The reconstruction in the project root. Reports use the identifier `candidate` for it. | Rustify |
 | requirement | A statement of a need and its constraints and conditions. | 29148 |
 | evidence | Objective data that supports a claim. | 24765, 15026 |
 | classification | `observed`, `inferred`, or `unknown` for a claim. | Rustify |

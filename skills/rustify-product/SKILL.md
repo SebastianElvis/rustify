@@ -9,7 +9,7 @@ metadata:
 
 # Recover the product specification
 
-The agent reads `recovered/state.yaml` and [the project format](../rustify/references/project.md).
+The agent reads `.rustify/state.yaml` and [the project format](../rustify/references/project.md).
 The agent writes with [the standards guide](../rustify/references/standards.md).
 The agent reconstructs original behavior without product improvements.
 
@@ -17,8 +17,8 @@ The agent reconstructs original behavior without product improvements.
 2. The agent invokes [rustify-probe](../rustify-probe/SKILL.md) for original behavior and binary evidence.
    The orchestrator owns dependency setup and shared session coordination.
 3. The agent reads [the output rules](references/output-format.md) before writing.
-4. The agent uses the [product specification template](assets/product-specification.md) for `recovered/product.md`.
-   The agent uses the [parity backlog template](assets/parity-backlog.md) for `recovered/roadmap.md`.
+4. The agent uses the [product specification template](assets/product-specification.md) for `.rustify/recovered/product.md`.
+   The agent uses the [parity backlog template](assets/parity-backlog.md) for `.rustify/recovered/roadmap.md`.
 5. The agent returns its requirement, evidence, scenario, and declarative-test shards to the orchestrator.
    The agent preserves original capture paths and REA Evidence IDs.
 

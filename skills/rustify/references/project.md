@@ -5,53 +5,54 @@ The helper scripts use Python 3.12 or later with PyYAML.
 ## Fidelity rule
 
 Rustify always reconstructs the full product with one-to-one compatibility.
-The helper `init` command records the target path and SHA-256 in `recovered/state.yaml`.
-`recovered/product.md` records the target identity, resources, documentation sources, platform, and environment.
+The helper `init` command records the target path and SHA-256 in `.rustify/state.yaml`.
+`.rustify/recovered/product.md` records the target identity, resources, documentation sources, platform, and environment.
 The environment covers the locale, clock, randomness, persistence, and services.
-`recovered/roadmap.md` records the investigation limits and stopping conditions.
+`.rustify/recovered/roadmap.md` records the investigation limits and stopping conditions.
 A missing feature is an open gap. The agent keeps working on each open gap.
 
 ## Target project
 
 ```text
 PROJECT/
-  recovered/
-    state.yaml  model.yaml
-    product.md  ux.md  architecture.md  roadmap.md
-    evidence.yaml  evidence/  scenarios.yaml  tests.yaml
-  implementation/
-    Cargo.toml  Cargo.lock  src/  tests/  fuzz/  .github/workflows/
-    README.md  LICENSE  CHANGELOG.md  CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
-    docs/design.md  docs/adr/  docs/migration.md  docs/compatibility.md
-  verification/
-    checks.yaml  comparison.yaml  parity.yaml  logs/
+  Cargo.toml  Cargo.lock  fuzz/  .github/workflows/  .gitignore
+  crates/<product>/  crates/<product>-<name>/
+  README.md  LICENSE  CHANGELOG.md  CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
+  docs/design.md  docs/adr/  docs/migration.md  docs/compatibility.md
+  .rustify/
+    state.yaml
+    recovered/
+      model.yaml  product.md  ux.md  architecture.md  roadmap.md
+      evidence.yaml  evidence/  scenarios.yaml  tests.yaml
+    verification/
+      checks.yaml  comparison.yaml  fuzz.yaml  parity.yaml  raw/  logs/
+    work/
 ```
 
-The user publishes only `implementation/` as an open-source repository.
-The agent workspace stays outside the project.
-A project named `app` uses the sibling workspace `.app-rustify` by default.
-The agent can select another external path with `init --work-dir WORK`.
-The helper rejects an internal workspace or a symlink.
+The project root is the open-source Rust repository.
+The user publishes the root without the private `.rustify/` directory.
+The helper `init` command creates `.rustify/` and adds `/.rustify/` and `/target/` to `.gitignore`.
+The agent workspace `.rustify/work/` holds only temporary worker shards and progress notes.
 The agent uses YAML for authored structured records, captures, test fixtures, and freeze manifests.
 The agent keeps prose in Markdown.
 The agent preserves external formats, such as Cargo messages, REA exports, and original product files.
 
 ## Ledger
 
-`recovered/model.yaml` is the single traceability record.
+`.rustify/recovered/model.yaml` is the single traceability record.
 The agent starts from [the ledger asset](../assets/model.yaml).
 Documents describe the ledger items. They do not keep a second copy of a mapping.
 
 | Section | Owner | Content |
 | --- | --- | --- |
-| `inventory` | Discovery | The inventory completeness flag. `recovered/product.md` names its evidence basis. |
+| `inventory` | Discovery | The inventory completeness flag. `.rustify/recovered/product.md` names its evidence basis. |
 | `requirements` | Discovery | EARS requirements with the attributes in [the standards guide](standards.md). |
 | `surface` | Discovery | Each user-visible option, program name, environment variable, diagnostic, input partition, condition, state, and interface item, with the requirements that cover it. |
 | `components` | Architecture discovery | C4 containers and components. |
 | `edges` | Architecture discovery | Control, data, and static relations between components. |
 | `correspondences` | Planning | One Rust source file for each original component. |
 | `slices` | Planning | The walking skeleton and the later slices. |
-| `gaps` | All phases | The `id`, the `items`, and the `open` or `closed` status. `recovered/roadmap.md` gives the kind and the closure check. |
+| `gaps` | All phases | The `id`, the `items`, and the `open` or `closed` status. `.rustify/recovered/roadmap.md` gives the kind and the closure check. |
 
 Each identifier stays stable across the ledger, documents, scenarios, and tests.
 The parity gate derives each requirement result from evidence and comparisons.
@@ -59,9 +60,9 @@ No agent writes a `passed` status into the ledger.
 
 ## Evidence and scenarios
 
-Each evidence record in `recovered/evidence.yaml` has `id` and `classification`.
+Each evidence record in `.rustify/recovered/evidence.yaml` has `id` and `classification`.
 The classification is `observed`, `inferred`, or `unknown`.
-An observed record also has `path` and `sha256` for its capture in `recovered/evidence/`.
+An observed record also has `path` and `sha256` for its capture in `.rustify/recovered/evidence/`.
 The documents that cite an evidence ID state its claim, source, and limitations.
 The citation of an inferred record names its observations and a falsifying experiment.
 The citation of an unknown record names the missing evidence.
@@ -69,12 +70,12 @@ The agent labels creator intent and design rationale as inferences.
 
 CLI scenarios use the `rustify-probe` comparison format.
 Other profiles use target-specific replay data with the same report fields.
-The compatibility constraints in `recovered/product.md` define tolerances for variable results.
+The compatibility constraints in `.rustify/recovered/product.md` define tolerances for variable results.
 The agent does not normalize unexplained differences.
 
 ## Declarative tests
 
-`recovered/tests.yaml` contains expectations, not executable test code.
+`.rustify/recovered/tests.yaml` contains expectations, not executable test code.
 Each record has `id`, `origin`, `evidence`, `scenarios`, and `expect`.
 The origin is `observed`, `inferred`, or `proposed`.
 
@@ -86,16 +87,16 @@ The origin is `observed`, `inferred`, or `proposed`.
   expect: {returncode: 0, stdout_b64: YUdWc2JHOD0K, stderr_b64: ''}
 ```
 
-The implementation keeps executable tests under `implementation/tests/` and Rust source modules.
+The implementation keeps executable tests under `crates/<crate>/tests/` and in Rust source modules.
 
 ## Checkpoints
 
 | Phase | Required artifacts |
 | --- | --- |
 | `discover` | The recovered documents, evidence, scenarios, tests, and the discovery sections of `model.yaml`. |
-| `plan` | The planning sections of `model.yaml` and `implementation/docs/design.md`. |
+| `plan` | The planning sections of `model.yaml` and `docs/design.md`. |
 | `implement` | The Cargo files, the Rust sources, the repository files, and a `checks.yaml` from the helper's `check` command. |
-| `validate` | `comparison.yaml`, `parity.yaml`, and `implementation/docs/compatibility.md`. |
+| `validate` | `comparison.yaml`, `parity.yaml`, and `docs/compatibility.md`. |
 
 ```sh
 python3 <rustify>/scripts/project.py check PROJECT [--deny] [--mutants]
@@ -103,10 +104,11 @@ python3 <rustify>/scripts/project.py checkpoint PROJECT PHASE
 python3 <rustify>/scripts/project.py status PROJECT
 ```
 
-The helper writes state atomically in `recovered/state.yaml`.
+The helper writes state atomically in `.rustify/state.yaml`.
 The helper hashes each required artifact. It hashes only the owned sections of `model.yaml`.
-The implementation hash excludes `implementation/docs/compatibility.md`, because validation owns it.
-The `implement` checkpoint requires `description`, `license`, and `rust-version` in the `Cargo.toml` package.
+The implementation hash covers the project root. It excludes `.rustify/`, `.git/`, `target/`, and `docs/compatibility.md`, because validation owns that document.
+The `implement` checkpoint requires `license` and `rust-version` in `[workspace.package]` and a `description` in each crate under `crates/`.
+The `implement` checkpoint requires the `/.rustify/` line in `.gitignore`.
 A change to a section reopens the phase that owns it.
 The `plan` checkpoint requires one walking skeleton, an acyclic slice graph, and a slice for each requirement.
 The `check` command runs `cargo fmt`, `cargo clippy`, `cargo test`, and `cargo doc` and records the logs and their hashes.

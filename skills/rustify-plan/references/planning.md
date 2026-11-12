@@ -8,13 +8,25 @@ The plan preserves original execution and component boundaries when evidence est
 The plan maps buffering, storage bounds, and allocation failure paths before it selects Rust data structures.
 The agent does not substitute a cleaner product or architecture.
 
+## Map original containers to crates
+
+The target project is a Cargo workspace. Each crate lives in `crates/<crate>/`.
+Each original executable becomes one binary. A multi-call original stays one binary.
+Each original library, plugin, or service container becomes one crate.
+The agent selects the remaining crate split for each case from the recovered architecture.
+For example, a large executable can have a library crate that holds its reusable behavior.
+A crate split needs an original boundary or a public reuse need. The agent records the split in an ADR.
+The binary crate takes the product name. Every other crate name starts with `<product>-`.
+A library crate exposes only its original public contract and what its dependents need. Other items are `pub(crate)`.
+The agent adds no crate without an original component, such as a generic `utils` crate.
+
 ## Map original components to Rust modules
 
 Each original component has one `correspondences` record with one Rust source file.
 That file forms one Rust module. Two components do not share one module.
-The crate root `main.rs` or `lib.rs` can correspond to the entry component.
+A crate root `main.rs` or `lib.rs` can correspond to the entry component of its container.
 The reflexion check compares the recovered `control` and `static` edges with Rust module references.
-A Rust module that uses another module refers to it with a path such as `codec::encode`.
+A Rust module that uses another module refers to it with a path such as `codec::encode` or `product_codec::encode`.
 A helper module without an original component is a divergence. It stays an open gap.
 
 The agent preserves every recoverable original process and thread boundary.
@@ -43,7 +55,7 @@ If an exact mapping is not feasible, the agent records the lost behavior or boun
 The lost behavior or boundary stays an open gap until a repair closes it.
 An architectural preference does not close a gap.
 
-The parity backlog in `recovered/roadmap.md` lists every open gap first.
+The parity backlog in `.rustify/recovered/roadmap.md` lists every open gap first.
 The agent does not add product improvements to the faithful reconstruction.
 
 The agent defines applicable [quality acceptance budgets](../../rustify-validate/references/quality.md) before implementation.

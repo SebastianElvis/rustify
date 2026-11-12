@@ -59,7 +59,7 @@ The task has two stages:
 | 2. Implementation | The recovered model | A Rust program | A Cargo project with tests |
 
 The recovered model is the intermediate representation.
-In Rustify it is the `recovered/` folder of the target project: EARS requirements, scenarios, components, and evidence.
+In Rustify it is the `.rustify/recovered/` folder of the target project: EARS requirements, scenarios, components, and evidence.
 A prior benchmark can use a different intermediate representation, such as decompiled C or a written specification.
 The stage split lets the analysis compare each benchmark with the part of the task that it measures.
 
@@ -439,7 +439,7 @@ A gate failure sets every graded score to 0. These checks are gates:
 
 - The project is present and has a Cargo build.
 - The project and the skill copies match their freeze before and after the scoring.
-- The candidate executable matches the hash in `verification/comparison.yaml`.
+- The candidate executable matches the hash in `.rustify/verification/comparison.yaml`.
 - The candidate is a runnable regular file that does not contain the reference path.
 - The candidate links no library from the forbidden list.
 - Each scored case maps to exactly one feature.
@@ -533,7 +533,7 @@ It scores the frozen candidate with `run.py --frozen`, runs the parity gate from
 It runs the adaptive distinguisher on each trial that passes the gate.
 `grades.yaml` gives each trial's scores and each track's median FPS, standard error, and tier result.
 
-**Parity gate.** The skill's `parity.py` reads the ledger `recovered/model.yaml`.
+**Parity gate.** The skill's `parity.py` reads the ledger `.rustify/recovered/model.yaml`.
 It computes each requirement result from evidence and captures and runs the reflexion check of components against Rust modules.
 A passing machine gate does not prove that the declared inventory covers every original feature.
 

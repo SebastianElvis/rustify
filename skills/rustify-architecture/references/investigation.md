@@ -12,7 +12,7 @@ The agent checks local symbols as well as exports before it declares symbols abs
 
 ## Trace complete workflows
 
-The agent selects scenarios from `recovered/product.md` and `recovered/ux.md`.
+The agent selects scenarios from `.rustify/recovered/product.md` and `.rustify/recovered/ux.md`.
 The agent traces each scenario from its entry point to its result.
 The trace records calls, data transfer, state changes, storage, and external effects.
 The agent records transient data layouts, buffer bounds, ownership, and allocation lifetimes.

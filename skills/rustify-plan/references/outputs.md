@@ -2,12 +2,12 @@
 
 ## Ledger sections
 
-The plan skill owns these sections of `recovered/model.yaml`.
+The plan skill owns these sections of `.rustify/recovered/model.yaml`.
 The helper hashes them for the `plan` checkpoint.
 
 | Section | Record fields |
 | --- | --- |
-| `correspondences` | `original` component ID and `rust` source path under `implementation/src/`. |
+| `correspondences` | `original` component ID and `rust` source path under `crates/<crate>/src/`. |
 | `slices` | `id`, `kind` (`skeleton` or `slice`), `requirements`, `depends_on`, and `risk` (`high`, `medium`, or `low`). |
 
 The parity gate reports each slice as passed only when all its requirements pass.
@@ -17,14 +17,14 @@ No plan record claims a measured result.
 
 The agent starts from [the design template](../assets/design.md).
 The design follows arc42 sections for the Rust implementation.
-It names every original component ID with its Rust module.
+It names every original container with its crate and every original component ID with its Rust module.
 It explains the execution model and each dependency choice.
 It links each decision to its ADR.
 
 ## Decision records
 
 The agent starts each ADR from [the ADR template](../assets/adr.md).
-The file name is `implementation/docs/adr/NNNN-short-title.md`.
+The file name is `docs/adr/NNNN-short-title.md`.
 One ADR records one decision. An accepted ADR does not change.
 A new ADR supersedes an old ADR and names it.
 Each dependency choice, language adaptation, and structural deviation needs an ADR.

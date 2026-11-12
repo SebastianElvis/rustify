@@ -22,7 +22,7 @@ The agent does not discard that error as variable output.
 The agent preserves setup, callbacks, and cleanup when it translates tests between interfaces.
 Unsupported conditions keep the translated scope incomplete.
 The agent preserves variable outputs and their causes as evidence.
-The agent applies only the normalization rules in `recovered/product.md`.
+The agent applies only the normalization rules in `.rustify/recovered/product.md`.
 An unexplained variation remains a gap.
 
 The validator qualifies a variable score change with repeated original and frozen-candidate captures under the complete controlled setup.
@@ -60,7 +60,7 @@ A failed slice returns to implementation. A new behavior returns to discovery.
 5. The validator checks the invoked suite's selection against every mapped regression for the repaired slice before it interprets mutation results.
    The agent runs the implementation `check` command with `--mutants` when the tool is installed.
 6. The agent checks [software quality acceptance](quality.md).
-7. The agent runs the parity gate and writes `implementation/docs/compatibility.md`.
+7. The agent runs the parity gate and writes `docs/compatibility.md`.
 
 The agent obtains fresh captures through `rustify-probe`.
 The agent checks mapped trace relations against the current implementation.
@@ -74,7 +74,7 @@ The agent does not invent a tolerance because both applications use native contr
 
 The validator preserves each failure and its smallest reproducer.
 The validator confirms the original result through `rustify-probe` before it requests a product repair.
-The validator links the failure to its requirement, evidence, test, and original-to-Rust mapping in `recovered/model.yaml`.
+The validator links the failure to its requirement, evidence, test, and original-to-Rust mapping in `.rustify/recovered/model.yaml`.
 
 The validator freezes the executable, source, recovered model, and fixture budget baseline before new repair probes.
 The validator sends a confirmed Rust defect to `rustify-implement`.
